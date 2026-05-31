@@ -62,7 +62,7 @@ useEffect(() => {
 }, [slug]);
 
  function abrirAudio() {
-  alert("MAIO");
+ 
 
   const url =
     `https://...`;
@@ -77,7 +77,7 @@ function baixarPdf() {
   window.open(url, "_blank");
 }
 function abrirAudioJunho() {
-  alert("JUNHO");
+  
 
   const url =
     `https://...`;
@@ -479,15 +479,7 @@ margin: "0 auto",
         🔮 Direcionamento da Semana
       </h2>
 
-      <div
-  style={{
-    color: "#fff",
-    marginBottom: "20px",
-    wordBreak: "break-all",
-  }}
->
-  {audioUrl}
-</div>
+      
 
 <audio
   controls
