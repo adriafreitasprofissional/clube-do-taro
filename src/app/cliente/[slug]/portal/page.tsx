@@ -12,6 +12,8 @@ export default function PortalPremium() {
   const [ano2027, setAno2027] = useState(false);
   const [maio, setMaio] = useState(true);
   const [junho, setJunho] = useState(false);
+  const [audioAberto, setAudioAberto] = useState(false);
+const [audioUrl, setAudioUrl] = useState("");
 
   const nomes: Record<string, string> = {
     gabi: "Gabriela",
@@ -59,11 +61,13 @@ useEffect(() => {
   carregarCliente();
 }, [slug]);
 
-  function abrirAudio() {
+ function abrirAudio() {
   const url =
     `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/maio/semana-1-${slug}-03-05.mp3`;
 
-  window.open(url, "_blank");
+  setAudioUrl(url);
+  setAudioAberto(true);
+
 }
 function baixarPdf() {
   const url =
@@ -72,10 +76,13 @@ function baixarPdf() {
   window.open(url, "_blank");
 }
 function abrirAudioJunho() {
+  alert("ABRIU O NOVO PLAYER");
+
   const url =
     `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/junho/semana-1-${slug}-01-06.mp3`;
 
-  window.open(url, "_blank");
+  setAudioUrl(url);
+  setAudioAberto(true);
 }
 
 function baixarPdfJunho() {
@@ -440,6 +447,73 @@ margin: "0 auto",
       </div>
     </div>
   </div>
+{audioAberto && (
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,.85)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        background: "#1a001f",
+        borderRadius: "24px",
+        padding: "30px",
+        width: "500px",
+        maxWidth: "90%",
+        border: "1px solid rgba(244,212,106,.25)",
+      }}
+    >
+      <h2
+        style={{
+          color: "#f4d46a",
+          marginBottom: "20px",
+        }}
+      >
+        🔮 Direcionamento da Semana
+      </h2>
+
+      <div
+  style={{
+    color: "#fff",
+    marginBottom: "20px",
+    wordBreak: "break-all",
+  }}
+>
+  {audioUrl}
+</div>
+
+<audio
+  controls
+  autoPlay
+  src={audioUrl}
+  style={{
+    width: "100%",
+  }}
+/>
+
+      <button
+        onClick={() => setAudioAberto(false)}
+        style={{
+          marginTop: "20px",
+          background: "#5b0c8c",
+          border: "none",
+          color: "#fff",
+          padding: "12px 20px",
+          borderRadius: "999px",
+          cursor: "pointer",
+        }}
+      >
+        Fechar
+      </button>
+    </div>
+  </div>
+)}
 </main>
 );
 }
