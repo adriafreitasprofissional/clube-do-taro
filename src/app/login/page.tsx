@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,27 +11,51 @@ export default function LoginPage() {
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
-
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    // Login no Supabase
+    const { data: user, error } = await supabase.auth.signInWithPassword({
       email,
       password: senha,
     });
 
-    if (error) {
+    if (error || !user) {
       alert("E-mail ou senha inválidos");
       setLoading(false);
       return;
     }
 
-    window.open("/cliente/gabi", "_blank");
+    // Busca o slug do cliente na tabela club_clients
+    const emailUsuario = user.user.email;
+
+const { data: clienteData, error: errorCliente } = await supabase
+  .from("club_clients")
+  .select("slug,status")
+  .eq("email", emailUsuario)
+  .single();
+
+if (errorCliente || !clienteData?.slug) {
+  alert(JSON.stringify(errorCliente));
+  setLoading(false);
+  return;
+}
+
+window.location.href =
+  `/cliente/${clienteData.slug}/portal`;
+
+setLoading(false);
+window.location.href =
+  `/cliente/${clienteData.slug}/portal`;
+
+    // Redireciona para a página do cliente em nova aba
+    const clienteUrl = `/cliente/${clienteData.slug}/portal`;
+    window.location.href =
+  `/cliente/${clienteData.slug}/portal`;
+    setLoading(false);
   }
 
   async function loginGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
+    await supabase.auth.signInWithOAuth({ provider: "google" });
   }
 
   async function resetSenha() {
@@ -46,7 +65,7 @@ export default function LoginPage() {
     }
 
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "http://localhost:3000/login",
+      redirectTo: "https://clube-do-taro.vercel.app/login",
     });
 
     alert("Enviamos um link para redefinir sua senha.");
@@ -99,7 +118,6 @@ export default function LoginPage() {
         </h1>
 
         <form onSubmit={login}>
-
           <input
             type="email"
             placeholder="Seu e-mail"
@@ -117,7 +135,6 @@ export default function LoginPage() {
           />
 
           <div style={{ position: "relative" }}>
-
             <input
               type={mostrarSenha ? "text" : "password"}
               placeholder="Sua senha"
@@ -132,7 +149,6 @@ export default function LoginPage() {
                 color: "white",
               }}
             />
-
             <button
               type="button"
               onClick={() => setMostrarSenha(!mostrarSenha)}
@@ -148,7 +164,6 @@ export default function LoginPage() {
             >
               👁
             </button>
-
           </div>
 
           <button
@@ -168,7 +183,6 @@ export default function LoginPage() {
           >
             {loading ? "Entrando..." : "ENTRAR NO PORTAL"}
           </button>
-
         </form>
 
         <button
@@ -200,7 +214,6 @@ export default function LoginPage() {
         >
           Esqueceu sua senha?
         </button>
-
       </div>
     </main>
   );
