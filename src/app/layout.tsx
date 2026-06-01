@@ -12,10 +12,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
+eexport const metadata: Metadata = {
   title: "Magia Oriente",
   description:
     "Portal das Guardiãs e Guardiões. Direcionamentos, leituras, áudios e conteúdos exclusivos.",
+
+  openGraph: {
+    title: "Magia Oriente",
+    description:
+      "Portal das Guardiãs e Guardiões. Direcionamentos, leituras, áudios e conteúdos exclusivos.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function RootLayout({
