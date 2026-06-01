@@ -54,25 +54,23 @@ window.location.href =
     setLoading(false);
   }
 
-  async function loginGoogle() {
-    await supabase.auth.signInWithOAuth({ provider: "google" });
-  }
-
   async function resetSenha() {
-    if (!email) {
-      alert("Digite seu e-mail primeiro.");
-      return;
-    }
-
-   const handleForgotPassword = async () => {
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "...",
-  });
-};
-
-    alert("Enviamos um link para redefinir sua senha.");
+  if (!email) {
+    alert("Digite seu e-mail primeiro.");
+    return;
   }
 
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://www.magiaoriente.com.br/auth/callback",
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Enviamos um link para redefinir sua senha.");
+}
   return (
     <main
       style={{
