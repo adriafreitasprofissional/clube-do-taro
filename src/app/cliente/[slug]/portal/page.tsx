@@ -8,10 +8,12 @@ export default function PortalPremium() {
   const params = useParams();
   const slug = params.slug as string;
 
-const [ano2026, setAno2026] = useState(false);
+const [ano2026, setAno2026] = useState(true);
 const [ano2027, setAno2027] = useState(false);
 
 const [maio, setMaio] = useState(false);
+
+console.log("MAIO =", maio);
 const [junho, setJunho] = useState(false);
 
 const [audioAberto, setAudioAberto] = useState(false);
@@ -469,25 +471,10 @@ margin: "0 auto",
         border: "1px solid rgba(244,212,106,.25)",
       }}
     >
-      <h2
-        style={{
-          color: "#f4d46a",
-          marginBottom: "20px",
-        }}
-      >
-        🔮 Direcionamento da Semana
-      </h2>
+  <h2>
+  🔮 Direcionamento da Semana
+</h2>
 
-    <div
-  style={{
-    color: "#f4d46a",
-    fontSize: "12px",
-    marginBottom: "10px",
-    wordBreak: "break-all",
-  }}
->
-  {audioUrl}
-</div>
 <audio
   controls
   autoPlay
