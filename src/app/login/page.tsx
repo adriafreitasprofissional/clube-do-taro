@@ -65,8 +65,8 @@ window.location.href =
     }
 
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://clube-do-taro.vercel.app/login",
-    });
+  redirectTo: "https://www.magiaoriente.com.br/auth/callback",
+});
 
     alert("Enviamos um link para redefinir sua senha.");
   }
