@@ -12,16 +12,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-eexport const metadata: Metadata = {
-  title: "Magia Oriente",
-  description:
-    "Portal das Guardiãs e Guardiões. Direcionamentos, leituras, áudios e conteúdos exclusivos.",
+export const metadata: Metadata = {
+  title: "Clube do Tarô",
+  description: "Portal exclusivo para assinantes",
+  manifest: "/manifest.json",
 
-  openGraph: {
-    title: "Magia Oriente",
-    description:
-      "Portal das Guardiãs e Guardiões. Direcionamentos, leituras, áudios e conteúdos exclusivos.",
-    images: ["/og-image.jpg"],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Clube do Tarô",
+  },
+
+  icons: {
+    apple: "/apple-touch-icon.png",
   },
 };
 
@@ -32,10 +35,12 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+      </body>
     </html>
   );
 }
