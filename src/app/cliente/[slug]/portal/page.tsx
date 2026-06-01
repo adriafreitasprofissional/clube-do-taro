@@ -8,13 +8,13 @@ export default function PortalPremium() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [ano2026, setAno2026] = useState(false);
+const [ano2026, setAno2026] = useState(false);
 const [ano2027, setAno2027] = useState(false);
 
 const [maio, setMaio] = useState(false);
 const [junho, setJunho] = useState(false);
 
-  const [audioAberto, setAudioAberto] = useState(false);
+const [audioAberto, setAudioAberto] = useState(false);
 const [audioUrl, setAudioUrl] = useState("");
 
   const nomes: Record<string, string> = {
