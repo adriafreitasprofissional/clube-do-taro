@@ -36,6 +36,26 @@ const [audioUrl, setAudioUrl] = useState("");
     tamilly: "Tamilly",
     vivi: "Viviane",
   };
+const genero: Record<string, string> = {
+  claudinho: "Guardião",
+  dani: "Guardião",
+  gabi: "Guardiã",
+  helena: "Guardiã",
+  carolmorena: "Guardiã",
+  carolruiva: "Guardiã",
+  cris: "Guardiã",
+  dorinha: "Guardiã",
+  fefe: "Guardiã",
+  lilian: "Guardiã",
+  luana: "Guardiã",
+  natalia: "Guardiã",
+  nathali: "Guardiã",
+  neide: "Guardiã",
+  rejiane: "Guardiã",
+  tamilly: "Guardiã",
+  vivi: "Guardiã",
+};
+const tituloGuardiao = genero[slug] || "Guardiã";
 
  const nome = nomes[slug] || "Guardiã";
 
@@ -186,7 +206,8 @@ margin: "0 auto",
       marginBottom: "12px",
     }}
   >
-    ✨ Guardiã {nome} ✨
+    ✨ {tituloGuardiao} {nome} ✨
+    
     Que os oráculos iluminem seus caminhos e revelem
 as respostas que sua alma precisa neste momento.
   </h2>
