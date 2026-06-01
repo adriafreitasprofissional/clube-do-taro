@@ -19,25 +19,30 @@ const { data, error } = await supabase.auth.signInWithPassword({
   password: senha,
 });
 
-if (error) {
-  alert(error.message);
+ if (error) {
+  alert("ERRO LOGIN: " + error.message);
+  console.error(error);
   setLoading(false);
   return;
 }
 
 const emailUsuario = data.user?.email;
 
-const { data: clienteData, error: errorCliente } = await supabase
-  .from("club_clients")
-  .select("slug,status")
-  .eq("email", emailUsuario)
-  .single();
+const { data, error } = await supabase.auth.signInWithPassword({
+  email,
+  password: senha,
+});
 
-if (errorCliente || !clienteData?.slug) {
-  alert("Cliente não encontrado.");
+alert("LOGIN EXECUTADO");
+
+if (error) {
+  alert("ERRO LOGIN: " + error.message);
+  console.error(error);
   setLoading(false);
   return;
 }
+
+const emailUsuario = data.user?.email;
 
 window.location.href = `/cliente/${clienteData.slug}/portal`;
 
