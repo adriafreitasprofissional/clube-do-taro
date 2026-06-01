@@ -10,42 +10,37 @@ const [mostrarSenha, setMostrarSenha] = useState(false);
 const [loading, setLoading] = useState(false);
 
 async function login(e: React.FormEvent) {
-e.preventDefault();
+  e.preventDefault();
 
-setLoading(true);
+  setLoading(true);
 
-const { data, error } = await supabase.auth.signInWithPassword({
-  email,
-  password: senha,
-});
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password: senha,
+  });
 
- if (error) {
-  alert("ERRO LOGIN: " + error.message);
-  console.error(error);
-  setLoading(false);
-  return;
-}
+  if (error) {
+    alert("ERRO LOGIN: " + error.message);
+    console.error(error);
+    setLoading(false);
+    return;
+  }
 
-const emailUsuario = data.user?.email;
+  const emailUsuario = data.user?.email;
 
-const { data, error } = await supabase.auth.signInWithPassword({
-  email,
-  password: senha,
-});
+  const { data: clienteData, error: errorCliente } = await supabase
+    .from("club_clients")
+    .select("slug,status")
+    .eq("email", emailUsuario)
+    .single();
 
-alert("LOGIN EXECUTADO");
+  if (errorCliente || !clienteData?.slug) {
+    alert("Cliente não encontrado.");
+    setLoading(false);
+    return;
+  }
 
-if (error) {
-  alert("ERRO LOGIN: " + error.message);
-  console.error(error);
-  setLoading(false);
-  return;
-}
-
-const emailUsuario = data.user?.email;
-
-window.location.href = `/cliente/${clienteData.slug}/portal`;
-
+  window.location.href = `/cliente/${clienteData.slug}/portal`;
 }
 
 async function resetSenha() {
