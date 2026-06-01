@@ -104,7 +104,7 @@ Portal do Assinante </p>
         color: "white",
       }}
     >
-    Clube do Tarô TESTE 999
+    Clube do Tarô - Seu Portal Místico
     </h1>
 
     <form onSubmit={login}>
