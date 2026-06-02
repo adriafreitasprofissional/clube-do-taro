@@ -20,10 +20,7 @@ async function login(e: React.FormEvent) {
   });
 
   if (error) {
-  alert(
-    "ERRO LOGIN COMPLETO:\n\n" +
-    JSON.stringify(error, null, 2)
-  );
+  alert("Não foi possível realizar o login. Verifique seu e-mail e senha.");
 
   console.error(error);
   setLoading(false);
