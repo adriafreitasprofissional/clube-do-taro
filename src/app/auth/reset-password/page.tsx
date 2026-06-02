@@ -24,9 +24,15 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
 
-    const sessionData = await supabase.auth.getSession();
+    const {
+  data: { session },
+} = await supabase.auth.getSession();
 
-console.log("SESSION:", sessionData);
+if (!session) {
+  setMessage("Sessão expirada. Solicite um novo link de recuperação.");
+  setLoading(false);
+  return;
+}
 
 const { error } = await supabase.auth.updateUser({
   password,

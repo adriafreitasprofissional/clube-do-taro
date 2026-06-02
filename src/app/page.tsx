@@ -54,22 +54,12 @@ function PortalCard({
 export default function Home() {
   return (
     <main className="min-h-screen overflow-hidden bg-gradient-to-b from-[#120613] via-[#1b0822] to-[#0d0512] text-white">
-      {/* FUNDO ETÉREO */}
+
+      <CelestialBackground />
+
+      {/* HERO */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="stars">
-  {[...Array(70)].map((_, i) => (
-    <span
-      key={i}
-      className="star"
-      style={{
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`,
-        animationDuration: `${15 + Math.random() * 20}s`,
-        animationDelay: `${Math.random() * 20}s`,
-      }}
-    />
-  ))}
-</div>
+
         <motion.div
           animate={{ x: [0, 40, 0], y: [0, -20, 0] }}
           transition={{ repeat: Infinity, duration: 14 }}
