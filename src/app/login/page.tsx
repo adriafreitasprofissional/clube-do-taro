@@ -20,11 +20,15 @@ async function login(e: React.FormEvent) {
   });
 
   if (error) {
-    alert("ERRO LOGIN: " + error.message);
-    console.error(error);
-    setLoading(false);
-    return;
-  }
+  alert(
+    "ERRO LOGIN COMPLETO:\n\n" +
+    JSON.stringify(error, null, 2)
+  );
+
+  console.error(error);
+  setLoading(false);
+  return;
+}
 
   const emailUsuario = data.user?.email;
 
