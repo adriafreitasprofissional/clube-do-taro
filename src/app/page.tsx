@@ -255,8 +255,10 @@ export default function Home() {
   <Image
     src="/icons/magic-book.png"
     alt="Biblioteca Mística"
-    width={70}
-    height={70}
+    width={100}
+    height={100
+
+    }
   />
 }
         />
@@ -267,10 +269,10 @@ export default function Home() {
           href="SEU_LINK_CURSOS"
           icon={
   <Image
-    src="/icons/magic-book.png"
-    alt="Biblioteca Mística"
-    width={70}
-    height={70}
+    src="/icons/gold-scroll.png"
+    alt="Cursos Exclusivos"
+    width={100}
+    height={100}
   />
 }
         />
@@ -281,10 +283,12 @@ export default function Home() {
           href="SEU_LINK_LOJA"
           icon={
   <Image
-    src="/icons/magic-book.png"
-    alt="Biblioteca Mística"
-    width={70}
-    height={70}
+    src="/icons/gypsy-chest.png"
+    alt="Loja Mística"
+    width={100}
+    height={100
+
+    }
   />
 }
         />
@@ -295,10 +299,10 @@ export default function Home() {
           href="https://uiclap.bio/ADRIAFREITAS"
           icon={
   <Image
-    src="/icons/magic-book.png"
-    alt="Biblioteca Mística"
-    width={70}
-    height={70}
+    src="/icons/gold-feather.png"
+    alt="Universo Literário"
+    width={100}
+    height={100}
   />
 }
         />
