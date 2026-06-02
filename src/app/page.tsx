@@ -146,13 +146,19 @@ export default function Home() {
         >
           <div className="absolute right-0 top-0 h-full w-full rounded-full bg-[#E7C96F]/10 blur-3xl" />
 
-          <Image
-            src="/imagens/adria-hero-metade.png"
-            alt="Ádria Freitas"
-            width={470}
-            height={690}
-            className="relative rounded-[36px] object-cover opacity-95 shadow-2xl"
-          />
+          <div className="relative flex justify-center">
+
+  <div className="absolute inset-0 rounded-[40px] bg-[#E7C96F]/30 blur-[90px]" />
+
+  <Image
+    src="/imagens/adria-hero.png"
+    alt="Ádria Freitas"
+    width={470}
+    height={690}
+    className="relative rounded-[36px] object-cover opacity-95 shadow-2xl"
+  />
+
+</div>
         </motion.div>
       </section>
       <section className="mx-auto max-w-7xl px-6 py-24">
