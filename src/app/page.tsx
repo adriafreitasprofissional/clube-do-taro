@@ -109,8 +109,6 @@ export default function Home() {
   </p>
 </div>
 
-          <p className="mt-5 text-2xl text-[#E7C96F]">by Ádria Freitas</p>
-
           <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/75">
             Um universo de espiritualidade, conhecimento, experiências e descobertas.
           </p>
