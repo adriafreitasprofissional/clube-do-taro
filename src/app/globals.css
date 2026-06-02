@@ -12,3 +12,42 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+/* ===== ESTRELAS MÍSTICAS ===== */
+
+.stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #e7c96f;
+  border-radius: 999px;
+  box-shadow: 0 0 10px #e7c96f;
+  animation: floatStar linear infinite;
+}
+
+@keyframes floatStar {
+  from {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(-120px);
+    opacity: 0;
+  }
+}
