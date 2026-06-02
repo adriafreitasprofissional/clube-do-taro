@@ -74,10 +74,11 @@ console.log("UPDATE ERROR:", error);
           {/* LOGO */}
           <div className="flex justify-center mb-4">
             <img
-              src="/og-image.png"
-              alt="Clube do Tarô"
-              className="w-32 h-32 object-contain"
-            />
+              <img
+  src="/imagens/og-image.png"
+  alt="Clube do Tarô"
+  className="w-32 h-32 object-contain"
+/>
           </div>
 
           <h1
