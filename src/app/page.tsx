@@ -10,7 +10,7 @@ import {
   Sparkles,
   ArrowRight,
 } from "lucide-react";
-
+import CelestialBackground from "./components/CelestialBackground";
 function PortalCard({
   title,
   subtitle,

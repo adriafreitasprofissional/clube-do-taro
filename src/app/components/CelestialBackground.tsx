@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import CelestialBackground from "./components/CelestialBackground";
+
+
 type Star = {
   x: number;
   y: number;
@@ -285,6 +286,7 @@ export default function CelestialBackground() {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       window.removeEventListener("scroll", onScroll);
+    
     };
   }, []);
 
@@ -300,6 +302,7 @@ export default function CelestialBackground() {
         style={{
           background:
             "radial-gradient(ellipse at center, transparent 60%, rgba(5,2,15,0.5) 100%)",
+            
         }}
       />
     </div>
