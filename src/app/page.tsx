@@ -174,7 +174,7 @@ export default function Home() {
   <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
 
     {/* CARD 1 */}
-    <div className="group rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-[#E7C96F]/40 hover:bg-white/10">
+    <div className="group rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]">
 
       <div className="mb-6 text-[#E7C96F]">
   <Sparkles size={56} />
@@ -191,7 +191,8 @@ export default function Home() {
     </div>
 
     {/* CARD 2 */}
-    <div className="group rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-[#E7C96F]/40 hover:bg-white/10">
+    <div className="group rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]">
+
 
       <div className="mb-6 text-[#E7C96F]">
   <Headphones size={56} />
@@ -209,7 +210,7 @@ export default function Home() {
     </div>
 
     {/* CARD 3 */}
-    <div className="group rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-[#E7C96F]/40 hover:bg-white/10">
+    <div className="group rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]">
 
       <div className="mb-6 text-[#E7C96F]">
   <BookOpen size={56} />
