@@ -14,7 +14,7 @@ export default function ResetPasswordPage() {
   const handleUpdatePassword = async () => {
     if (password !== confirmPassword) {
       setMessage("As senhas não coincidem.");
-      return;f
+      return;
     }
 
     if (password.length < 6) {
