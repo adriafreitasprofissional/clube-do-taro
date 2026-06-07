@@ -9,8 +9,6 @@ export default function PortalPremium() {
   const slug = params.slug as string;
 
 const [ano2026, setAno2026] = useState(false);
-const [ano2027, setAno2027] = useState(false);
-
 const [maio, setMaio] = useState(false);
 const [junho, setJunho] = useState(false);
 
@@ -513,20 +511,6 @@ leituras, áudios e conteúdos especiais.
 
         </div>
       )}
-
-      <div
-        onClick={() => setAno2027(!ano2027)}
-        style={{
-          padding: "24px",
-          borderRadius: "24px",
-          border: "1px solid rgba(244,212,106,.2)",
-          background: "#140014",
-          cursor: "pointer",
-          marginTop: "20px",
-        }}
-            >
-        {ano2027 ? "▼" : "▶"} Ano 2027
-      </div>
 
     </div>
   </div>
