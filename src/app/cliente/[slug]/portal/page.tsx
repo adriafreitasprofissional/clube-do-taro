@@ -96,17 +96,17 @@ function baixarPdf() {
 
   window.open(url, "_blank");
 }
-function abrirAudioJunho() {
+function abrirAudioJunho(semana: string, arquivo: string) {
   const url =
-    `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/junho/semana-1-${slug}-08-06.mp3`;
+    `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/junho/${semana}-${slug}-${arquivo}.mp3`;
 
   setAudioUrl(url);
   setAudioAberto(true);
 }
 
-function baixarPdfJunho() {
+function baixarPdfJunho(semana: string, arquivo: string) {
   const url =
-    `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/junho/semana-1-${slug}-01-06.pdf`;
+    `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/junho/${semana}-${slug}-${arquivo}.pdf`;
 
   window.open(url, "_blank");
 }
@@ -115,6 +115,39 @@ const semanas = [
   { titulo: "2ª Semana", data: "10/05 a 17/05" },
   { titulo: "3ª Semana", data: "17/05 a 24/05" },
   { titulo: "4ª Semana", data: "24/05 a 31/05" },
+];
+
+const semanasJunho = [
+  {
+    titulo: "1ª Semana",
+    data: "01/06 a 07/06",
+    semana: "semana-1",
+    arquivo: "01-06",
+  },
+  {
+    titulo: "2ª Semana",
+    data: "08/06 a 14/06",
+    semana: "semana-2",
+    arquivo: "08-06",
+  },
+  {
+    titulo: "3ª Semana",
+    data: "15/06 a 21/06",
+    semana: "semana-3",
+    arquivo: "15-06",
+  },
+  {
+    titulo: "4ª Semana",
+    data: "22/06 a 28/06",
+    semana: "semana-4",
+    arquivo: "22-06",
+  },
+  {
+    titulo: "5ª Semana",
+    data: "29/06 a 30/06",
+    semana: "semana-5",
+    arquivo: "29-06",
+  },
 ];
 
 return (
