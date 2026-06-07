@@ -98,7 +98,7 @@ function baixarPdf() {
 }
 function abrirAudioJunho() {
   const url =
-    `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/junho/semana-1-${slug}-01-06.mp3`;
+    `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/junho/semana-1-${slug}-08-06.mp3`;
 
   setAudioUrl(url);
   setAudioAberto(true);
