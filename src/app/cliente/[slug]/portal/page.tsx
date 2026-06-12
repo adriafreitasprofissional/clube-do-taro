@@ -14,6 +14,9 @@ const [junho, setJunho] = useState(false);
 
 const [audioAberto, setAudioAberto] = useState(false);
 const [audioUrl, setAudioUrl] = useState("");
+const [direcionamentoAberto, setDirecionamentoAberto] = useState(false);
+const [categoria, setCategoria] = useState("");
+const [pergunta, setPergunta] = useState("");
 
   const nomes: Record<string, string> = {
     gabi: "Gabriela",
@@ -33,6 +36,7 @@ const [audioUrl, setAudioUrl] = useState("");
     rejiane: "Rejiane",
     tamilly: "Tamilly",
     vivi: "Viviane",
+    evelyn: "Evelyn",
   };
 const genero: Record<string, string> = {
   claudinho: "Guardião",
@@ -52,6 +56,7 @@ const genero: Record<string, string> = {
   rejiane: "Guardiã",
   tamilly: "Guardiã",
   vivi: "Guardiã",
+  Evelyn:"Guardiã",
 };
 const tituloGuardiao = genero[slug] || "Guardiã";
 
@@ -60,11 +65,13 @@ const tituloGuardiao = genero[slug] || "Guardiã";
 const [clienteId, setClienteId] = useState("");
 const [plano, setPlano] = useState("");
 
+const [dataInicio, setDataInicio] = useState("");
+
 useEffect(() => {
   async function carregarCliente() {
     const { data, error } = await supabase
       .from("club_clients")
-      .select("id, plano")
+      .select("id, plano, data_inicio")
       .eq("slug", slug)
       .single();
 
@@ -72,10 +79,10 @@ useEffect(() => {
     console.log("ERRO:", error);
 
     if (data) {
-      setClienteId(data.id);
-      setPlano(data.plano);
-      
-    }
+  setClienteId(data.id);
+  setPlano(data.plano);
+  setDataInicio(data.data_inicio);
+}
   }
 
   carregarCliente();
@@ -108,6 +115,39 @@ function baixarPdfJunho(semana: string, arquivo: string) {
 
   window.open(url, "_blank");
 }
+async function enviarPergunta() {
+  if (!categoria) {
+    alert("Escolha uma área.");
+    return;
+  }
+
+  if (!pergunta.trim()) {
+    alert("Digite sua pergunta.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("exclusive_questions")
+    .insert({
+      nome_cliente: nome,
+      email_cliente: slug,
+      categoria,
+      pergunta,
+    });
+
+  if (error) {
+    alert(error.message);
+    console.error(error);
+    return;
+  }
+
+  alert("Pergunta enviada com sucesso!");
+
+  setCategoria("");
+  setPergunta("");
+  setDirecionamentoAberto(false);
+}
+
 const semanas = [
   { titulo: "1ª Semana", data: "03/05 a 10/05" },
   { titulo: "2ª Semana", data: "10/05 a 17/05" },
@@ -129,11 +169,12 @@ const semanasJunho = [
     arquivo: "08-06",
   },
   {
-    titulo: "3ª Semana",
-    data: "15/06 a 21/06",
-    semana: "semana-3",
-    arquivo: "15-06",
-  },
+  titulo: "3ª Semana",
+  data: "15/06 a 21/06",
+  semana: "semana-3",
+  arquivo: "15-06",
+  direcionamentoExclusivo: true,
+},
   {
     titulo: "4ª Semana",
     data: "22/06 a 28/06",
@@ -147,7 +188,24 @@ const semanasJunho = [
     arquivo: "29-06",
   },
 ];
+const mostrarMaio =
+  !dataInicio || new Date(dataInicio) <= new Date("2026-05-31");
 
+const semanasJunhoFiltradas = semanasJunho.filter((semana) => {
+  if (!dataInicio) return true;
+
+  const inicio = new Date(dataInicio);
+
+  const datas: Record<string, string> = {
+    "semana-1": "2026-06-01",
+    "semana-2": "2026-06-08",
+    "semana-3": "2026-06-15",
+    "semana-4": "2026-06-22",
+    "semana-5": "2026-06-29",
+  };
+
+  return inicio <= new Date(datas[semana.semana]);
+});
 return (
 <main
 style={{
@@ -314,20 +372,23 @@ leituras, áudios e conteúdos especiais.
 
       {ano2026 && (
         <div style={{ marginLeft: "30px" }}>
-          <div
-            onClick={() => setMaio(!maio)}
-            style={{
-              padding: "20px",
-              borderRadius: "18px",
-              background: "rgba(244,212,106,.08)",
-              cursor: "pointer",
-              marginBottom: "15px",
-            }}
-          >
-            {maio ? "▼" : "▶"} Maio 2026
-          </div>
+          
+          {mostrarMaio && (
+  <>
+    <div
+      onClick={() => setMaio(!maio)}
+      style={{
+        padding: "20px",
+        borderRadius: "18px",
+        background: "rgba(244,212,106,.08)",
+        cursor: "pointer",
+        marginBottom: "15px",
+      }}
+    >
+      {maio ? "▼" : "▶"} Maio 2026
+    </div>
 
-          {maio && (
+    {maio && (
   <div
     style={{
       display: "grid",
@@ -399,11 +460,15 @@ leituras, áudios e conteúdos especiais.
 >
   📥 Baixar Leitura Completa
 </button>
+
+
 </div>
              
                 </div>
 ))}
 </div>
+    )}
+  </>
 )}
 
 <div
@@ -428,7 +493,7 @@ leituras, áudios e conteúdos especiais.
       gap: "18px",
     }}
   >
-    {semanasJunho.map((semana) => (
+    {semanasJunhoFiltradas.map((semana) => (
       <div
         key={semana.titulo}
         style={{
@@ -503,6 +568,21 @@ leituras, áudios e conteúdos especiais.
           >
             📥 Baixar Leitura Completa
           </button>
+          {semana.direcionamentoExclusivo && (
+  <button
+    onClick={() => setDirecionamentoAberto(true)}
+    style={{
+      background: "#7d1bb5",
+      border: "none",
+      color: "#fff",
+      padding: "12px 22px",
+      borderRadius: "999px",
+      cursor: "pointer",
+    }}
+  >
+    🔮 Direcionamento Exclusivo
+  </button>
+)}
         </div>
       </div>
     ))}
@@ -514,6 +594,113 @@ leituras, áudios e conteúdos especiais.
 
     </div>
   </div>
+
+{direcionamentoAberto && (
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,.85)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        background: "#1a001f",
+        borderRadius: "24px",
+        padding: "30px",
+        width: "650px",
+        maxWidth: "95%",
+        border: "1px solid rgba(244,212,106,.25)",
+      }}
+    >
+      <h2
+        style={{
+          color: "#f4d46a",
+          marginBottom: "20px",
+        }}
+      >
+        🔮 Direcionamento Exclusivo
+      </h2>
+
+      <p style={{ color: "#fff" }}>
+        Escolha a área da sua pergunta.
+      </p>
+<select
+  value={categoria}
+  onChange={(e) => setCategoria(e.target.value)}
+  style={{
+    width: "100%",
+    padding: "14px",
+    borderRadius: "12px",
+    marginTop: "20px",
+    marginBottom: "20px",
+    background: "#2a0738",
+    color: "#f4d46a",
+    border: "1px solid rgba(244,212,106,.25)",
+    outline: "none",
+  }}
+>
+  <option value="">Escolha o tema do seu direcionamento...</option>
+  <option value="Amor">❤️ Amor</option>
+  <option value="Trabalho">💰 Trabalho</option>
+  <option value="Saúde">🌿 Saúde</option>
+  <option value="Espiritualidade">✨ Espiritualidade</option>
+  <option value="Relacionamentos">👨‍👩‍👧 Relacionamentos</option>
+  <option value="Emocional">🧠 Emocional</option>
+</select>
+
+<textarea
+  value={pergunta}
+  onChange={(e) => setPergunta(e.target.value)}
+  placeholder="Digite sua pergunta para a Cigana Ádria..."
+  rows={6}
+  style={{
+    width: "100%",
+    padding: "15px",
+    borderRadius: "12px",
+    marginBottom: "20px",
+    background: "#2a0738",
+    color: "#fff",
+    border: "1px solid rgba(244,212,106,.25)",
+    outline: "none",
+  }}
+/>
+      <button
+  onClick={enviarPergunta}
+  style={{
+    marginTop: "20px",
+    marginRight: "12px",
+    background: "#7d1bb5",
+    border: "none",
+    color: "#fff",
+    padding: "12px 20px",
+    borderRadius: "999px",
+    cursor: "pointer",
+  }}
+>
+  ✨ Enviar Pergunta
+</button>
+
+<button
+  onClick={() => setDirecionamentoAberto(false)}
+  style={{
+    marginTop: "20px",
+    background: "#5b0c8c",
+    border: "none",
+    color: "#fff",
+    padding: "12px 20px",
+    borderRadius: "999px",
+  }}
+>
+  Fechar
+</button>
+ </div>
+  </div>
+)}
 
 {audioAberto && (
   <div
