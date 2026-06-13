@@ -18,49 +18,10 @@ const [direcionamentoAberto, setDirecionamentoAberto] = useState(false);
 const [categoria, setCategoria] = useState("");
 const [pergunta, setPergunta] = useState("");
 
-  const nomes: Record<string, string> = {
-    gabi: "Gabriela",
-    helena: "Helena",
-    carolmorena: "Carol",
-    carolruiva: "Carol",
-    cris: "Cristiane",
-    claudinho: "Claudinho",
-    dani: "Dani",
-    dorinha: "Dorinha",
-    fefe: "Fernanda",
-    lilian: "Lilian",
-    luana: "Luana",
-    natalia: "Natalia",
-    nathali: "Nathali",
-    neide: "Neide",
-    rejiane: "Rejiane",
-    tamilly: "Tamilly",
-    vivi: "Viviane",
-    evelyn: "Evelyn",
-  };
-const genero: Record<string, string> = {
-  claudinho: "Guardião",
-  dani: "Guardião",
-  gabi: "Guardiã",
-  helena: "Guardiã",
-  carolmorena: "Guardiã",
-  carolruiva: "Guardiã",
-  cris: "Guardiã",
-  dorinha: "Guardiã",
-  fefe: "Guardiã",
-  lilian: "Guardiã",
-  luana: "Guardiã",
-  natalia: "Guardiã",
-  nathali: "Guardiã",
-  neide: "Guardiã",
-  rejiane: "Guardiã",
-  tamilly: "Guardiã",
-  vivi: "Guardiã",
-  Evelyn:"Guardiã",
-};
-const tituloGuardiao = genero[slug] || "Guardiã";
+const [tituloGuardiao, setTituloGuardiao] =
+  useState("Guardiã");
 
- const nome = nomes[slug] || "Guardiã";
+ const [nome, setNome] = useState("");
 
 const [clienteId, setClienteId] = useState("");
 const [plano, setPlano] = useState("");
@@ -71,20 +32,31 @@ useEffect(() => {
   async function carregarCliente() {
     const { data, error } = await supabase
       .from("club_clients")
-      .select("id, plano, data_inicio")
+     .select("id, plano, data_inicio, nome, slug, genero")
       .eq("slug", slug)
       .single();
 
     console.log("DATA:", data);
     console.log("ERRO:", error);
 
-    if (data) {
+   if (data) {
   setClienteId(data.id);
   setPlano(data.plano);
   setDataInicio(data.data_inicio);
+  
+ 
+  setNome(
+    data.slug.charAt(0).toUpperCase() +
+    data.slug.slice(1)
+  );
+console.log("GENERO:", data.genero);
+  setTituloGuardiao(
+    data.genero === "homem"
+      ? "Guardião"
+      : "Guardiã"
+  );
 }
-  }
-
+}
   carregarCliente();
 }, [slug]);
 
@@ -225,9 +197,10 @@ margin: "0 auto",
  <div
   style={{
     display: "flex",
-    justifyContent: "flex-end",
+   justifyContent: "flex-start",
     gap: "12px",
     marginBottom: "20px",
+    paddingLeft: "20px"
   }}
 >
   <button
@@ -278,29 +251,44 @@ margin: "0 auto",
     ✦ ✨ 🔮 ✨ ✦
   </div>
 
-  <h1
+ <div
+  style={{
+    textAlign: "center",
+    marginBottom: "15px",
+  }}
+>
+  <div
     style={{
-      fontSize: "70px",
-      marginBottom: "15px",
-      textShadow: "0 0 25px rgba(244,212,106,.25)",
+      color: "#f4d46a",
+      fontSize: "52px",
+      marginBottom: "10px",
     }}
   >
-    🔮 Portal das Guardiãs e Guardiões
-  </h1>
+   {tituloGuardiao}
+  </div>
 
-  <h2
+  <div
     style={{
       color: "#fff",
-      fontWeight: 400,
-      marginBottom: "12px",
+      fontSize: "38px",
+      fontWeight: "bold",
+      marginBottom: "20px",
     }}
   >
-    ✨ {tituloGuardiao} {nome} ✨
-    
-    Que os oráculos iluminem seus caminhos e revelem
-as respostas que sua alma precisa neste momento.
-  </h2>
+    {nome}
+  </div>
 
+  <p
+    style={{
+      color: "#fff",
+      opacity: 0.85,
+      fontSize: "18px",
+    }}
+  >
+    Que os oráculos iluminem seus caminhos e revelem as respostas que sua alma precisa neste momento.
+  </p>
+
+</div>
   <div
     style={{
   display: "inline-block",
