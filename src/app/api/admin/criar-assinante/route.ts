@@ -6,14 +6,14 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const {
-  nome,
-  email,
-  whatsapp,
-  plano,
-  genero,
-  senhaInicial,
-  dataInicio,
-} = body;
+      nome,
+      email,
+      whatsapp,
+      plano,
+      genero,
+      senhaInicial,
+      dataInicio,
+    } = body;
 
     const slug = nome
       .toLowerCase()
@@ -26,6 +26,9 @@ export async function POST(req: Request) {
         email,
         password: senhaInicial,
         email_confirm: true,
+        user_metadata: {
+          display_name: nome,
+        },
       });
 
     if (authError) {
@@ -35,19 +38,22 @@ export async function POST(req: Request) {
       );
     }
 
-    const { error: clientError } = await supabaseAdmin
-      .from("club_clients")
-      .insert({
-        nome,
-        email,
-        whatsapp,
-        plano,
-        genero,
-        senha_inicial: senhaInicial,
-        data_inicio: dataInicio,
-        slug,
-        status: "Ativo",
-      });
+    const { data: cliente, error: clientError } =
+  await supabaseAdmin
+    .from("club_clients")
+    .insert({
+      nome,
+      email,
+      whatsapp,
+      plano,
+      genero,
+      senha_inicial: senhaInicial,
+      data_inicio: dataInicio,
+      slug,
+      status: "Ativo",
+    })
+    .select()
+    .single();
 
     if (clientError) {
       return NextResponse.json(
@@ -55,29 +61,50 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-const clienteId = authUser.user?.id;
 
-const { data: storageData, error: storageError } =
-  await supabaseAdmin.storage
-    .from("clientes")
-    .upload(
-      `${clienteId}/clube-do-taro/.keep`,
-      Buffer.from("criado")
-    );
-if (storageError) {
-  console.error("ERRO STORAGE:", storageError);
-}
-console.log("STORAGE DATA:", storageData);
-console.log("STORAGE ERROR:", storageError);
+    const clienteId = cliente.id;
 
+    const meses = [
+      "maio",
+      "junho",
+      "julho",
+      "agosto",
+      "setembro",
+      "outubro",
+      "novembro",
+      "dezembro",
+    ];
+
+    for (const mes of meses) {
+      const { error } = await supabaseAdmin.storage
+        .from("clientes")
+        .upload(
+  `${clienteId}/clube-do-taro/2026/${mes}/.keep`,
+  Buffer.from("criado"),
+  {
+    upsert: true,
+  }
+);
+
+      if (error) {
+        console.error(`ERRO NO MÊS ${mes}:`, error);
+
+        return NextResponse.json(
+          { error: `Erro ao criar estrutura do mês ${mes}` },
+          { status: 500 }
+        );
+      }
+    }
 
     return NextResponse.json({
       success: true,
       userId: authUser.user?.id,
     });
   } catch (error) {
+    console.error("ERRO GERAL:", error);
+
     return NextResponse.json(
-      { error: "Erro interno" },
+      { error: String(error) },
       { status: 500 }
     );
   }

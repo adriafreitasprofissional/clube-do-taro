@@ -74,8 +74,15 @@ function baixarPdf() {
   window.open(url, "_blank");
 }
 function abrirAudioJunho(semana: string, arquivo: string) {
+  console.log("clienteId:", clienteId);
+  console.log("slug:", slug);
+  console.log("semana:", semana);
+  console.log("arquivo:", arquivo);
+
   const url =
     `https://xzvraybpzukrfaxmtkch.supabase.co/storage/v1/object/public/clientes/${clienteId}/clube-do-taro/2026/junho/${semana}-${slug}-${arquivo}.mp3`;
+
+  console.log("URL FINAL:", url);
 
   setAudioUrl(url);
   setAudioAberto(true);
