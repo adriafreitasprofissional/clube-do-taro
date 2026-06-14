@@ -184,7 +184,43 @@ export default async function ClientePage({
           >
             Seus conteúdos espirituais liberados mês a mês.
           </p>
+<div
+  style={{
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginBottom: "30px",
+  }}
+>
+  <a
+    href="/admin"
+    style={{
+      background: "#f4d46a",
+      color: "#000",
+      padding: "12px 22px",
+      borderRadius: "999px",
+      textDecoration: "none",
+      fontWeight: "bold",
+    }}
+  >
+    ⚙️ Administração
+  </a>
 
+  <a
+    href="https://mystic-lunar-flow.lovable.app/admin"
+    target="_blank"
+    style={{
+      background: "#7d1bb5",
+      color: "#fff",
+      padding: "12px 22px",
+      borderRadius: "999px",
+      textDecoration: "none",
+      fontWeight: "bold",
+    }}
+  >
+    👑 Mentoria Diamante
+  </a>
+</div>
           <a
             
   href={`https://clube-do-taro-clientes.vercel.app/cliente/${slug}/index.html`}
