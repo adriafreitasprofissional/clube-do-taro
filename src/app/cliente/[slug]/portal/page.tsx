@@ -342,14 +342,61 @@ leituras, áudios e conteúdos especiais.
       </h2>
 
       <p
-        style={{
-          color: "#fff",
-          opacity: 0.7,
-          marginBottom: "40px",
-        }}
-      >
-        Seus conteúdos espirituais serão carregados automaticamente.
-      </p>
+  style={{
+    color: "#fff",
+    opacity: 0.7,
+    marginBottom: "40px",
+  }}
+>
+  Seus conteúdos espirituais serão carregados automaticamente.
+</p>
+
+<div
+  style={{
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginBottom: "30px",
+  }}
+>
+  <a
+    href="/admin"
+    style={{
+      background: "#f4d46a",
+      color: "#000",
+      padding: "12px 22px",
+      borderRadius: "999px",
+      textDecoration: "none",
+      fontWeight: "bold",
+    }}
+  >
+    ⚙️ Administração
+  </a>
+
+  <a
+    href="https://mystic-lunar-flow.lovable.app/admin"
+    target="_blank"
+    style={{
+      background: "#7d1bb5",
+      color: "#fff",
+      padding: "12px 22px",
+      borderRadius: "999px",
+      textDecoration: "none",
+      fontWeight: "bold",
+    }}
+  >
+    👑 Mentoria Diamante
+  </a>
+</div>
+
+<div
+  style={{
+    background: "rgba(25,0,35,.75)",
+    borderRadius: "36px",
+    padding: "50px",
+    border: "1px solid rgba(244,212,106,.2)",
+  }}
+></div>
 
       <div
         onClick={() => setAno2026(!ano2026)}
