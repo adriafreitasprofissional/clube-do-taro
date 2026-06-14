@@ -55,6 +55,21 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+const clienteId = authUser.user?.id;
+
+const { data: storageData, error: storageError } =
+  await supabaseAdmin.storage
+    .from("clientes")
+    .upload(
+      `${clienteId}/clube-do-taro/.keep`,
+      Buffer.from("criado")
+    );
+if (storageError) {
+  console.error("ERRO STORAGE:", storageError);
+}
+console.log("STORAGE DATA:", storageData);
+console.log("STORAGE ERROR:", storageError);
+
 
     return NextResponse.json({
       success: true,
