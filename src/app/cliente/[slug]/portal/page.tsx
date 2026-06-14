@@ -310,6 +310,24 @@ margin: "0 auto",
   >
     🔮 Plano {plano}
   </div>
+{plano?.toLowerCase() === "diamante" && (
+    <a
+      href="SEU_LINK_DE_MENTORIA"
+      target="_blank"
+      style={{
+        padding: "12px 30px",
+        fontWeight: "bold",
+        borderRadius: "999px",
+        background:
+          "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
+        color: "#fff",
+        textDecoration: "none",
+      }}
+    >
+      👑 Mentoria Diamante
+    </a>
+  )}
+</div>
 
   <p
     style={{
@@ -351,43 +369,6 @@ leituras, áudios e conteúdos especiais.
   Seus conteúdos espirituais serão carregados automaticamente.
 </p>
 
-<div
-  style={{
-    display: "flex",
-    gap: "12px",
-    flexWrap: "wrap",
-    marginBottom: "30px",
-  }}
->
-  <a
-    href="/admin"
-    style={{
-      background: "#f4d46a",
-      color: "#000",
-      padding: "12px 22px",
-      borderRadius: "999px",
-      textDecoration: "none",
-      fontWeight: "bold",
-    }}
-  >
-    ⚙️ Administração
-  </a>
-
-  <a
-    href="https://mystic-lunar-flow.lovable.app/admin"
-    target="_blank"
-    style={{
-      background: "#7d1bb5",
-      color: "#fff",
-      padding: "12px 22px",
-      borderRadius: "999px",
-      textDecoration: "none",
-      fontWeight: "bold",
-    }}
-  >
-    👑 Mentoria Diamante
-  </a>
-</div>
 
 <div
   style={{
