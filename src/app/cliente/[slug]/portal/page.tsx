@@ -240,7 +240,9 @@ margin: "0 auto",
   >
     🚪 Sair
   </button>
+
 </div>
+
 <div
   style={{
     textAlign: "center",
@@ -296,6 +298,7 @@ margin: "0 auto",
   </p>
 
 </div>
+
   <div
     style={{
   display: "inline-block",
@@ -310,6 +313,7 @@ margin: "0 auto",
   >
     🔮 Plano {plano}
   </div>
+
 {plano?.toLowerCase() === "diamante" && (
     <a
       href="SEU_LINK_DE_MENTORIA"
@@ -327,6 +331,7 @@ margin: "0 auto",
       👑 Mentoria Diamante
     </a>
   )}
+
 </div>
 
   <p
@@ -340,285 +345,254 @@ margin: "0 auto",
     Seu espaço exclusivo para acessar direcionamentos,
 leituras, áudios e conteúdos especiais.
   </p>
+  
 </div>
 
     <div
-      style={{
-        background: "rgba(25,0,35,.75)",
-        borderRadius: "36px",
-        padding: "50px",
-        border: "1px solid rgba(244,212,106,.2)",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: "42px",
-          marginBottom: "20px",
-        }}
-      >
-        Direcionamentos Exclusivos
-      </h2>
-
-      <p
-  style={{
-    color: "#fff",
-    opacity: 0.7,
-    marginBottom: "40px",
-  }}
->
-  Seus conteúdos espirituais serão carregados automaticamente.
-</p>
-
-
-<div
   style={{
     background: "rgba(25,0,35,.75)",
     borderRadius: "36px",
     padding: "50px",
     border: "1px solid rgba(244,212,106,.2)",
   }}
-></div>
+>
 
-      <div
-        onClick={() => setAno2026(!ano2026)}
-        style={{
-          padding: "24px",
-          borderRadius: "24px",
-          border: "1px solid rgba(244,212,106,.2)",
-          background: "#140014",
-          cursor: "pointer",
-          marginBottom: "15px",
-        }}
-      >
-        {ano2026 ? "▼" : "▶"} Ano 2026
-      </div>
+  <div
+  onClick={() => setAno2026(!ano2026)}
+  style={{
+    padding: "24px",
+    borderRadius: "24px",
+    border: "1px solid rgba(244,212,106,.2)",
+    background: "#140014",
+    cursor: "pointer",
+    marginBottom: "15px",
+  }}
+>
+  {ano2026 ? "▼" : "▶"} Ano 2026
+</div>
 
-      {ano2026 && (
-        <div style={{ marginLeft: "30px" }}>
-          
-          {mostrarMaio && (
-  <>
+{ano2026 && (
+  <div style={{ marginLeft: "20px" }}>
+
+    {mostrarMaio && (
+      <>
+        <div
+          onClick={() => setMaio(!maio)}
+          style={{
+            padding: "20px",
+            borderRadius: "18px",
+            background: "rgba(244,212,106,.08)",
+            cursor: "pointer",
+            marginBottom: "15px",
+          }}
+        >
+          {maio ? "▼" : "▶"} Maio 2026
+        </div>
+
+        {maio && (
+          <div
+            style={{
+              display: "grid",
+              gap: "18px",
+            }}
+          >
+            {semanas.map((semana) => (
+              <div
+                key={semana.titulo}
+                style={{
+                  background:
+                    "linear-gradient(180deg,#2a0738 0%, #1a001f 100%)",
+                  border:
+                    "1px solid rgba(244,212,106,.15)",
+                  borderRadius: "24px",
+                  padding: "24px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "26px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  ✦ {semana.titulo}
+                </div>
+
+                <div
+                  style={{
+                    color: "rgba(255,255,255,.65)",
+                    marginBottom: "20px",
+                  }}
+                >
+                  {semana.data}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <button
+                    onClick={abrirAudio}
+                    style={{
+                      background:
+                        "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
+                      border: "none",
+                      color: "#fff",
+                      padding: "12px 22px",
+                      borderRadius: "999px",
+                    }}
+                  >
+                    🎧 Ouvir Direcionamento
+                  </button>
+
+                  <button
+                    onClick={baixarPdf}
+                    style={{
+                      background:
+                        "rgba(244,212,106,.12)",
+                      border:
+                        "1px solid rgba(244,212,106,.25)",
+                      color: "#f4d46a",
+                      padding: "12px 22px",
+                      borderRadius: "999px",
+                    }}
+                  >
+                    📥 Baixar Leitura Completa
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
+    )}
+
     <div
-      onClick={() => setMaio(!maio)}
+      onClick={() => setJunho(!junho)}
       style={{
         padding: "20px",
         borderRadius: "18px",
         background: "rgba(244,212,106,.08)",
         cursor: "pointer",
         marginBottom: "15px",
+        marginTop: "15px",
       }}
     >
-      {maio ? "▼" : "▶"} Maio 2026
+      {junho ? "▼" : "▶"} Junho 2026
     </div>
 
-    {maio && (
-  <div
-    style={{
-      display: "grid",
-      gap: "18px",
-    }}
-  >
-    {semanas.map((semana) => (
+    {junho && (
       <div
-        key={semana.titulo}
         style={{
-          background:
-            "linear-gradient(180deg,#2a0738 0%, #1a001f 100%)",
-          border:
-            "1px solid rgba(244,212,106,.15)",
-          borderRadius: "24px",
-          padding: "24px",
-        }}
-        
-
-                >
-                  <div
-                    style={{
-                      fontSize: "26px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    ✦ {semana.titulo}
-                  </div>
-
-                  <div
-                    style={{
-                      color: "rgba(255,255,255,.65)",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    {semana.data}
-                  </div>
-
-                  <div
-  style={{
-    display: "flex",
-    gap: "12px",
-    flexWrap: "wrap",
-  }}
->
-  <button
-    onClick={abrirAudio}
-    style={{
-      background:
-        "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
-      border: "none",
-      color: "#fff",
-      padding: "12px 22px",
-      borderRadius: "999px",
-    }}
-  >
-    🎧 Ouvir Direcionamento
-  </button>
-
-  <button
-  onClick={baixarPdf}
-  style={{
-    background: "rgba(244,212,106,.12)",
-    border: "1px solid rgba(244,212,106,.25)",
-    color: "#f4d46a",
-    padding: "12px 22px",
-    borderRadius: "999px",
-  }}
->
-  📥 Baixar Leitura Completa
-</button>
-
-
-</div>
-             
-                </div>
-))}
-</div>
-    )}
-  </>
-)}
-
-<div
-  onClick={() => setJunho(!junho)}
-  style={{
-    padding: "20px",
-    borderRadius: "18px",
-    background: "rgba(244,212,106,.08)",
-    cursor: "pointer",
-    marginBottom: "15px",
-    marginTop: "15px",
-  }}
-
->
-  {junho ? "▼" : "▶"} Junho 2026
-</div>
-
-{junho && (
-  <div
-    style={{
-      display: "grid",
-      gap: "18px",
-    }}
-  >
-    {semanasJunhoFiltradas.map((semana) => (
-      <div
-        key={semana.titulo}
-        style={{
-          background:
-            "linear-gradient(180deg,#2a0738 0%, #1a001f 100%)",
-          border:
-            "1px solid rgba(244,212,106,.15)",
-          borderRadius: "24px",
-          padding: "24px",
+          display: "grid",
+          gap: "18px",
         }}
       >
-        <div
-          style={{
-            fontSize: "26px",
-            marginBottom: "10px",
-          }}
-        >
-          ✦ {semana.titulo}
-        </div>
-
-        <div
-          style={{
-            color: "rgba(255,255,255,.65)",
-            marginBottom: "20px",
-          }}
-        >
-          {semana.data}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          <button
-            onClick={() =>
-              abrirAudioJunho(
-                semana.semana,
-                semana.arquivo
-              )
-            }
+        {semanasJunhoFiltradas.map((semana) => (
+          <div
+            key={semana.titulo}
             style={{
               background:
-                "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
-              border: "none",
-              color: "#fff",
-              padding: "12px 22px",
-              borderRadius: "999px",
-            }}
-          >
-            🎧 Ouvir Direcionamento
-          </button>
-
-          <button
-            onClick={() =>
-              baixarPdfJunho(
-                semana.semana,
-                semana.arquivo
-              )
-            }
-            style={{
-              background:
-                "rgba(244,212,106,.12)",
+                "linear-gradient(180deg,#2a0738 0%, #1a001f 100%)",
               border:
-                "1px solid rgba(244,212,106,.25)",
-              color: "#f4d46a",
-              padding: "12px 22px",
-              borderRadius: "999px",
+                "1px solid rgba(244,212,106,.15)",
+              borderRadius: "24px",
+              padding: "24px",
             }}
           >
-            📥 Baixar Leitura Completa
-          </button>
-          {semana.direcionamentoExclusivo && (
-  <button
-    onClick={() => setDirecionamentoAberto(true)}
-    style={{
-      background: "#7d1bb5",
-      border: "none",
-      color: "#fff",
-      padding: "12px 22px",
-      borderRadius: "999px",
-      cursor: "pointer",
-    }}
-  >
-    🔮 Direcionamento Exclusivo
-  </button>
-)}
-        </div>
+            <div
+              style={{
+                fontSize: "26px",
+                marginBottom: "10px",
+              }}
+            >
+              ✦ {semana.titulo}
+            </div>
+
+            <div
+              style={{
+                color: "rgba(255,255,255,.65)",
+                marginBottom: "20px",
+              }}
+            >
+              {semana.data}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={() =>
+                  abrirAudioJunho(
+                    semana.semana,
+                    semana.arquivo
+                  )
+                }
+                style={{
+                  background:
+                    "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
+                  border: "none",
+                  color: "#fff",
+                  padding: "12px 22px",
+                  borderRadius: "999px",
+                }}
+              >
+                🎧 Ouvir Direcionamento
+              </button>
+
+              <button
+                onClick={() =>
+                  baixarPdfJunho(
+                    semana.semana,
+                    semana.arquivo
+                  )
+                }
+                style={{
+                  background:
+                    "rgba(244,212,106,.12)",
+                  border:
+                    "1px solid rgba(244,212,106,.25)",
+                  color: "#f4d46a",
+                  padding: "12px 22px",
+                  borderRadius: "999px",
+                }}
+              >
+                📥 Baixar Leitura Completa
+              </button>
+
+              {semana.direcionamentoExclusivo && (
+                <button
+                  onClick={() =>
+                    setDirecionamentoAberto(true)
+                  }
+                  style={{
+                    background: "#7d1bb5",
+                    border: "none",
+                    color: "#fff",
+                    padding: "12px 22px",
+                    borderRadius: "999px",
+                    cursor: "pointer",
+                  }}
+                >
+                  🔮 Direcionamento Exclusivo
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
-    ))}
+    )}
+
   </div>
 )}
-
-        </div>
-      )}
-
-    </div>
-  </div>
-
 {direcionamentoAberto && (
+
   <div
     style={{
       position: "fixed",
@@ -652,7 +626,9 @@ leituras, áudios e conteúdos especiais.
       <p style={{ color: "#fff" }}>
         Escolha a área da sua pergunta.
       </p>
+
 <select
+
   value={categoria}
   onChange={(e) => setCategoria(e.target.value)}
   style={{
