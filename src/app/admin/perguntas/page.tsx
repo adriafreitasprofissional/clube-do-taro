@@ -21,6 +21,31 @@ export default function Page() {
     setPerguntas(data);
   }
 
+  async function marcarComoRespondida() {
+    if (!selecionada) return;
+
+    await fetch(
+      "/api/admin/perguntas/responder",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          id: selecionada.id,
+        }),
+      }
+    );
+
+    await carregarPerguntas();
+
+    setSelecionada({
+      ...selecionada,
+      status: "Respondida",
+    });
+  }
+
   const perguntasFiltradas = perguntas.filter(
     (pergunta) => {
       const termo = busca.toLowerCase();
@@ -62,7 +87,9 @@ export default function Page() {
           type="text"
           placeholder="Buscar..."
           value={busca}
-          onChange={(e) => setBusca(e.target.value)}
+          onChange={(e) =>
+            setBusca(e.target.value)
+          }
           style={{
             width: "100%",
             padding: "10px",
@@ -77,19 +104,24 @@ export default function Page() {
         {perguntasFiltradas.map((pergunta) => (
           <div
             key={pergunta.id}
-            onClick={() => setSelecionada(pergunta)}
+            onClick={() =>
+              setSelecionada(pergunta)
+            }
             style={{
               padding: "12px",
               cursor: "pointer",
-              borderBottom: "1px solid #222",
+              borderBottom:
+                "1px solid #222",
               borderRadius: "8px",
               marginBottom: "8px",
               background:
-                selecionada?.id === pergunta.id
+                selecionada?.id ===
+                pergunta.id
                   ? "#2a1d00"
                   : "transparent",
               border:
-                selecionada?.id === pergunta.id
+                selecionada?.id ===
+                pergunta.id
                   ? "1px solid #f4d46a"
                   : "1px solid transparent",
             }}
@@ -107,7 +139,15 @@ export default function Page() {
             <small>
               {new Date(
                 pergunta.created_at
-              ).toLocaleDateString("pt-BR")}
+              ).toLocaleDateString(
+                "pt-BR"
+              )}
+            </small>
+
+            <br />
+
+            <small>
+              Status: {pergunta.status}
             </small>
           </div>
         ))}
@@ -121,7 +161,9 @@ export default function Page() {
         }}
       >
         {!selecionada ? (
-          <p>Selecione uma pergunta.</p>
+          <p>
+            Selecione uma pergunta.
+          </p>
         ) : (
           <>
             <h2>
@@ -129,7 +171,9 @@ export default function Page() {
             </h2>
 
             <p>
-              <strong>Categoria:</strong>{" "}
+              <strong>
+                Categoria:
+              </strong>{" "}
               {selecionada.categoria}
             </p>
 
@@ -143,6 +187,26 @@ export default function Page() {
             <p>
               {selecionada.pergunta}
             </p>
+
+            {selecionada.status !==
+              "Respondida" && (
+              <button
+                onClick={
+                  marcarComoRespondida
+                }
+                style={{
+                  marginTop: "20px",
+                  padding:
+                    "12px 18px",
+                  borderRadius:
+                    "8px",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                ✓ Marcar como Respondida
+              </button>
+            )}
           </>
         )}
       </div>
