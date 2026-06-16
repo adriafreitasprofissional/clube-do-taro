@@ -28,6 +28,43 @@ export default function AdminPage() {
           gap: "20px",
         }}
       >
+
+        <a
+  href="/admin/recados"
+  style={card}
+>
+  📢 Recados
+  <br />
+  Publicar novidades
+</a>
+
+<a
+  href="/admin/mensalidades"
+  style={card}
+>
+  💳 Mensalidades
+  <br />
+  Controle financeiro
+</a>
+
+<a
+  href="/admin/indicacoes"
+  style={card}
+>
+  🎁 Indicações
+  <br />
+  Cupons e descontos
+</a>
+
+<a
+  href="/admin/sorteios"
+  style={card}
+>
+  🍀 Sorteios
+  <br />
+  Número da sorte
+  
+</a>
         <a
           href="/admin/assinantes"
           style={card}
