@@ -4,12 +4,13 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 export async function GET() {
   const { data, error } = await supabaseAdmin
     .from("club_clients")
-    .select("*")
-    .order("nome");
+    .select("*");
 
-  if (error) {
-    return NextResponse.json([]);
-  }
+  console.log("DADOS:", data);
+  console.log("ERRO:", error);
 
-  return NextResponse.json(data);
+  return NextResponse.json({
+    data,
+    error,
+  });
 }
