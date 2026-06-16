@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function Page() {
   const [perguntas, setPerguntas] = useState<any[]>([]);
   const [selecionada, setSelecionada] = useState<any>(null);
+  const [busca, setBusca] = useState("");
 
   useEffect(() => {
     carregarPerguntas();
@@ -19,6 +20,24 @@ export default function Page() {
 
     setPerguntas(data);
   }
+
+  const perguntasFiltradas = perguntas.filter(
+    (pergunta) => {
+      const termo = busca.toLowerCase();
+
+      return (
+        String(pergunta.nome_cliente || "")
+          .toLowerCase()
+          .includes(termo) ||
+        String(pergunta.categoria || "")
+          .toLowerCase()
+          .includes(termo) ||
+        String(pergunta.pergunta || "")
+          .toLowerCase()
+          .includes(termo)
+      );
+    }
+  );
 
   return (
     <div
@@ -35,28 +54,46 @@ export default function Page() {
           padding: "16px",
         }}
       >
-        <h2>Perguntas</h2>
+        <h2>
+          Perguntas ({perguntasFiltradas.length})
+        </h2>
 
-        {perguntas.map((pergunta) => (
-  <div
-    key={pergunta.id}
-    onClick={() => setSelecionada(pergunta)}
-    style={{
-      padding: "12px",
-      cursor: "pointer",
-      borderBottom: "1px solid #222",
-      borderRadius: "8px",
-      marginBottom: "8px",
-      background:
-        selecionada?.id === pergunta.id
-          ? "#2a1d00"
-          : "transparent",
-      border:
-        selecionada?.id === pergunta.id
-          ? "1px solid #f4d46a"
-          : "1px solid transparent",
-    }}
-  >
+        <input
+          type="text"
+          placeholder="Buscar..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginBottom: "15px",
+            borderRadius: "8px",
+            border: "1px solid #333",
+            background: "#111",
+            color: "#fff",
+          }}
+        />
+
+        {perguntasFiltradas.map((pergunta) => (
+          <div
+            key={pergunta.id}
+            onClick={() => setSelecionada(pergunta)}
+            style={{
+              padding: "12px",
+              cursor: "pointer",
+              borderBottom: "1px solid #222",
+              borderRadius: "8px",
+              marginBottom: "8px",
+              background:
+                selecionada?.id === pergunta.id
+                  ? "#2a1d00"
+                  : "transparent",
+              border:
+                selecionada?.id === pergunta.id
+                  ? "1px solid #f4d46a"
+                  : "1px solid transparent",
+            }}
+          >
             <strong>
               {pergunta.nome_cliente}
             </strong>
@@ -64,6 +101,14 @@ export default function Page() {
             <br />
 
             {pergunta.categoria}
+
+            <br />
+
+            <small>
+              {new Date(
+                pergunta.created_at
+              ).toLocaleDateString("pt-BR")}
+            </small>
           </div>
         ))}
       </div>
