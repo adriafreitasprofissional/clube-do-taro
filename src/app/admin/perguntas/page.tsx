@@ -6,6 +6,8 @@ export default function Page() {
   const [perguntas, setPerguntas] = useState<any[]>([]);
   const [selecionada, setSelecionada] = useState<any>(null);
   const [busca, setBusca] = useState("");
+  const [filtroStatus, setFiltroStatus] =
+    useState("Todos");
 
   useEffect(() => {
     carregarPerguntas();
@@ -50,7 +52,7 @@ export default function Page() {
     (pergunta) => {
       const termo = busca.toLowerCase();
 
-      return (
+      const passouBusca =
         String(pergunta.nome_cliente || "")
           .toLowerCase()
           .includes(termo) ||
@@ -59,8 +61,13 @@ export default function Page() {
           .includes(termo) ||
         String(pergunta.pergunta || "")
           .toLowerCase()
-          .includes(termo)
-      );
+          .includes(termo);
+
+      const passouStatus =
+        filtroStatus === "Todos" ||
+        pergunta.status === filtroStatus;
+
+      return passouBusca && passouStatus;
     }
   );
 
@@ -101,6 +108,38 @@ export default function Page() {
           }}
         />
 
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            marginBottom: "15px",
+          }}
+        >
+          <button
+            onClick={() =>
+              setFiltroStatus("Todos")
+            }
+          >
+            Todos
+          </button>
+
+          <button
+            onClick={() =>
+              setFiltroStatus("Pendente")
+            }
+          >
+            Pendentes
+          </button>
+
+          <button
+            onClick={() =>
+              setFiltroStatus("Respondida")
+            }
+          >
+            Respondidas
+          </button>
+        </div>
+
         {perguntasFiltradas.map((pergunta) => (
           <div
             key={pergunta.id}
@@ -132,7 +171,15 @@ export default function Page() {
 
             <br />
 
-            {pergunta.categoria}
+            <small>
+              Plano: {pergunta.plano}
+            </small>
+
+            <br />
+
+            <small>
+              {pergunta.categoria}
+            </small>
 
             <br />
 
@@ -169,6 +216,11 @@ export default function Page() {
             <h2>
               {selecionada.nome_cliente}
             </h2>
+
+            <p>
+              <strong>Plano:</strong>{" "}
+              {selecionada.plano}
+            </p>
 
             <p>
               <strong>
