@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import CelestialBackground from "./components/CelestialBackground";
+import { div } from "framer-motion/m";
 function PortalCard({
   title,
   subtitle,
@@ -123,7 +124,7 @@ export default function Home() {
               href="https://cigana-tarot-magia.lovable.app/"
               className="rounded-full bg-[#D4AF37] px-8 py-5 text-center font-semibold text-black transition hover:scale-105"
             >
-              QUERO FAZER PARTE DO CLUBE
+              QUERO FAZER PARTE DO CLUBE  Conheça os Planos
             </a>
           </div>
         </motion.div>
@@ -145,9 +146,8 @@ export default function Home() {
     alt="Ádria Freitas"
     width={470}
     height={690}
-    className="relative rounded-[36px] object-cover opacity-95 shadow-2xl"
-  />
-
+ 
+/>
 </div>
         </motion.div>
       </section>
@@ -161,84 +161,102 @@ export default function Home() {
       Explore o Universo do Clube do Tarô
     </h2>
 
-    <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
-      Conteúdos espirituais, leituras mensais, rituais, aulas e experiências
-      desenvolvidas para elevar sua conexão espiritual.
+    <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-white/70">
+      Uma comunidade exclusiva criada por Ádria Freitas, taróloga com mais de 30 anos de experiência em
+Cartas Ciganas, Tarot, Numerologia Cabalística e Espiritualidade.
+Toda semana os membros recebem direcionamentos,áudios exclusivos, benefícios especiais, conteúdos inéditos e mentorias de acordo com
+seu plano de assinatura.
     </p>
   </div>
 
   <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
 
-    {/* CARD 1 */}
-    <div className="group rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]">
-
-      <div className="mb-6">
-  <Image
-    src="/icons/tarot-card-gold.png"
-    alt="Leituras Mensais"
-    width={90}
-    height={90}
-    className="drop-shadow-[0_0_20px_rgba(231,201,111,0.4)]"
-  />
-</div>
-
-      <h3 className="mb-4 font-serif text-3xl text-white">
-        Leituras Mensais
-      </h3>
-
-      <p className="leading-relaxed text-white/70">
-        Leituras intuitivas completas com direcionamentos espirituais,
-        conselhos e previsões energéticas do mês.
-      </p>
-    </div>
-
-    {/* CARD 2 */}
-    <div className="group rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]">
-
-
-      <div className="mb-6">
-  <Image
-    src="/icons/gold-headphones.png"
-    alt="Áudios Exclusivos"
-    width={90}
-    height={90}
-    className="drop-shadow-[0_0_20px_rgba(231,201,111,0.4)]"
-  />
-</div>
-
-      <h3 className="mb-4 font-serif text-3xl text-white">
-        Áudios Exclusivos
-      </h3>
-
-      <p className="leading-relaxed text-white/70">
-        Meditações, ativações espirituais e conteúdos energéticos exclusivos
-        liberados semanalmente para os membros.
-      </p>
-    </div>
-
-    {/* CARD 3 */}
-    <div className="group rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]">
-
-      <div className="mb-6">
-  <Image
-    src="/icons/magic-book.png"
-    alt="Biblioteca Mística"
-    width={90}
-    height={90}
-    className="drop-shadow-[0_0_20px_rgba(231,201,111,0.4)]"
-  />
-</div>
-
-      <h3 className="mb-4 font-serif text-3xl text-white">
-        Biblioteca Mística
-      </h3>
-
-      <p className="leading-relaxed text-white/70">
-        E-books, romances umbandistas, materiais exclusivos, vídeo de ativação da pineal e conteúdos para fortalecer sua jornada espiritual.
-      </p>
-    </div>
-
+   {/* CARD 1 */}
+<a
+  href="/"
+  className="group block rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]"
+>
+  <div className="mb-6">
+    <Image
+      src="/icons/gold-scroll.png"
+      alt="Cursos Exclusivos"
+      width={90}
+      height={90}
+      className="drop-shadow-[0_0_20px_rgba(231,201,111,0.4)]"
+    />
   </div>
+
+  <h3 className="mb-4 font-serif text-3xl text-white">
+    Cursos Exclusivos
+  </h3>
+
+  <p className="leading-relaxed text-white/70">
+    Cursos de Umbanda, Tarot, Baralho Cigano, desenvolvimento espiritual,
+    rituais, palestras e conteúdos exclusivos com vantagens especiais para
+    membros do Clube do Tarô.
+  </p>
+
+  <div className="mt-6 font-semibold text-[#E7C96F]">
+    ENTRAR →
+  </div>
+</a>
+{/* CARD 2 */}
+<a
+  href="/audios"
+  className="group block rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]"
+>
+  <div className="mb-6">
+    <Image
+      src="/icons/gold-headphones.png"
+      alt="Áudio do Mês"
+      width={90}
+      height={90}
+      className="drop-shadow-[0_0_20px_rgba(231,201,111,0.4)]"
+    />
+  </div>
+
+  <h3 className="mb-4 font-serif text-3xl text-white">
+    Áudio do Mês
+  </h3>
+
+  <p className="leading-relaxed text-white/70">
+    Meditações, ativações, direcionamentos e conteúdos energéticos exclusivos
+    liberados semanalmente para os membros.
+  </p>
+
+  <div className="mt-6 font-semibold text-[#E7C96F]">
+    ENTRAR →
+  </div>
+</a>
+
+   {/* CARD 3 */}
+<a
+  href="/cliente/gabi/cursos"
+  className="group block rounded-[32px] border border-[#E7C96F]/20 bg-gradient-to-b from-white/10 to-white/5 p-8 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#E7C96F]/60 hover:shadow-[0_0_40px_rgba(231,201,111,0.15)]"
+>
+  <div className="mb-6">
+    <Image
+      src="/icons/gold-scroll.png"
+      alt="Destaque do Mês"
+      width={90}
+      height={90}
+      className="drop-shadow-[0_0_20px_rgba(231,201,111,0.4)]"
+    />
+  </div>
+
+  <h3 className="mb-4 font-serif text-3xl text-white">
+    Destaque do Mês
+  </h3>
+
+  <p className="leading-relaxed text-white/70">
+    🌹 Portal do Poder da Sua Pombogira. Um desafio de 7 dias para despertar sua força interior, autoestima, magnetismo e conexão espiritual.
+  </p>
+
+  <div className="mt-6 font-semibold text-[#E7C96F]">
+    ENTRAR →
+  </div>
+</a>
+</div>
 </section>
 
       {/* PORTAIS */}
@@ -257,20 +275,7 @@ export default function Home() {
     }
   />
 }
-        />
-
-        <PortalCard
-          title="Cursos Exclusivos"
-          subtitle="Entre em jornadas profundas de aprendizado, expansão espiritual e transformação."
-          href="SEU_LINK_CURSOS"
-          icon={
-  <Image
-    src="/icons/gold-scroll.png"
-    alt="Cursos Exclusivos"
-    width={100}
-    height={100}
-  />
-}
+      
         />
 
         <PortalCard
@@ -290,7 +295,7 @@ export default function Home() {
         />
 
         <PortalCard
-          title="Universo Literário"
+          title="Universo Literário de Ádria Freitas"
           subtitle="Próximos lançamentos, trailers, sinopses narradas e experiências literárias imersivas."
           href="https://uiclap.bio/ADRIAFREITAS"
           icon={
