@@ -1,65 +1,84 @@
-<a href="/admin/direcionamentos">
-  📩 Direcionamentos
-</a>
-const [mensagens, setMensagens] = useState<any[]>([]);
-const [selecionada, setSelecionada] = useState<any>(null);
+"use client";
 
-useEffect(() => {
-  carregarMensagens();
-}, []);
+import { useState } from "react";
 
-async function carregarMensagens() {
-  const response = await fetch(
-    "/api/admin/direcionamentos"
-  );
+type Mensagem = {
+  id: string;
+  nome_cliente: string;
+  categoria: string;
+  pergunta: string;
+};
 
-  const data = await response.json();
+export default function DirecionamentosPage() {
+  const [mensagens] = useState<Mensagem[]>([]);
+  const [selecionada, setSelecionada] = useState<Mensagem | null>(null);
 
-  setMensagens(data);
-}
+  return (
+    <div style={{ padding: "30px", color: "#fff" }}>
+      <h1>📩 Direcionamentos</h1>
 
-return (
-  <div>
-    <h1>📩 Direcionamentos</h1>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "350px 1fr",
+          gap: "20px",
+          marginTop: "24px",
+        }}
+      >
+        <div>
+          {mensagens.length === 0 ? (
+            <p style={{ opacity: 0.7 }}>Nenhum direcionamento recebido ainda.</p>
+          ) : (
+            mensagens.map((msg) => (
+              <button
+                key={msg.id}
+                onClick={() => setSelecionada(msg)}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  marginBottom: "10px",
+                  padding: "16px",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(231,201,111,.25)",
+                  background: "#1a0026",
+                  color: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                <strong>{msg.nome_cliente}</strong>
+                <br />
+                <span style={{ opacity: 0.75 }}>{msg.categoria}</span>
+              </button>
+            ))
+          )}
+        </div>
 
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "350px 1fr",
-        gap: "20px",
-      }}
-    >
-      <div>
-        {mensagens.map((msg) => (
-          <div
-            key={msg.id}
-            onClick={() => setSelecionada(msg)}
-          >
-            <strong>{msg.nome_cliente}</strong>
-            <br />
-            {msg.categoria}
-          </div>
-        ))}
-      </div>
+        <div
+          style={{
+            minHeight: "260px",
+            padding: "24px",
+            borderRadius: "16px",
+            border: "1px solid rgba(231,201,111,.25)",
+            background: "#1a0026",
+          }}
+        >
+          {selecionada ? (
+            <>
+              <h2>{selecionada.nome_cliente}</h2>
 
-      <div>
-        {selecionada && (
-          <>
-            <h2>
-              {selecionada.nome_cliente}
-            </h2>
+              <p>
+                <strong>Categoria:</strong> {selecionada.categoria}
+              </p>
 
-            <p>
-              <strong>Categoria:</strong>
-              {selecionada.categoria}
+              <p>{selecionada.pergunta}</p>
+            </>
+          ) : (
+            <p style={{ opacity: 0.7 }}>
+              Selecione um direcionamento para visualizar.
             </p>
-
-            <p>
-              {selecionada.pergunta}
-            </p>
-          </>
-        )}
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+}
