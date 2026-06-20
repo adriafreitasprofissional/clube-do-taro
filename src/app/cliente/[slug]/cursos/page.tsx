@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { color } from "framer-motion/dom";
+
 
 type Course = {
   id: string;
