@@ -93,10 +93,7 @@ const diasRestantesAnual = Math.ceil(
     }}
   >
     <p>
-      <strong>Tipo:</strong>{" "}
-      {tipoAssinatura === "anual"
-        ? "Anual"
-        : "Mensal"}
+      <strong>Tipo:</strong> Mensal
     </p>
 
     <p>
