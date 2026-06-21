@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     }
 
     const { data: pedido, error: erroPedido } = await supabaseAdmin
-      .from("orders")
+      .from("infinitepay_orders")
       .select("id, valor, status")
       .eq("order_nsu", orderNsu)
       .single();
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     }
 
     const { error: erroAtualizacao } = await supabaseAdmin
-      .from("orders")
+      .from("infinitepay_orders")
       .update({
         status: "pago",
         infinitepay_transaction_id: transactionNsu,

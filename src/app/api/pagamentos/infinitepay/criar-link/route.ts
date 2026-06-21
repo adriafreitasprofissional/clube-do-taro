@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const siteUrl =
       process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-    const { error: erroPedido } = await supabaseAdmin.from("orders").insert({
+        const { error: erroPedido } = await supabaseAdmin.from("infinitepay_orders").insert({
       order_nsu: orderNsu,
       produto_id: produtoId,
       descricao: produto.descricao,
@@ -91,11 +91,11 @@ export async function POST(request: Request) {
 
     const dados = await resposta.json();
 
-    if (!resposta.ok || !dados.url) {
+        if (!resposta.ok || !dados.url) {
       console.error("Erro da InfinitePay:", dados);
 
       await supabaseAdmin
-        .from("orders")
+        .from("infinitepay_orders")
         .update({ status: "erro_checkout" })
         .eq("order_nsu", orderNsu);
 
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     }
 
     await supabaseAdmin
-      .from("orders")
+      .from("infinitepay_orders")
       .update({ checkout_url: dados.url })
       .eq("order_nsu", orderNsu);
 
