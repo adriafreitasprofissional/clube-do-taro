@@ -44,16 +44,16 @@ export default function LoginPage() {
       return;
     }
 
-    if (clienteData.status !== "ativo") {
-      alert("Seu acesso está temporariamente indisponível. Entre em contato com o Clube do Tarô.");
-      setLoading(false);
-      return;
-    }
-
     if (clienteData.role === "admin") {
-      window.location.href = "/admin";
-      return;
-    }
+  window.location.href = "/admin";
+  return;
+}
+
+if (clienteData.status !== "ativo") {
+  alert("Seu acesso está temporariamente indisponível. Entre em contato com o Clube do Tarô.");
+  setLoading(false);
+  return;
+}
 
     window.location.href = `/cliente/${clienteData.slug}/portal`;
   }

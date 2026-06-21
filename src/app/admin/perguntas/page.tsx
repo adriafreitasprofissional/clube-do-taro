@@ -1,267 +1,402 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+type Pergunta = {
+  id: string;
+  nome_cliente: string | null;
+  plano: string | null;
+  categoria: string | null;
+  pergunta: string | null;
+  status: string | null;
+  created_at: string;
+};
 
 export default function Page() {
-  const [perguntas, setPerguntas] = useState<any[]>([]);
-  const [selecionada, setSelecionada] = useState<any>(null);
+  const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
+  const [selecionada, setSelecionada] = useState<Pergunta | null>(null);
   const [busca, setBusca] = useState("");
-  const [filtroStatus, setFiltroStatus] =
-    useState("Todos");
+  const [aba, setAba] = useState<"pendentes" | "respondidas">("pendentes");
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     carregarPerguntas();
   }, []);
 
   async function carregarPerguntas() {
-    const response = await fetch(
-      "/api/admin/perguntas"
-    );
+    setCarregando(true);
 
-    const data = await response.json();
+    try {
+      const response = await fetch("/api/admin/perguntas");
+      const data = await response.json();
 
-    setPerguntas(data);
+      setPerguntas(Array.isArray(data) ? data : []);
+    } finally {
+      setCarregando(false);
+    }
   }
 
   async function marcarComoRespondida() {
     if (!selecionada) return;
 
-    await fetch(
-      "/api/admin/perguntas/responder",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify({
-          id: selecionada.id,
-        }),
-      }
-    );
+    const response = await fetch("/api/admin/perguntas/responder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: selecionada.id,
+      }),
+    });
 
-    await carregarPerguntas();
+    if (!response.ok) {
+      alert("Não foi possível atualizar a pergunta.");
+      return;
+    }
 
-    setSelecionada({
+    const perguntaAtualizada = {
       ...selecionada,
       status: "Respondida",
-    });
+    };
+
+    setPerguntas((lista) =>
+      lista.map((item) =>
+        item.id === selecionada.id ? perguntaAtualizada : item
+      )
+    );
+
+    setSelecionada(null);
+    setAba("pendentes");
   }
 
-  const perguntasFiltradas = perguntas.filter(
-    (pergunta) => {
-      const termo = busca.toLowerCase();
-
-      const passouBusca =
-        String(pergunta.nome_cliente || "")
-          .toLowerCase()
-          .includes(termo) ||
-        String(pergunta.categoria || "")
-          .toLowerCase()
-          .includes(termo) ||
-        String(pergunta.pergunta || "")
-          .toLowerCase()
-          .includes(termo);
-
-      const passouStatus =
-        filtroStatus === "Todos" ||
-        pergunta.status === filtroStatus;
-
-      return passouBusca && passouStatus;
-    }
+  const pendentes = useMemo(
+    () =>
+      perguntas.filter(
+        (pergunta) =>
+          String(pergunta.status || "").toLowerCase() !== "respondida"
+      ),
+    [perguntas]
   );
+
+  const respondidas = useMemo(
+    () =>
+      perguntas.filter(
+        (pergunta) =>
+          String(pergunta.status || "").toLowerCase() === "respondida"
+      ),
+    [perguntas]
+  );
+
+  const listaDaAba = aba === "pendentes" ? pendentes : respondidas;
+
+  const perguntasFiltradas = listaDaAba.filter((pergunta) => {
+    const termo = busca.toLowerCase().trim();
+
+    if (!termo) return true;
+
+    return (
+      String(pergunta.nome_cliente || "").toLowerCase().includes(termo) ||
+      String(pergunta.plano || "").toLowerCase().includes(termo) ||
+      String(pergunta.categoria || "").toLowerCase().includes(termo) ||
+      String(pergunta.pergunta || "").toLowerCase().includes(termo)
+    );
+  });
+
+  function trocarAba(novaAba: "pendentes" | "respondidas") {
+    setAba(novaAba);
+    setBusca("");
+    setSelecionada(null);
+  }
 
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "350px 1fr",
+        gridTemplateColumns: "350px minmax(0, 1fr)",
         gap: "20px",
+        minHeight: "620px",
       }}
     >
-      <div
+      <aside
         style={{
-          border: "1px solid #333",
-          borderRadius: "12px",
+          border: "1px solid rgba(231, 201, 111, 0.22)",
+          borderRadius: "16px",
           padding: "16px",
+          background: "rgba(31, 0, 42, 0.55)",
         }}
       >
-        <h2>
-          Perguntas ({perguntasFiltradas.length})
-        </h2>
+        <p
+          style={{
+            margin: "0 0 14px",
+            color: "#E7C96F",
+            fontWeight: 700,
+            fontSize: "16px",
+          }}
+        >
+          📩 Perguntas dos Assinantes
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "8px",
+            marginBottom: "14px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => trocarAba("pendentes")}
+            style={{
+              border: "1px solid #E7C96F",
+              borderRadius: "10px",
+              padding: "10px 8px",
+              cursor: "pointer",
+              background: aba === "pendentes" ? "#E7C96F" : "transparent",
+              color: aba === "pendentes" ? "#1A0921" : "#ffffff",
+              fontWeight: 700,
+            }}
+          >
+            Novas ({pendentes.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => trocarAba("respondidas")}
+            style={{
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: "10px",
+              padding: "10px 8px",
+              cursor: "pointer",
+              background:
+                aba === "respondidas"
+                  ? "rgba(231, 201, 111, 0.18)"
+                  : "transparent",
+              color: "#ffffff",
+              fontWeight: 700,
+            }}
+          >
+            Respondidas ({respondidas.length})
+          </button>
+        </div>
 
         <input
           type="text"
-          placeholder="Buscar..."
-          value={busca}
-          onChange={(e) =>
-            setBusca(e.target.value)
+          placeholder={
+            aba === "pendentes"
+              ? "Buscar nas perguntas novas..."
+              : "Buscar nas respondidas..."
           }
+          value={busca}
+          onChange={(event) => setBusca(event.target.value)}
           style={{
             width: "100%",
-            padding: "10px",
-            marginBottom: "15px",
-            borderRadius: "8px",
-            border: "1px solid #333",
-            background: "#111",
-            color: "#fff",
+            boxSizing: "border-box",
+            padding: "11px",
+            marginBottom: "14px",
+            borderRadius: "10px",
+            border: "1px solid rgba(231, 201, 111, 0.22)",
+            background: "#120018",
+            color: "#ffffff",
           }}
         />
 
         <div
           style={{
-            display: "flex",
-            gap: "8px",
-            marginBottom: "15px",
+            maxHeight: "510px",
+            overflowY: "auto",
+            paddingRight: "4px",
           }}
         >
-          <button
-            onClick={() =>
-              setFiltroStatus("Todos")
-            }
-          >
-            Todos
-          </button>
+          {carregando ? (
+            <p style={{ color: "rgba(255,255,255,0.65)" }}>
+              Carregando perguntas...
+            </p>
+          ) : perguntasFiltradas.length === 0 ? (
+            <p
+              style={{
+                color: "rgba(255,255,255,0.65)",
+                lineHeight: 1.5,
+              }}
+            >
+              {aba === "pendentes"
+                ? "Nenhuma pergunta nova no momento."
+                : "Nenhuma pergunta respondida encontrada."}
+            </p>
+          ) : (
+            perguntasFiltradas.map((pergunta) => {
+              const ativa = selecionada?.id === pergunta.id;
 
-          <button
-            onClick={() =>
-              setFiltroStatus("Pendente")
-            }
-          >
-            Pendentes
-          </button>
+              return (
+                <button
+                  type="button"
+                  key={pergunta.id}
+                  onClick={() => setSelecionada(pergunta)}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "12px",
+                    cursor: "pointer",
+                    borderRadius: "10px",
+                    marginBottom: "8px",
+                    background: ativa
+                      ? "rgba(231, 201, 111, 0.16)"
+                      : "rgba(255,255,255,0.025)",
+                    border: ativa
+                      ? "1px solid #E7C96F"
+                      : "1px solid rgba(255,255,255,0.08)",
+                    color: "#ffffff",
+                  }}
+                >
+                  <strong style={{ display: "block", marginBottom: "5px" }}>
+                    {pergunta.nome_cliente || "Assinante"}
+                  </strong>
 
-          <button
-            onClick={() =>
-              setFiltroStatus("Respondida")
-            }
-          >
-            Respondidas
-          </button>
+                  <span
+                    style={{
+                      display: "block",
+                      color: "#E7C96F",
+                      fontSize: "12px",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    {pergunta.plano || "Plano não informado"} ·{" "}
+                    {pergunta.categoria || "Sem categoria"}
+                  </span>
+
+                  <span
+                    style={{
+                      color: "rgba(255,255,255,0.62)",
+                      fontSize: "12px",
+                    }}
+                  >
+                    {new Date(pergunta.created_at).toLocaleDateString("pt-BR")}
+                  </span>
+                </button>
+              );
+            })
+          )}
         </div>
+      </aside>
 
-        {perguntasFiltradas.map((pergunta) => (
-          <div
-            key={pergunta.id}
-            onClick={() =>
-              setSelecionada(pergunta)
-            }
-            style={{
-              padding: "12px",
-              cursor: "pointer",
-              borderBottom:
-                "1px solid #222",
-              borderRadius: "8px",
-              marginBottom: "8px",
-              background:
-                selecionada?.id ===
-                pergunta.id
-                  ? "#2a1d00"
-                  : "transparent",
-              border:
-                selecionada?.id ===
-                pergunta.id
-                  ? "1px solid #f4d46a"
-                  : "1px solid transparent",
-            }}
-          >
-            <strong>
-              {pergunta.nome_cliente}
-            </strong>
-
-            <br />
-
-            <small>
-              Plano: {pergunta.plano}
-            </small>
-
-            <br />
-
-            <small>
-              {pergunta.categoria}
-            </small>
-
-            <br />
-
-            <small>
-              {new Date(
-                pergunta.created_at
-              ).toLocaleDateString(
-                "pt-BR"
-              )}
-            </small>
-
-            <br />
-
-            <small>
-              Status: {pergunta.status}
-            </small>
-          </div>
-        ))}
-      </div>
-
-      <div
+      <section
         style={{
-          border: "1px solid #333",
-          borderRadius: "12px",
-          padding: "16px",
+          border: "1px solid rgba(231, 201, 111, 0.22)",
+          borderRadius: "16px",
+          padding: "28px",
+          background: "rgba(31, 0, 42, 0.38)",
         }}
       >
         {!selecionada ? (
-          <p>
-            Selecione uma pergunta.
-          </p>
-        ) : (
-          <>
-            <h2>
-              {selecionada.nome_cliente}
+          <div style={{ color: "rgba(255,255,255,0.68)" }}>
+            <p
+              style={{
+                color: "#E7C96F",
+                fontSize: "13px",
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Caixa de entrada
+            </p>
+
+            <h2 style={{ color: "#ffffff", marginTop: "10px" }}>
+              {aba === "pendentes"
+                ? "Selecione uma pergunta nova"
+                : "Selecione uma pergunta respondida"}
             </h2>
 
             <p>
-              <strong>Plano:</strong>{" "}
-              {selecionada.plano}
+              As perguntas respondidas ficam separadas para sua lista principal
+              mostrar apenas o que ainda precisa de atenção.
+            </p>
+          </div>
+        ) : (
+          <>
+            <p
+              style={{
+                margin: 0,
+                color: "#E7C96F",
+                fontSize: "13px",
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Pergunta de {selecionada.nome_cliente || "assinante"}
             </p>
 
-            <p>
-              <strong>
-                Categoria:
-              </strong>{" "}
-              {selecionada.categoria}
-            </p>
+            <h2 style={{ color: "#ffffff", margin: "12px 0 22px" }}>
+              {selecionada.categoria || "Pergunta exclusiva"}
+            </h2>
 
-            <p>
-              <strong>Status:</strong>{" "}
-              {selecionada.status}
-            </p>
-
-            <hr />
-
-            <p>
-              {selecionada.pergunta}
-            </p>
-
-            {selecionada.status !==
-              "Respondida" && (
-              <button
-                onClick={
-                  marcarComoRespondida
-                }
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px",
+                marginBottom: "24px",
+              }}
+            >
+              <span
                 style={{
-                  marginTop: "20px",
-                  padding:
-                    "12px 18px",
-                  borderRadius:
-                    "8px",
-                  border: "none",
-                  cursor: "pointer",
+                  padding: "7px 10px",
+                  borderRadius: "999px",
+                  background: "rgba(231, 201, 111, 0.14)",
+                  color: "#E7C96F",
+                  fontSize: "13px",
                 }}
               >
-                ✓ Marcar como Respondida
+                Plano: {selecionada.plano || "Não informado"}
+              </span>
+
+              <span
+                style={{
+                  padding: "7px 10px",
+                  borderRadius: "999px",
+                  background: "rgba(255,255,255,0.08)",
+                  color: "#ffffff",
+                  fontSize: "13px",
+                }}
+              >
+                {selecionada.status || "Pendente"}
+              </span>
+            </div>
+
+            <div
+              style={{
+                borderTop: "1px solid rgba(255,255,255,0.12)",
+                paddingTop: "22px",
+                color: "#ffffff",
+                fontSize: "17px",
+                lineHeight: 1.75,
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {selecionada.pergunta}
+            </div>
+
+            {String(selecionada.status || "").toLowerCase() !==
+              "respondida" && (
+              <button
+                type="button"
+                onClick={marcarComoRespondida}
+                style={{
+                  marginTop: "30px",
+                  padding: "13px 18px",
+                  borderRadius: "10px",
+                  border: "none",
+                  cursor: "pointer",
+                  background: "#E7C96F",
+                  color: "#1A0921",
+                  fontWeight: 800,
+                }}
+              >
+                ✓ Marcar como respondida
               </button>
             )}
           </>
         )}
-      </div>
+      </section>
     </div>
   );
 }

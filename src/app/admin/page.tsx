@@ -1,106 +1,45 @@
 export default function AdminPage() {
   return (
-    <div>
-      <h1
+    <div
+      style={{
+        maxWidth: "760px",
+        paddingTop: "24px",
+      }}
+    >
+      <p
         style={{
-          color: "#f4d46a",
-          marginBottom: "30px",
+          margin: 0,
+          color: "#E7C96F",
+          fontSize: "13px",
+          letterSpacing: "2px",
+          textTransform: "uppercase",
         }}
       >
-        🔮 Administração Clube do Tarô
+        Administração Clube do Tarô
+      </p>
+
+      <h1
+        style={{
+          marginTop: "14px",
+          marginBottom: "14px",
+          color: "#ffffff",
+          fontSize: "38px",
+        }}
+      >
+        Bem-vinda ao seu painel
       </h1>
 
       <p
         style={{
-          color: "#fff",
-          opacity: 0.8,
-          marginBottom: "30px",
+          margin: 0,
+          color: "rgba(255,255,255,0.68)",
+          fontSize: "17px",
+          lineHeight: 1.7,
         }}
       >
-        Painel administrativo do Clube do Tarô
+        Escolha uma opção no menu lateral para gerenciar assinantes,
+        perguntas, recados, conteúdos e as atividades do Clube do Tarô.
       </p>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fit,minmax(250px,1fr))",
-          gap: "20px",
-        }}
-      >
-
-        <a
-  href="/admin/recados"
-  style={card}
->
-  📢 Recados
-  <br />
-  Publicar novidades
-</a>
-
-<a
-  href="/admin/mensalidades"
-  style={card}
->
-  💳 Mensalidades
-  <br />
-  Controle financeiro
-</a>
-
-<a
-  href="/admin/indicacoes"
-  style={card}
->
-  🎁 Indicações
-  <br />
-  Cupons e descontos
-</a>
-
-<a
-  href="/admin/sorteios"
-  style={card}
->
-  🍀 Sorteios
-  <br />
-  Número da sorte
-  
-</a>
-        <a
-          href="/admin/assinantes"
-          style={card}
-        >
-          👥 Assinantes
-          <br />
-          Gerenciar clientes
-        </a>
-
-        <div style={card}>
-          🔮 Direcionamentos
-          <br />
-          Em desenvolvimento
-        </div>
-
-        <div style={card}>
-          🎁 Benefícios
-          <br />
-          Em desenvolvimento
-        </div>
-
-        <div style={card}>
-          🌟 Convites
-          <br />
-          Em desenvolvimento
-        </div>
-      </div>
     </div>
   );
 }
-
-const card = {
-  background: "#240032",
-  padding: "30px",
-  borderRadius: "20px",
-  border: "1px solid rgba(244,212,106,.15)",
-  color: "#fff",
-  textDecoration: "none",
-};

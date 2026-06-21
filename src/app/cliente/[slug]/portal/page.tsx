@@ -31,6 +31,7 @@ export default function PortalPremium() {
     async function carregarCliente() {
       setLoading(true);
       setError(null);
+
       try {
         const { data, error } = await supabase
           .from("club_clients")
@@ -38,23 +39,17 @@ export default function PortalPremium() {
           .eq("slug", slug)
           .single();
 
-        if (error) {
-          throw new Error(error.message);
-        }
+        if (error) throw new Error(error.message);
 
         if (data) {
           setClienteId(data.id);
           setPlano(data.plano);
           setDataInicio(data.data_inicio);
           setNome(
-            data.slug.charAt(0).toUpperCase() +
-            data.slug.slice(1)
+            data.nome ||
+              `${data.slug.charAt(0).toUpperCase()}${data.slug.slice(1)}`
           );
-          setTituloGuardiao(
-            data.genero === "homem"
-              ? "Guardião"
-              : "Guardiã"
-          );
+          setTituloGuardiao(data.genero === "homem" ? "Guardião" : "Guardiã");
         }
       } catch (err: any) {
         console.error("Erro ao carregar cliente:", err);
@@ -63,12 +58,20 @@ export default function PortalPremium() {
         setLoading(false);
       }
     }
-    if (slug) {
-      carregarCliente();
-    }
+
+    if (slug) carregarCliente();
   }, [slug]);
 
-  const mostrarMaio = dataInicio ? new Date(dataInicio) <= new Date("2026-05-31") : true;
+  const mostrarMaio = dataInicio
+    ? new Date(dataInicio) <= new Date("2026-05-31")
+    : true;
+
+  const semanas = [
+    { titulo: "1ª Semana", data: "03/05 a 10/05" },
+    { titulo: "2ª Semana", data: "10/05 a 17/05" },
+    { titulo: "3ª Semana", data: "17/05 a 24/05" },
+    { titulo: "4ª Semana", data: "24/05 a 31/05" },
+  ];
 
   const semanasJunho = [
     {
@@ -106,6 +109,7 @@ export default function PortalPremium() {
 
   const semanasJunhoFiltradas = semanasJunho.filter((semana) => {
     if (!dataInicio) return true;
+
     const inicio = new Date(dataInicio);
     const datas: Record<string, string> = {
       "semana-1": "2026-06-01",
@@ -114,6 +118,7 @@ export default function PortalPremium() {
       "semana-4": "2026-06-22",
       "semana-5": "2026-06-29",
     };
+
     return inicio <= new Date(datas[semana.semana]);
   });
 
@@ -144,39 +149,55 @@ export default function PortalPremium() {
       alert("Escolha uma área.");
       return;
     }
+
     if (!pergunta.trim()) {
       alert("Digite sua pergunta.");
       return;
     }
+
     const { error } = await supabase.from("exclusive_questions").insert({
       nome_cliente: nome,
       email_cliente: slug,
       categoria,
       pergunta,
     });
+
     if (error) {
       alert(error.message);
       return;
     }
+
     alert("Pergunta enviada com sucesso!");
     setCategoria("");
     setPergunta("");
     setDirecionamentoAberto(false);
   }
 
-  const semanas = [
-    { titulo: "1ª Semana", data: "03/05 a 10/05" },
-    { titulo: "2ª Semana", data: "10/05 a 17/05" },
-    { titulo: "3ª Semana", data: "17/05 a 24/05" },
-    { titulo: "4ª Semana", data: "24/05 a 31/05" },
-  ];
+  const botaoAudio = {
+    background: "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
+    border: "none",
+    color: "#fff",
+    padding: "12px 22px",
+    borderRadius: "999px",
+    cursor: "pointer",
+  };
+
+  const botaoPdf = {
+    background: "rgba(244,212,106,.12)",
+    border: "1px solid rgba(244,212,106,.25)",
+    color: "#f4d46a",
+    padding: "12px 22px",
+    borderRadius: "999px",
+    cursor: "pointer",
+  };
 
   if (loading) {
     return (
       <main
         style={{
           minHeight: "100vh",
-          background: "radial-gradient(circle at top, #4b0082 0%, #1a001a 35%, #080010 100%)",
+          background:
+            "radial-gradient(circle at top, #4b0082 0%, #1a001a 35%, #080010 100%)",
           color: "#f4d46a",
           padding: "40px 20px",
           display: "flex",
@@ -194,7 +215,8 @@ export default function PortalPremium() {
       <main
         style={{
           minHeight: "100vh",
-          background: "radial-gradient(circle at top, #4b0082 0%, #1a001a 35%, #080010 100%)",
+          background:
+            "radial-gradient(circle at top, #4b0082 0%, #1a001a 35%, #080010 100%)",
           color: "#f4d46a",
           padding: "40px 20px",
           display: "flex",
@@ -211,7 +233,8 @@ export default function PortalPremium() {
     <main
       style={{
         minHeight: "100vh",
-        background: "radial-gradient(circle at top, #4b0082 0%, #1a001a 35%, #080010 100%)",
+        background:
+          "radial-gradient(circle at top, #4b0082 0%, #1a001a 35%, #080010 100%)",
         color: "#f4d46a",
         padding: "40px 20px",
       }}
@@ -239,6 +262,7 @@ export default function PortalPremium() {
           >
             🏠 Portal Principal
           </button>
+
           <button
             onClick={() => {
               localStorage.clear();
@@ -257,27 +281,31 @@ export default function PortalPremium() {
           </button>
         </div>
 
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "60px",
-            position: "relative",
-            zIndex: 2,
-          }}
-        >
-          <div style={{ fontSize: "30px", marginBottom: "18px" }}>✦ ✨ 🔮 ✨ ✦</div>
-          <div style={{ textAlign: "center", marginBottom: "15px" }}>
-            <div style={{ color: "#f4d46a", fontSize: "52px", marginBottom: "10px" }}>
-              {tituloGuardiao}
-            </div>
-            <div style={{ color: "#fff", fontSize: "38px", fontWeight: "bold", marginBottom: "20px" }}>
-              {nome}
-            </div>
-            <p style={{ color: "#fff", opacity: 0.85, fontSize: "18px" }}>
-              Que os oráculos iluminem seus caminhos e revelem as respostas que sua alma precisa neste
-              momento.
-            </p>
+        <div style={{ textAlign: "center", marginBottom: "60px" }}>
+          <div style={{ fontSize: "30px", marginBottom: "18px" }}>
+            ✦ ✨ 🔮 ✨ ✦
           </div>
+
+          <div style={{ color: "#f4d46a", fontSize: "52px", marginBottom: "10px" }}>
+            {tituloGuardiao}
+          </div>
+
+          <div
+            style={{
+              color: "#fff",
+              fontSize: "38px",
+              fontWeight: "bold",
+              marginBottom: "20px",
+            }}
+          >
+            {nome}
+          </div>
+
+          <p style={{ color: "#fff", opacity: 0.85, fontSize: "18px" }}>
+            Que os oráculos iluminem seus caminhos e revelem as respostas que
+            sua alma precisa neste momento.
+          </p>
+
           <div
             style={{
               display: "inline-block",
@@ -292,191 +320,171 @@ export default function PortalPremium() {
           >
             🔮 Plano {plano}
           </div>
-          {plano?.toLowerCase() === "diamante" && (
-            <a
-              href="SEU_LINK_DE_MENTORIA"
-              target="_blank"
-              style={{
-                marginLeft: "10px",
-                padding: "12px 30px",
-                fontWeight: "bold",
-                borderRadius: "999px",
-                background: "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
-                color: "#fff",
-                textDecoration: "none",
-              }}
-            >
-              👑 Mentoria Diamante
-            </a>
-          )}
         </div>
-      </div>
 
-      <div
-        style={{
-          background: "rgba(25,0,35,.75)",
-          borderRadius: "36px",
-          padding: "50px",
-          border: "1px solid rgba(244,212,106,.2)",
-        }}
-      >
         <div
-          onClick={() => setAno2026(!ano2026)}
           style={{
-            padding: "24px",
-            borderRadius: "24px",
+            background: "rgba(25,0,35,.75)",
+            borderRadius: "36px",
+            padding: "50px",
             border: "1px solid rgba(244,212,106,.2)",
-            background: "#140014",
-            cursor: "pointer",
-            marginBottom: "15px",
           }}
         >
-          {ano2026 ? "▼" : "▶"} Ano 2026
-        </div>
-        {ano2026 && (
-          <div style={{ marginLeft: "20px" }}>
-            {mostrarMaio && (
-              <>
-                <div
-                  onClick={() => setMaio(!maio)}
-                  style={{
-                    padding: "20px",
-                    borderRadius: "18px",
-                    background: "rgba(244,212,106,.08)",
-                    cursor: "pointer",
-                    marginBottom: "15px",
-                  }}
-                >
-                  {maio ? "▼" : "▶"} Maio 2026
-                </div>
-                {maio && (
-                  <div style={{ display: "grid", gap: "18px" }}>
-                    {semanas.map((semana) => (
+          <div
+            onClick={() => setAno2026(!ano2026)}
+            style={{
+              padding: "24px",
+              borderRadius: "24px",
+              border: "1px solid rgba(244,212,106,.2)",
+              background: "#140014",
+              cursor: "pointer",
+              marginBottom: "15px",
+            }}
+          >
+            {ano2026 ? "▼" : "▶"} Ano 2026
+          </div>
+
+          {ano2026 && (
+            <div style={{ marginLeft: "20px" }}>
+              {mostrarMaio && (
+                <>
+                  <div
+                    onClick={() => setMaio(!maio)}
+                    style={{
+                      padding: "20px",
+                      borderRadius: "18px",
+                      background: "rgba(244,212,106,.08)",
+                      cursor: "pointer",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    {maio ? "▼" : "▶"} Maio 2026
+                  </div>
+
+                  {maio && (
+                    <div style={{ display: "grid", gap: "18px" }}>
+                      {semanas.map((semana) => (
+                        <div
+                          key={semana.titulo}
+                          style={{
+                            background:
+                              "linear-gradient(180deg,#2a0738 0%, #1a001f 100%)",
+                            border: "1px solid rgba(244,212,106,.15)",
+                            borderRadius: "24px",
+                            padding: "24px",
+                          }}
+                        >
+                          <div style={{ fontSize: "26px", marginBottom: "10px" }}>
+                            ✦ {semana.titulo}
+                          </div>
+
+                          <div
+                            style={{
+                              color: "rgba(255,255,255,.65)",
+                              marginBottom: "20px",
+                            }}
+                          >
+                            {semana.data}
+                          </div>
+
+                          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                            <button onClick={abrirAudio} style={botaoAudio}>
+                              🎧 Ouvir Direcionamento
+                            </button>
+
+                            <button onClick={baixarPdf} style={botaoPdf}>
+                              📥 Baixar Leitura Completa
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div
+                onClick={() => setJunho(!junho)}
+                style={{
+                  padding: "20px",
+                  borderRadius: "18px",
+                  background: "rgba(244,212,106,.08)",
+                  cursor: "pointer",
+                  marginBottom: "15px",
+                  marginTop: "15px",
+                }}
+              >
+                {junho ? "▼" : "▶"} Junho 2026
+              </div>
+
+              {junho && (
+                <div style={{ display: "grid", gap: "18px" }}>
+                  {semanasJunhoFiltradas.map((semana) => (
+                    <div
+                      key={semana.titulo}
+                      style={{
+                        background:
+                          "linear-gradient(180deg,#2a0738 0%, #1a001f 100%)",
+                        border: "1px solid rgba(244,212,106,.15)",
+                        borderRadius: "24px",
+                        padding: "24px",
+                      }}
+                    >
+                      <div style={{ fontSize: "26px", marginBottom: "10px" }}>
+                        ✦ {semana.titulo}
+                      </div>
+
                       <div
-                        key={semana.titulo}
                         style={{
-                          background: "linear-gradient(180deg,#2a0738 0%, #1a001f 100%)",
-                          border: "1px solid rgba(244,212,106,.15)",
-                          borderRadius: "24px",
-                          padding: "24px",
+                          color: "rgba(255,255,255,.65)",
+                          marginBottom: "20px",
                         }}
                       >
-                        <div style={{ fontSize: "26px", marginBottom: "10px" }}>
-                          ✦ {semana.titulo}
-                        </div>
-                        <div style={{ color: "rgba(255,255,255,.65)", marginBottom: "20px" }}>
-                          {semana.data}
-                        </div>
-                        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                        {semana.data}
+                      </div>
+
+                      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                        <button
+                          onClick={() =>
+                            abrirAudioJunho(semana.semana, semana.arquivo)
+                          }
+                          style={botaoAudio}
+                        >
+                          🎧 Ouvir Direcionamento
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            baixarPdfJunho(semana.semana, semana.arquivo)
+                          }
+                          style={botaoPdf}
+                        >
+                          📥 Baixar Leitura Completa
+                        </button>
+
+                        {semana.direcionamentoExclusivo && (
                           <button
-                            onClick={abrirAudio}
+                            onClick={() => setDirecionamentoAberto(true)}
                             style={{
-                              background: "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
+                              background: "#7d1bb5",
                               border: "none",
                               color: "#fff",
                               padding: "12px 22px",
                               borderRadius: "999px",
+                              cursor: "pointer",
                             }}
                           >
-                            🎧 Ouvir Direcionamento
+                            🔮 Direcionamento Exclusivo
                           </button>
-                          <button
-                            onClick={baixarPdf}
-                            style={{
-                              background: "rgba(244,212,106,.12)",
-                              border: "1px solid rgba(244,212,106,.25)",
-                              color: "#f4d46a",
-                              padding: "12px 22px",
-                              borderRadius: "999px",
-                            }}
-                          >
-                            📥 Baixar Leitura Completa
-                          </button>
-                        </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-            <div
-              onClick={() => setJunho(!junho)}
-              style={{
-                padding: "20px",
-                borderRadius: "18px",
-                background: "rgba(244,212,106,.08)",
-                cursor: "pointer",
-                marginBottom: "15px",
-                marginTop: "15px",
-              }}
-            >
-              {junho ? "▼" : "▶"} Junho 2026
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            {junho && (
-              <div style={{ display: "grid", gap: "18px" }}>
-                {semanasJunhoFiltradas.map((semana) => (
-                  <div
-                    key={semana.titulo}
-                    style={{
-                      background: "linear-gradient(180deg,#2a0738 0%, #1a001f 100%)",
-                      border: "1px solid rgba(244,212,106,.15)",
-                      borderRadius: "24px",
-                      padding: "24px",
-                    }}
-                  >
-                    <div style={{ fontSize: "26px", marginBottom: "10px" }}>
-                      ✦ {semana.titulo}
-                    </div>
-                    <div style={{ color: "rgba(255,255,255,.65)", marginBottom: "20px" }}>
-                      {semana.data}
-                    </div>
-                    <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                      <button
-                        onClick={() => abrirAudioJunho(semana.semana, semana.arquivo)}
-                        style={{
-                          background: "linear-gradient(180deg,#7d1bb5,#5b0c8c)",
-                          border: "none",
-                          color: "#fff",
-                          padding: "12px 22px",
-                          borderRadius: "999px",
-                        }}
-                      >
-                        🎧 Ouvir Direcionamento
-                      </button>
-                      <button
-                        onClick={() => baixarPdfJunho(semana.semana, semana.arquivo)}
-                        style={{
-                          background: "rgba(244,212,106,.12)",
-                          border: "1px solid rgba(244,212,106,.25)",
-                          color: "#f4d46a",
-                          padding: "12px 22px",
-                          borderRadius: "9999px",
-                        }}
-                      >
-                        📥 Baixar Leitura Completa
-                      </button>
-                      {semana.direcionamentoExclusivo && (
-                        <button
-                          onClick={() => setDirecionamentoAberto(true)}
-                          style={{
-                            background: "#7d1bb5",
-                            border: "none",
-                            color: "#fff",
-                            padding: "12px 22px",
-                            borderRadius: "999px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          🔮 Direcionamento Exclusivo
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {direcionamentoAberto && (
@@ -501,11 +509,15 @@ export default function PortalPremium() {
               border: "1px solid rgba(244,212,106,.25)",
             }}
           >
-            <h2 style={{ color: "#f4d46a", marginBottom: "20px" }}>🔮 Direcionamento Exclusivo</h2>
+            <h2 style={{ color: "#f4d46a", marginBottom: "20px" }}>
+              🔮 Direcionamento Exclusivo
+            </h2>
+
             <p style={{ color: "#fff" }}>Escolha a área da sua pergunta.</p>
+
             <select
               value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
+              onChange={(event) => setCategoria(event.target.value)}
               style={{
                 width: "100%",
                 padding: "14px",
@@ -515,7 +527,6 @@ export default function PortalPremium() {
                 background: "#2a0738",
                 color: "#f4d46a",
                 border: "1px solid rgba(244,212,106,.25)",
-                outline: "none",
               }}
             >
               <option value="">Escolha o tema do seu direcionamento...</option>
@@ -526,22 +537,24 @@ export default function PortalPremium() {
               <option value="Relacionamentos">👨‍👩‍👧 Relacionamentos</option>
               <option value="Emocional">🧠 Emocional</option>
             </select>
+
             <textarea
               value={pergunta}
-              onChange={(e) => setPergunta(e.target.value)}
+              onChange={(event) => setPergunta(event.target.value)}
               placeholder="Digite sua pergunta..."
               rows={6}
               style={{
                 width: "100%",
+                boxSizing: "border-box",
                 padding: "15px",
                 borderRadius: "12px",
                 marginBottom: "20px",
                 background: "#2a0738",
                 color: "#fff",
                 border: "1px solid rgba(244,212,106,.25)",
-                outline: "none",
               }}
             />
+
             <button
               onClick={enviarPergunta}
               style={{
@@ -556,9 +569,17 @@ export default function PortalPremium() {
             >
               ✨ Enviar Pergunta
             </button>
+
             <button
               onClick={() => setDirecionamentoAberto(false)}
-              style={{ background: "#5b0c8c", border: "none", color: "#fff", padding: "12px 20px", borderRadius: "999px" }}
+              style={{
+                background: "#5b0c8c",
+                border: "none",
+                color: "#fff",
+                padding: "12px 20px",
+                borderRadius: "999px",
+                cursor: "pointer",
+              }}
             >
               Fechar
             </button>
@@ -588,8 +609,12 @@ export default function PortalPremium() {
               border: "1px solid rgba(244,212,106,.25)",
             }}
           >
-            <h2 style={{ color: "#f4d46a", marginBottom: "20px" }}>🔮 Direcionamento da Semana</h2>
+            <h2 style={{ color: "#f4d46a", marginBottom: "20px" }}>
+              🔮 Direcionamento da Semana
+            </h2>
+
             <audio controls autoPlay src={audioUrl} style={{ width: "100%" }} />
+
             <button
               onClick={() => setAudioAberto(false)}
               style={{
