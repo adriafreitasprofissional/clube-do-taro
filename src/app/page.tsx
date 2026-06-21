@@ -245,7 +245,7 @@ seu plano de assinatura.
   </div>
 
   <h3 className="mb-4 font-serif text-3xl text-white">
-    Destaque do Mês
+    Portal de Destaques
   </h3>
 
   <p className="leading-relaxed text-white/70">
@@ -253,7 +253,7 @@ seu plano de assinatura.
   </p>
 
   <div className="mt-6 font-semibold text-[#E7C96F]">
-    ENTRAR →
+    ENTRAR NO PORTAL →
   </div>
 </a>
 </div>
