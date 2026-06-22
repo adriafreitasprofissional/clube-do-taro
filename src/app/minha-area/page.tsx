@@ -39,11 +39,32 @@ export default function MinhaAreaPage() {
       let nomeExibido = "";
       let slugEncontrado = "";
 
-      if (cliente) {
-        idDoAluno = cliente.id;
-        nomeExibido = cliente.slug || cliente.nome || "Aluna";
-        slugEncontrado = cliente.slug || "";
-      } else {
+     if (cliente) {
+  nomeExibido = cliente.slug || cliente.nome || "Aluna";
+  slugEncontrado = cliente.slug || "";
+
+  const { data: alunoDoCurso, error: erroAlunoDoCurso } = await supabase
+    .from("course_students")
+    .select("id")
+    .ilike("email", email)
+    .maybeSingle();
+
+  if (erroAlunoDoCurso) {
+    setErro(`Erro ao localizar aluno do curso: ${erroAlunoDoCurso.message}`);
+    setLoading(false);
+    return;
+  }
+
+  if (!alunoDoCurso) {
+    setNome(nomeExibido);
+    setSlugDoCliente(slugEncontrado);
+    setTemCursoPombagira(false);
+    setLoading(false);
+    return;
+  }
+
+  idDoAluno = alunoDoCurso.id;
+} else {
         const { data: aluno, error: erroAluno } = await supabase
           .from("course_students")
           .select("id, nome")
@@ -82,7 +103,7 @@ export default function MinhaAreaPage() {
 
       setNome(nomeExibido);
       setSlugDoCliente(slugEncontrado);
-      setTemCursoPombagira(!!curso);
+    setTemCursoPombagira(!!curso || !!cliente);
       setLoading(false);
     }
 
