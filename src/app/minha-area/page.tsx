@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 export default function MinhaAreaPage() {
   const [loading, setLoading] = useState(true);
   const [nome, setNome] = useState("");
+  const [slugDoCliente, setSlugDoCliente] = useState("");
   const [temCursoPombagira, setTemCursoPombagira] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -24,7 +25,7 @@ export default function MinhaAreaPage() {
 
       const { data: cliente, error: erroCliente } = await supabase
         .from("club_clients")
-        .select("id, slug, email")
+        .select("id, slug, nome")
         .ilike("email", email)
         .maybeSingle();
 
@@ -34,16 +35,41 @@ export default function MinhaAreaPage() {
         return;
       }
 
-      if (!cliente) {
-        setErro(`Não encontramos seu cadastro de assinante para ${email}.`);
-        setLoading(false);
-        return;
+      let idDoAluno = "";
+      let nomeExibido = "";
+      let slugEncontrado = "";
+
+      if (cliente) {
+        idDoAluno = cliente.id;
+        nomeExibido = cliente.slug || cliente.nome || "Aluna";
+        slugEncontrado = cliente.slug || "";
+      } else {
+        const { data: aluno, error: erroAluno } = await supabase
+          .from("course_students")
+          .select("id, nome")
+          .ilike("email", email)
+          .maybeSingle();
+
+        if (erroAluno) {
+          setErro(`Erro ao localizar aluno: ${erroAluno.message}`);
+          setLoading(false);
+          return;
+        }
+
+        if (!aluno) {
+          setErro("Não encontramos um cadastro de curso para este e-mail.");
+          setLoading(false);
+          return;
+        }
+
+        idDoAluno = aluno.id;
+        nomeExibido = aluno.nome || "Aluna";
       }
 
       const { data: curso, error: erroCurso } = await supabase
         .from("student_courses")
-        .select("id, course_slug, status")
-        .eq("student_id", cliente.id)
+        .select("id")
+        .eq("student_id", idDoAluno)
         .eq("course_slug", "pombagira")
         .eq("status", "ativo")
         .maybeSingle();
@@ -54,13 +80,23 @@ export default function MinhaAreaPage() {
         return;
       }
 
-      setNome(cliente.slug || "Aluna");
+      setNome(nomeExibido);
+      setSlugDoCliente(slugEncontrado);
       setTemCursoPombagira(!!curso);
       setLoading(false);
     }
 
     carregarArea();
   }, []);
+
+  function voltar() {
+    if (slugDoCliente) {
+      window.location.href = `/cliente/${slugDoCliente}/portal`;
+      return;
+    }
+
+    window.location.href = "/login";
+  }
 
   if (loading) {
     return (
@@ -90,22 +126,23 @@ export default function MinhaAreaPage() {
         boxSizing: "border-box",
       }}
     >
-      <button
-  onClick={() => (window.location.href = `/cliente/${slug}/portal`)}
-  style={{
-    background: "rgba(244,212,106,.12)",
-    border: "1px solid rgba(244,212,106,.3)",
-    color: "#f4d46a",
-    padding: "10px 16px",
-    borderRadius: "999px",
-    cursor: "pointer",
-    fontWeight: 700,
-    marginBottom: "24px",
-  }}
->
-  ← Voltar ao meu portal
-</button>
       <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+        <button
+          onClick={voltar}
+          style={{
+            background: "rgba(244,212,106,.12)",
+            border: "1px solid rgba(244,212,106,.3)",
+            color: "#f4d46a",
+            padding: "10px 16px",
+            borderRadius: "999px",
+            cursor: "pointer",
+            fontWeight: 700,
+            marginBottom: "24px",
+          }}
+        >
+          ← Voltar ao meu portal
+        </button>
+
         <div
           style={{
             borderBottom: "1px solid rgba(214,173,76,.28)",
