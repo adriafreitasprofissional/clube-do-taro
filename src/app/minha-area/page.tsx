@@ -90,6 +90,21 @@ export default function MinhaAreaPage() {
         boxSizing: "border-box",
       }}
     >
+      <button
+  onClick={() => (window.location.href = `/cliente/${slug}/portal`)}
+  style={{
+    background: "rgba(244,212,106,.12)",
+    border: "1px solid rgba(244,212,106,.3)",
+    color: "#f4d46a",
+    padding: "10px 16px",
+    borderRadius: "999px",
+    cursor: "pointer",
+    fontWeight: 700,
+    marginBottom: "24px",
+  }}
+>
+  ← Voltar ao meu portal
+</button>
       <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
         <div
           style={{
