@@ -161,6 +161,59 @@ const PDFS_JUNHO: Record<string, Record<string, string>> = {
     "semana-5": "",
   },
 };
+const PLANILHA_CONTEUDOS_CSV =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSr7qra9Jsh2IO6vDO_8vVxe-8lkf9zbFeuDPtw5Wny7zHUKIhVa7lIqqshLo_4JbRDUhWjv0sb_5y3/pub?gid=0&single=true&output=csv";
+
+type ConteudoPlanilha = {
+  slug: string;
+  ano: string;
+  mes: string;
+  semana: string;
+  tipo: string;
+  titulo: string;
+  drive_file: string;
+  ativo: string;
+};
+
+function lerCsv(linha: string) {
+  const colunas: string[] = [];
+  let atual = "";
+  let dentroDeAspas = false;
+
+  for (let i = 0; i < linha.length; i++) {
+    const caractere = linha[i];
+
+    if (caractere === '"') {
+      dentroDeAspas = !dentroDeAspas;
+    } else if (caractere === "," && !dentroDeAspas) {
+      colunas.push(atual.trim().replace(/^"|"$/g, ""));
+      atual = "";
+    } else {
+      atual += caractere;
+    }
+  }
+
+  colunas.push(atual.trim().replace(/^"|"$/g, ""));
+  return colunas;
+}
+function linkDrive(valor: string, tipo: string) {
+  if (!valor) return "";
+
+  const valorLimpo = valor.trim();
+
+  const idEncontrado = valorLimpo.startsWith("http")
+    ? valorLimpo.match(/\/d\/([^/]+)/)?.[1]
+    : valorLimpo;
+
+  if (!idEncontrado) return "";
+
+  const ehAudio =
+    tipo === "audio_individual" || tipo === "audio_geral";
+
+  return ehAudio
+    ? `https://drive.google.com/file/d/${idEncontrado}/preview`
+    : `https://drive.google.com/file/d/${idEncontrado}/view`;
+}
 
 export default function PortalPremium() {
   const params = useParams();
@@ -184,8 +237,10 @@ export default function PortalPremium() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
+const [conteudosPlanilha, setConteudosPlanilha] = useState<ConteudoPlanilha[]>([]);
+const [carregandoConteudos, setCarregandoConteudos] = useState(true);
+  
+useEffect(() => {
     async function carregarCliente() {
       setLoading(true);
       setError(null);
@@ -217,6 +272,57 @@ export default function PortalPremium() {
     if (slug) carregarCliente();
   }, [slug]);
 
+  useEffect(() => {
+    async function carregarConteudosDaPlanilha() {
+      try {
+        const resposta = await fetch(PLANILHA_CONTEUDOS_CSV, {
+          cache: "no-store",
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Não foi possível carregar a planilha de conteúdos.");
+        }
+
+        const texto = await resposta.text();
+        const linhas = texto
+          .split(/\r?\n/)
+          .map((linha) => linha.trim())
+          .filter(Boolean);
+
+        const cabecalho = lerCsv(linhas[0]).map((item) =>
+          item.toLowerCase().trim()
+        );
+
+        const conteudos = linhas.slice(1).map((linha) => {
+          const valores = lerCsv(linha);
+          const item: Record<string, string> = {};
+
+          cabecalho.forEach((coluna, indice) => {
+            item[coluna] = valores[indice] || "";
+          });
+
+          return {
+            slug: (item.slug || "").toLowerCase().trim(),
+            ano: (item.ano || "").trim(),
+            mes: (item.mes || "").toLowerCase().trim(),
+            semana: (item.semana || "").trim(),
+            tipo: (item.tipo || "").toLowerCase().trim(),
+            titulo: (item.titulo || "").trim(),
+            drive_file: (item.drive_file || "").trim(),
+            ativo: (item.ativo || "").toLowerCase().trim(),
+          };
+        });
+
+        setConteudosPlanilha(conteudos);
+      } catch (err) {
+        console.error("Erro ao carregar planilha:", err);
+      } finally {
+        setCarregandoConteudos(false);
+      }
+    }
+
+    carregarConteudosDaPlanilha();
+  }, []);
   const mostrarMaio = dataInicio
     ? new Date(dataInicio) <= new Date("2026-05-31")
     : true;
@@ -300,28 +406,57 @@ export default function PortalPremium() {
     window.open(conteudo.pdf, "_blank", "noopener,noreferrer");
   }
 
-  function abrirAudioJunho(semana: string) {
-    const url = AUDIOS_JUNHO[slug]?.[semana];
+  function buscarConteudoJunho(semana: string, tipo: string) {
+  
+console.log("BUSCA PLANILHA:", {
+  slug,
+  semana,
+  tipo,
+  totalDeLinhas: conteudosPlanilha.length,
+  primeiraLinha: conteudosPlanilha[0],
+});
 
-    if (!url) {
-      alert("Áudio desta semana ainda não está disponível.");
-      return;
-    }
+return conteudosPlanilha.find(
+    (item) =>
+      item.slug === slug.toLowerCase().trim() &&
+      item.ano === "2026" &&
+      item.mes === "junho" &&
+      item.semana === semana.replace("semana-", "") &&
+      item.tipo === tipo &&
+      item.ativo === "sim" &&
+      item.drive_file
+  );
+}
 
-    setAudioUrl(url);
-    setAudioAberto(true);
+function abrirAudioJunho(semana: string) {
+  const conteudo = buscarConteudoJunho(semana, "audio_individual");
+
+  if (!conteudo) {
+    alert("Áudio desta semana ainda não está disponível.");
+    return;
   }
 
-  function baixarPdfJunho(semana: string) {
-    const url = PDFS_JUNHO[slug]?.[semana];
+ const urlDoAudio = linkDrive(conteudo.drive_file, conteudo.tipo);
+console.log("URL DO ÁUDIO:", urlDoAudio);
+setAudioUrl(urlDoAudio);
+  setAudioAberto(true);
+}
 
-    if (!url) {
-      alert("PDF desta semana ainda não está disponível.");
-      return;
-    }
+function baixarPdfJunho(semana: string) {
+  const conteudo = buscarConteudoJunho(semana, "pdf_individual");
 
-    window.open(url, "_blank", "noopener,noreferrer");
+  if (!conteudo) {
+    alert("PDF desta semana ainda não está disponível.");
+    return;
   }
+
+  window.open(
+    linkDrive(conteudo.drive_file, conteudo.tipo),
+    "_blank",
+    "noopener,noreferrer"
+  );
+}
+    
 
   async function enviarPergunta() {
     if (!categoria) {
@@ -858,7 +993,8 @@ export default function PortalPremium() {
             </h3>
 
             <iframe
-  src={audioUrl}
+  key={audioUrl}
+  src={`${audioUrl}?embedded=true`}
   title="Direcionamento da Semana"
   width="100%"
   height="140"
