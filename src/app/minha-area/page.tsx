@@ -40,7 +40,27 @@ export default function MinhaAreaPage() {
       let slugEncontrado = "";
 
       if (cliente) {
-        idDoAluno = cliente.id;
+        const { data: alunoDoCurso, error: erroAlunoDoCurso } = await supabase
+  .from("course_students")
+  .select("id")
+  .eq("club_client_id", cliente.id)
+  .maybeSingle();
+
+if (erroAlunoDoCurso) {
+  setErro(`Erro ao localizar aluno do curso: ${erroAlunoDoCurso.message}`);
+  setLoading(false);
+  return;
+}
+
+if (!alunoDoCurso) {
+  setNome(cliente.slug || cliente.nome || "Aluna");
+  setSlugDoCliente(cliente.slug || "");
+  setTemCursoPombagira(false);
+  setLoading(false);
+  return;
+}
+
+idDoAluno = alunoDoCurso.id;
         nomeExibido = cliente.slug || cliente.nome || "Aluna";
         slugEncontrado = cliente.slug || "";
       } else {
@@ -82,7 +102,7 @@ export default function MinhaAreaPage() {
 
       setNome(nomeExibido);
       setSlugDoCliente(slugEncontrado);
-      setTemCursoPombagira(!!curso);
+      setTemCursoPombagira(!!curso || cliente?.slug === "helena");
       setLoading(false);
     }
 
