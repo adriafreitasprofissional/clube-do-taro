@@ -52,7 +52,6 @@ export default function PortalPremium() {
           setTituloGuardiao(data.genero === "homem" ? "Guardião" : "Guardiã");
         }
       } catch (err: any) {
-        console.error("Erro ao carregar cliente:", err);
         setError(err.message || "Erro ao carregar dados do cliente.");
       } finally {
         setLoading(false);
@@ -243,42 +242,84 @@ export default function PortalPremium() {
         <div
           style={{
             display: "flex",
-            justifyContent: "flex-start",
-            gap: "12px",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "16px",
             marginBottom: "20px",
-            paddingLeft: "20px",
+            padding: "0 20px",
+            flexWrap: "wrap",
           }}
         >
-          <button
-            onClick={() => (window.location.href = "/")}
+          <div
             style={{
-              background: "rgba(244,212,106,.12)",
-              border: "1px solid rgba(244,212,106,.3)",
               color: "#f4d46a",
-              padding: "10px 18px",
-              borderRadius: "999px",
-              cursor: "pointer",
+              fontWeight: 800,
+              fontSize: "16px",
+              letterSpacing: ".5px",
             }}
           >
-            🏠 Portal Principal
-          </button>
+            ✨ Portal da Guardiã
+          </div>
 
-          <button
-            onClick={() => {
-              localStorage.clear();
-              window.location.href = "/login";
-            }}
+          <div
             style={{
-              background: "#5b0c8c",
-              border: "none",
-              color: "#fff",
-              padding: "10px 18px",
-              borderRadius: "999px",
-              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: "10px",
+              flexWrap: "wrap",
             }}
           >
-            🚪 Sair
-          </button>
+            <button
+              onClick={() =>
+                (window.location.href = `/cliente/${slug}/mensalidades`)
+              }
+              style={{
+                background: "rgba(244,212,106,.12)",
+                border: "1px solid rgba(244,212,106,.3)",
+                color: "#f4d46a",
+                padding: "10px 16px",
+                borderRadius: "999px",
+                cursor: "pointer",
+                fontWeight: 700,
+              }}
+            >
+              💳 Meus Pagamentos
+            </button>
+
+            <button
+              onClick={() => (window.location.href = "/minha-area")}
+              style={{
+                background: "#d4af37",
+                border: "none",
+                color: "#1a001a",
+                padding: "10px 16px",
+                borderRadius: "999px",
+                cursor: "pointer",
+                fontWeight: 800,
+              }}
+            >
+              📚 Meus Cursos
+            </button>
+
+            <button
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = "/login";
+              }}
+              style={{
+                background: "#5b0c8c",
+                border: "none",
+                color: "#fff",
+                padding: "10px 16px",
+                borderRadius: "999px",
+                cursor: "pointer",
+                fontWeight: 700,
+              }}
+            >
+              🚪 Sair
+            </button>
+          </div>
         </div>
 
         <div style={{ textAlign: "center", marginBottom: "60px" }}>
@@ -286,7 +327,13 @@ export default function PortalPremium() {
             ✦ ✨ 🔮 ✨ ✦
           </div>
 
-          <div style={{ color: "#f4d46a", fontSize: "52px", marginBottom: "10px" }}>
+          <div
+            style={{
+              color: "#f4d46a",
+              fontSize: "52px",
+              marginBottom: "10px",
+            }}
+          >
             {tituloGuardiao}
           </div>
 
@@ -387,7 +434,13 @@ export default function PortalPremium() {
                             {semana.data}
                           </div>
 
-                          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "12px",
+                              flexWrap: "wrap",
+                            }}
+                          >
                             <button onClick={abrirAudio} style={botaoAudio}>
                               🎧 Ouvir Direcionamento
                             </button>
@@ -443,7 +496,13 @@ export default function PortalPremium() {
                         {semana.data}
                       </div>
 
-                      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "12px",
+                          flexWrap: "wrap",
+                        }}
+                      >
                         <button
                           onClick={() =>
                             abrirAudioJunho(semana.semana, semana.arquivo)

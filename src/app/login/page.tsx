@@ -32,30 +32,45 @@ export default function LoginPage() {
 
     const emailUsuario = data.user.email;
 
-    const { data: clienteData, error: errorCliente } = await supabase
+    const { data: clienteData } = await supabase
       .from("club_clients")
       .select("slug, status, role")
       .eq("email", emailUsuario)
-      .single();
+      .maybeSingle();
 
-    if (errorCliente || !clienteData?.slug) {
-      alert("Cliente não encontrado.");
-      setLoading(false);
+    if (clienteData?.role === "admin") {
+      window.location.href = "/admin";
       return;
     }
 
-    if (clienteData.role === "admin") {
-  window.location.href = "/admin";
-  return;
-}
+    if (clienteData?.slug) {
+      if (clienteData.status !== "ativo") {
+        await supabase.auth.signOut();
+        alert(
+          "Seu acesso está temporariamente indisponível. Entre em contato com o Clube do Tarô."
+        );
+        setLoading(false);
+        return;
+      }
 
-if (clienteData.status !== "ativo") {
-  alert("Seu acesso está temporariamente indisponível. Entre em contato com o Clube do Tarô.");
-  setLoading(false);
-  return;
-}
+      window.location.href = `/cliente/${clienteData.slug}/portal`;
+      return;
+    }
 
-    window.location.href = `/cliente/${clienteData.slug}/portal`;
+    const { data: alunoData } = await supabase
+      .from("course_students")
+      .select("id, status")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    if (alunoData?.id && alunoData.status === "ativo") {
+      window.location.href = "/minha-area";
+      return;
+    }
+
+    await supabase.auth.signOut();
+    alert("Este acesso não possui assinatura ou curso liberado.");
+    setLoading(false);
   }
 
   async function resetSenha() {
@@ -73,7 +88,9 @@ if (clienteData.status !== "ativo") {
       return;
     }
 
-    alert("Enviamos um link para redefinir sua senha. Abra o e-mail e crie uma nova senha.");
+    alert(
+      "Enviamos um link para redefinir sua senha. Abra o e-mail e crie uma nova senha."
+    );
   }
 
   return (
@@ -108,7 +125,7 @@ if (clienteData.status !== "ativo") {
             color: "#E7C96F",
           }}
         >
-          Portal do Assinante
+          Portal do Aluno e Assinante
         </p>
 
         <h1
