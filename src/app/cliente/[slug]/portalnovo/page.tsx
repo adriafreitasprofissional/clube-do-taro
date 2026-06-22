@@ -195,8 +195,7 @@ export default function PortalPremium() {
           .from("club_clients")
           .select("plano, data_inicio, nome, slug, genero")
           .eq("slug", slug)
-          .single();
-
+          .maybeSingle();
         if (error) throw new Error(error.message);
 
         if (data) {
