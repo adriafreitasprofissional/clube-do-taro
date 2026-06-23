@@ -3,6 +3,26 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+function formatarNome(nome: string) {
+  if (!nome) return "Pessoa";
+
+  const palavrasMenores = ["da", "de", "do", "das", "dos", "e"];
+
+  return nome
+    .trim()
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean)
+    .map((palavra, indice) => {
+      if (indice > 0 && palavrasMenores.includes(palavra)) {
+        return palavra;
+      }
+
+      return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+    })
+    .join(" ");
+}
+
 export default function MinhaAreaPage() {
   const [loading, setLoading] = useState(true);
   const [nome, setNome] = useState("");
@@ -41,27 +61,29 @@ export default function MinhaAreaPage() {
 
       if (cliente) {
         const { data: alunoDoCurso, error: erroAlunoDoCurso } = await supabase
-  .from("course_students")
-  .select("id")
-  .eq("club_client_id", cliente.id)
-  .maybeSingle();
+          .from("course_students")
+          .select("id")
+          .eq("club_client_id", cliente.id)
+          .maybeSingle();
 
-if (erroAlunoDoCurso) {
-  setErro(`Erro ao localizar aluno do curso: ${erroAlunoDoCurso.message}`);
-  setLoading(false);
-  return;
-}
+        if (erroAlunoDoCurso) {
+          setErro(
+            `Erro ao localizar aluno do curso: ${erroAlunoDoCurso.message}`
+          );
+          setLoading(false);
+          return;
+        }
 
-if (!alunoDoCurso) {
-  setNome(cliente.slug || cliente.nome || "Aluna");
-  setSlugDoCliente(cliente.slug || "");
-  setTemCursoPombagira(false);
-  setLoading(false);
-  return;
-}
+        if (!alunoDoCurso) {
+          setNome(cliente.nome || cliente.slug || "Pessoa");
+          setSlugDoCliente(cliente.slug || "");
+          setTemCursoPombagira(false);
+          setLoading(false);
+          return;
+        }
 
-idDoAluno = alunoDoCurso.id;
-        nomeExibido = cliente.slug || cliente.nome || "Aluna";
+        idDoAluno = alunoDoCurso.id;
+        nomeExibido = cliente.nome || cliente.slug || "Pessoa";
         slugEncontrado = cliente.slug || "";
       } else {
         const { data: aluno, error: erroAluno } = await supabase
@@ -83,7 +105,7 @@ idDoAluno = alunoDoCurso.id;
         }
 
         idDoAluno = aluno.id;
-        nomeExibido = aluno.nome || "Aluna";
+        nomeExibido = aluno.nome || "Pessoa";
       }
 
       const { data: curso, error: erroCurso } = await supabase
@@ -189,7 +211,7 @@ idDoAluno = alunoDoCurso.id;
               lineHeight: 1.1,
             }}
           >
-            Olá, {nome || "Aluna"}
+            Olá, {formatarNome(nome)}
           </h1>
 
           <p style={{ color: "#c9c9d1", margin: 0, fontSize: "17px" }}>

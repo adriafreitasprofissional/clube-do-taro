@@ -8,7 +8,11 @@ const AULAS = [
     video: "https://www.youtube.com/embed/q7uMTxtoVIw",
     imagem: "/desafio-pombagira/dia1.png",
   },
-  
+  {
+    titulo: "2º DIA DO DESAFIO",
+    video: "https://www.youtube.com/embed/iPXA35eE2iU","
+    imagem: "/desafio-pombagira/dia2.png",
+  },
 ];
 
 export default function CursoPombagira() {
