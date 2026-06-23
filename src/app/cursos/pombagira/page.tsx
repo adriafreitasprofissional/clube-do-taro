@@ -10,7 +10,7 @@ const AULAS = [
   },
   {
     titulo: "2º DIA DO DESAFIO",
-    video: "https://www.youtube.com/embed/iPXA35eE2iU","
+    video: "https://www.youtube.com/embed/iPXA35eE2iU",
     imagem: "/desafio-pombagira/dia2.png",
   },
 ];
