@@ -505,6 +505,13 @@ function baixarPdfJunho(semana: string) {
     cursor: "pointer",
   };
 
+  const nomePortal =
+  slug === "carolruiva"
+    ? "Carol Ruiva"
+    : slug === "carolmorena"
+      ? "Carol Morena"
+      : slug.charAt(0).toUpperCase() + slug.slice(1);
+      
   if (loading) {
     return (
       <main

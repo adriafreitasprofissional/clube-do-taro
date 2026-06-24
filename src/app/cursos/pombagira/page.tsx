@@ -13,6 +13,50 @@ const AULAS = [
     video: "https://www.youtube.com/embed/iPXA35eE2iU",
     imagem: "/desafio-pombagira/dia2.png",
   },
+  {
+    titulo: "3º DIA — O Poder da Sua Pombogira",
+    descricao:
+      "Hoje você vai compreender como reconhecer sua força, sem medo e sem culpa.",
+    dica:
+      "Assista com calma e anote tudo que tocar seu coração.",
+    imagem: "/desafio-pombagira/dia3.png",
+    videos: [
+      {
+        titulo: "Parte 1 — CORES E ELEMENTOS",
+        url: "https://www.youtube.com/embed/KvRLmUulqBc",
+      },
+      {
+        titulo: "Parte 2 — OFERENDAS",
+        url: "https://www.youtube.com/embed/PBSD6fFNCIw",
+      },
+    ],
+    pdf: {
+      titulo: "Material complementar da aula",
+      url: "https://drive.google.com/file/d/1Si4XlrQv2awGN1SaXLQR3aV6WACE7-2z/view?usp=drive_link",
+    },
+  },
+  {
+    titulo: "4º DIA — O Espelho da Alma",
+    descricao:
+      "Hoje eu desafio você a aceitar a verdade e reconhecer a força que existe em sua própria história.",
+    dica:
+      "Assista com calma e permita-se refletir antes de seguir para a próxima etapa.",
+    imagem: "/desafio-pombagira/dia4.png",
+    videos: [
+      {
+        titulo: "Parte 1 — O ESPELHO DA ALMA",
+        url: "https://www.youtube.com/embed/HHdTxnhscKQ",
+      },
+      {
+        titulo: "Parte 2 — SIGA EM FRENTE — FAÇA ALGO POR VOCÊ!",
+        url: "https://www.youtube.com/embed/t0N3JRIjYmg",
+      },
+    ],
+    pdf: {
+      titulo: "Material complementar da aula",
+      url: "https://drive.google.com/file/d/1S8fmVU75SCtRKI8xSaPuV-uEKZxnBuLL/view?usp=sharing",
+    },
+  },
 ];
 
 export default function CursoPombagira() {
@@ -157,65 +201,157 @@ export default function CursoPombagira() {
         </div>
       </section>
 
-      {audioAberto && (
-        <div
+{audioAberto && (
+
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,.82)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 100,
+      padding: "20px",
+    }}
+  >
+    <div
+      style={{
+        width: "860px",
+        maxWidth: "100%",
+        maxHeight: "90vh",
+        overflowY: "auto",
+        background: "#17171b",
+        borderRadius: "18px",
+        padding: "20px",
+        boxSizing: "border-box",
+        border: "1px solid #3a3a43",
+      }}
+    >
+      <h2 style={{ marginTop: 0 }}>
+        {AULAS[aulaAtiva].titulo}
+      </h2>
+
+      {AULAS[aulaAtiva].descricao && (
+        <p
           style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,.82)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 100,
-            padding: "20px",
+            color: "#f5e9c8",
+            lineHeight: 1.6,
+            background: "#101014",
+            padding: "14px",
+            borderRadius: "12px",
           }}
         >
-          <div
-            style={{
-              width: "860px",
-              maxWidth: "100%",
-              background: "#17171b",
-              borderRadius: "18px",
-              padding: "20px",
-              boxSizing: "border-box",
-              border: "1px solid #3a3a43",
-            }}
-          >
-            <h2 style={{ marginTop: 0 }}>{AULAS[aulaAtiva].titulo}</h2>
+          {AULAS[aulaAtiva].descricao}
+        </p>
+      )}
 
-            <iframe
-              src={audioUrl}
-              title={AULAS[aulaAtiva].titulo}
-              width="100%"
-              height="480"
-              style={{
-                border: "none",
-                borderRadius: "12px",
-                background: "#000",
-              }}
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-            />
-
-            <button
-              onClick={() => setAudioAberto(false)}
-              style={{
-                marginTop: "16px",
-                width: "100%",
-                padding: "12px",
-                background: "#7d1bb5",
-                color: "#fff",
-                border: "none",
-                borderRadius: "10px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              Fechar aula
-            </button>
-          </div>
+      {AULAS[aulaAtiva].dica && (
+        <div
+          style={{
+            marginTop: "14px",
+            marginBottom: "18px",
+            padding: "14px",
+            borderRadius: "12px",
+            background: "rgba(125,27,181,.18)",
+            border: "1px solid rgba(198,126,255,.35)",
+            color: "#f1dcff",
+            lineHeight: 1.6,
+          }}
+        >
+          <strong style={{ color: "#f4d46a" }}>
+            ✦ Dica da Guardiã
+          </strong>
+          <br />
+          {AULAS[aulaAtiva].dica}
         </div>
       )}
-    </main>
-  );
+
+      {AULAS[aulaAtiva].video && (
+        <iframe
+          src={AULAS[aulaAtiva].video}
+          title={AULAS[aulaAtiva].titulo}
+          width="100%"
+          height="480"
+          style={{
+            border: "none",
+            borderRadius: "12px",
+            background: "#000",
+          }}
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+        />
+      )}
+
+      {AULAS[aulaAtiva].videos?.map((video) => (
+        <div key={video.url} style={{ marginTop: "20px" }}>
+          <p
+            style={{
+              color: "#f4d46a",
+              fontWeight: "bold",
+              marginBottom: "10px",
+            }}
+          >
+            ▶ {video.titulo}
+          </p>
+
+          <iframe
+            src={video.url}
+            title={video.titulo}
+            width="100%"
+            height="480"
+            style={{
+              border: "none",
+              borderRadius: "12px",
+              background: "#000",
+            }}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ))}
+
+      {AULAS[aulaAtiva].pdf?.url && (
+        <a
+          href={AULAS[aulaAtiva].pdf.url}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            display: "block",
+            marginTop: "20px",
+            padding: "14px",
+            background: "rgba(244,212,106,.12)",
+            border: "1px solid rgba(244,212,106,.45)",
+            borderRadius: "12px",
+            color: "#f4d46a",
+            textDecoration: "none",
+            textAlign: "center",
+            fontWeight: "bold",
+          }}
+        >
+          📄 {AULAS[aulaAtiva].pdf.titulo}
+        </a>
+      )}
+
+      <button
+        onClick={() => setAudioAberto(false)}
+        style={{
+          marginTop: "16px",
+          width: "100%",
+          padding: "12px",
+          background: "#7d1bb5",
+          color: "#fff",
+          border: "none",
+          borderRadius: "10px",
+          cursor: "pointer",
+          fontWeight: "bold",
+        }}
+      >
+        Fechar aula
+      </button>
+    </div>
+  </div>
+)}
+</main>
+);
 }

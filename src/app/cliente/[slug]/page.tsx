@@ -1,311 +1,191 @@
-
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 const clientes: Record<
   string,
   {
     nome: string;
-    plano: string;
+    plano: "bronze" | "prata" | "ouro" | "diamante";
   }
 > = {
-  gabi: {
-    nome: "Gabi",
-    plano: "Bronze",
-  },
-
-  nathali: {
-    nome: "Nathali",
-    plano: "Prata",
-  },
-
-  carolmorena: {
-    nome: "Carol Morena",
-    plano: "Ouro",
-  },
-
-  carolruiva: {
-    nome: "Carol Ruiva",
-    plano: "Diamante",
-  },
-
-  claudinho: {
-    nome: "Claudinho",
-    plano: "Bronze",
-  },
-
-  cris: {
-    nome: "Cris",
-    plano: "Diamante",
-  },
-
-  dani: {
-    nome: "Dani",
-    plano: "Bronze",
-  },
-
-  dorinha: {
-    nome: "Dorinha",
-    plano: "Diamante",
-  },
-
-  fefe: {
-    nome: "Fefe",
-    plano: "Bronze",
-  },
-
-  helena: {
-    nome: "Helena",
-    plano: "Diamante",
-  },
-
-  lilian: {
-    nome: "Lilian",
-    plano: "Diamante",
-  },
-
-  luana: {
-    nome: "Luana",
-    plano: "Bronze",
-  },
-
-  nena: {
-    nome: "Nena",
-    plano: "Bronze",
-  },
-
-  neide: {
-    nome: "Neide",
-    plano: "Ouro",
-  },
-
-  natalia: {
-    nome: "Natalia",
-    plano: "Bronze",
-  },
-
-  rejiane: {
-    nome: "Rejiane",
-    plano: "Bronze",
-  },
-
-  tamilly: {
-    nome: "Tamilly",
-    plano: "Ouro",
-  },
-
-  vivi: {
-    nome: "Vivi",
-    plano: "Diamante",
-  },
+  gabi: { nome: "Gabi", plano: "bronze" },
+  nathali: { nome: "Nathali", plano: "prata" },
+  carolmorena: { nome: "Carol Morena", plano: "ouro" },
+  carolruiva: { nome: "Carol Ruiva", plano: "diamante" },
+  claudinho: { nome: "Claudinho", plano: "bronze" },
+  cris: { nome: "Cris", plano: "diamante" },
+  dani: { nome: "Dani", plano: "bronze" },
+  dorinha: { nome: "Dorinha", plano: "diamante" },
+  fefe: { nome: "Fefe", plano: "bronze" },
+  helena: { nome: "Helena", plano: "diamante" },
+  lilian: { nome: "Lilian", plano: "diamante" },
+  luana: { nome: "Luana", plano: "bronze" },
+  nena: { nome: "Nena", plano: "bronze" },
+  neide: { nome: "Neide", plano: "ouro" },
+  natalia: { nome: "Natalia", plano: "bronze" },
+  rejiane: { nome: "Rejiane", plano: "bronze" },
+  tamilly: { nome: "Tamilly", plano: "ouro" },
+  vivi: { nome: "Vivi", plano: "diamante" },
 };
 
-export default async function ClientePage({
+const pagamentosPorPlano = {
+  bronze: {
+    nome: "Plano Bronze",
+    valorFormatado: "R$ 27,20",
+    linkPagamento:
+      "https://invoice.infinitepay.io/plans/adriaescritora/fC6YXan9aP",
+  },
+  prata: {
+    nome: "Plano Prata",
+    valorFormatado: "R$ 47,00",
+    linkPagamento:
+      "https://app.infinitepay.io/plans/share/fpn2fMg9Qd",
+  },
+  ouro: {
+    nome: "Plano Ouro",
+    valorFormatado: "R$ 67,00",
+    linkPagamento:
+      "https://invoice.infinitepay.io/plans/adriaescritora/fvbXy2rRsn",
+  },
+  diamante: {
+    nome: "Plano Diamante",
+    valorFormatado: "R$ 147,00",
+    linkPagamento:
+      "https://invoice.infinitepay.io/plans/adriaescritora/UM4UHqFNPD",
+  },
+} as const;
+
+export default async function MensalidadesPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
   const cliente = clientes[slug];
 
   if (!cliente) {
     notFound();
   }
 
+  const pagamentoAtual = pagamentosPorPlano[cliente.plano];
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#1A001A",
-        color: "white",
-        padding: "60px 24px",
-        fontFamily: "Arial",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-        }}
-      >
-        <p
-          style={{
-            color: "#E7C96F",
-            letterSpacing: "4px",
-            fontSize: "12px",
-            textTransform: "uppercase",
-          }}
-        >
-          Portal do Assinante
-        </p>
+    <main className="min-h-screen bg-[#08070f] text-white">
+      <div className="mx-auto flex min-h-screen max-w-7xl">
+        <aside className="hidden w-72 flex-col border-r border-purple-900/40 bg-[#100d24] p-6 md:flex">
+          <div className="mb-10">
+            <p className="text-xs uppercase tracking-[0.25em] text-purple-300">
+              Clube do Tarô
+            </p>
+            <h1 className="mt-2 text-xl font-bold text-yellow-400">
+              Área da Assinante
+            </h1>
+          </div>
 
-        <h1
-          style={{
-            fontSize: "58px",
-            marginTop: "20px",
-            marginBottom: "10px",
-          }}
-        >
-          Bem-vinda Guardiã {cliente.nome}
-        </h1>
+          <nav className="flex flex-1 flex-col gap-3">
+            <Link
+              href={`/cliente/${slug}`}
+              className="rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-purple-800/40"
+            >
+              🔮 Meu Portal
+            </Link>
 
-        <p
-          style={{
-            color: "#E7C96F",
-            opacity: 0.7,
-            marginBottom: "50px",
-          }}
-        >
-          Plano {cliente.plano}
-        </p>
+            <Link
+              href={`/cliente/${slug}/mensalidades`}
+              className="rounded-xl bg-purple-800 px-4 py-3 text-sm font-bold shadow-lg"
+            >
+              💳 Minhas Mensalidades
+            </Link>
+          </nav>
 
-        <div
-          style={{
-            background: "#240024",
-            border: "1px solid rgba(231,201,111,0.15)",
-            borderRadius: "32px",
-            padding: "40px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "42px",
-              marginBottom: "16px",
-            }}
+          <Link
+            href={`/cliente/${slug}`}
+            className="rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-center text-sm font-bold text-yellow-300"
           >
-            Meus Direcionamentos
-          </h2>
+            ← Voltar ao Portal
+          </Link>
+        </aside>
 
-          <p
-            style={{
-              color: "rgba(255,255,255,0.65)",
-              marginBottom: "40px",
-            }}
-          >
-            Seus conteúdos espirituais liberados mês a mês.
-          </p>
+        <section className="flex-1 px-5 py-8 md:px-10">
+          <div className="mx-auto max-w-2xl">
+            <Link
+              href={`/cliente/${slug}`}
+              className="mb-6 inline-flex rounded-xl border border-purple-500/40 bg-[#17142d] px-4 py-3 text-sm font-bold text-purple-200 md:hidden"
+            >
+              ← Voltar ao Portal
+            </Link>
 
-          <a
-            
-  href={`https://clube-do-taro-clientes.vercel.app/cliente/${slug}/index.html`}
-  target="_blank"
-  style={{
-    display: "block",
-    background: "#140014",
-    border: "1px solid rgba(231,201,111,0.25)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "white",
-    textDecoration: "none",
-    marginBottom: "16px",
-  }}
->
-  ✦ Maio 2026
-</a>
+            <div className="mb-7">
+              <p className="text-sm text-purple-300">
+                Área financeira de {cliente.nome}
+              </p>
+              <h2 className="mt-1 text-2xl font-bold">
+                💳 Minhas Mensalidades
+              </h2>
+            </div>
 
-<div
-  style={{
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "rgba(255,255,255,0.4)",
-    marginBottom: "16px",
-  }}
->
-  ✦ Junho 2026
-</div>
+            <div className="mb-5 rounded-2xl border border-blue-400/30 bg-[#101827] p-6 shadow-xl">
+              <h3 className="text-lg font-bold text-yellow-400">
+                💎 {pagamentoAtual.nome}
+              </h3>
 
-<div
-  style={{
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "rgba(255,255,255,0.4)",
-    marginBottom: "16px",
-  }}
->
-  ✦ Julho 2026
-</div>
+              <div className="mt-5 grid gap-3 text-sm">
+                <p>
+                  <strong>Tipo:</strong> Mensal
+                </p>
+                <p>
+                  <strong>Status:</strong> Ativo
+                </p>
+                <p>
+                  <strong>Valor:</strong> {pagamentoAtual.valorFormatado}
+                </p>
+              </div>
+            </div>
 
-<div
-  style={{
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "rgba(255,255,255,0.4)",
-    marginBottom: "16px",
-  }}
->
-  ✦ Agosto 2026
-</div>
+            <div className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl">
+              <p className="text-sm text-purple-200">
+                Mensalidade do {pagamentoAtual.nome}
+              </p>
 
-<div
-  style={{
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "rgba(255,255,255,0.4)",
-    marginBottom: "16px",
-  }}
->
-  ✦ Setembro 2026
-</div>
+              <h3 className="mt-2 text-3xl font-extrabold text-yellow-400">
+                {pagamentoAtual.valorFormatado}
+              </h3>
 
-<div
-  style={{
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "rgba(255,255,255,0.4)",
-    marginBottom: "16px",
-  }}
->
-  ✦ Outubro 2026
-</div>
+              <div className="mt-7 flex flex-col gap-3">
+                <a
+                  href={pagamentoAtual.linkPagamento}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-xl bg-red-600 px-5 py-4 text-center text-sm font-extrabold transition hover:bg-red-500"
+                >
+                  PAGAR AGORA
+                </a>
 
-<div
-  style={{
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "rgba(255,255,255,0.4)",
-    marginBottom: "16px",
-  }}
->
-  ✦ Novembro 2026
-</div>
+                <a
+                  href={pagamentoAtual.linkPagamento}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-xl bg-blue-600 px-5 py-4 text-center text-sm font-extrabold transition hover:bg-blue-500"
+                >
+                  PAGAR COM PIX
+                </a>
 
-<div
-  style={{
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "rgba(255,255,255,0.4)",
-    marginBottom: "16px",
-  }}
->
-  ✦ Dezembro 2026
-</div>
+                <a
+                  href={pagamentoAtual.linkPagamento}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-xl bg-cyan-600 px-5 py-4 text-center text-sm font-extrabold transition hover:bg-cyan-500"
+                >
+                  PAGAR COM CARTÃO
+                </a>
+              </div>
 
-<div
-  style={{
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: "20px",
-    padding: "24px",
-    color: "rgba(255,255,255,0.4)",
-  }}
->
-  ✦ Janeiro 2027
-</div>
-        </div>
+              <p className="mt-6 text-center text-xs leading-relaxed text-purple-300">
+                Escolha PIX ou cartão no checkout da InfinitePay.
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
