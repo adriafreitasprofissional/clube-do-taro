@@ -238,8 +238,22 @@ export default function FinanceiroAdminPage() {
     let vence = 0;
     let atraso = 0;
     let anual = 0;
+    let previsaoMensal = 0;
 
     clientes.forEach((cliente) => {
+      if (
+        cliente.tipo_assinatura === "mensal" &&
+        cliente.status === "ativo"
+      ) {
+        const valorMensal =
+          cliente.valor_mensal_personalizado ||
+          cliente.valor_mensal ||
+          valoresPadrao[cliente.plano || "bronze"] ||
+          0;
+
+        previsaoMensal += Number(valorMensal);
+      }
+
       if (cliente.tipo_assinatura === "anual") {
         anual += 1;
         return;
@@ -252,7 +266,7 @@ export default function FinanceiroAdminPage() {
       else if (situacao.texto.includes("atraso")) atraso += 1;
     });
 
-    return { emDia, vence, atraso, anual };
+    return { emDia, vence, atraso, anual, previsaoMensal };
   }, [clientes]);
 
   function abrirEdicao(cliente: Cliente) {
@@ -540,7 +554,7 @@ if (carregando) {
           Controle de vencimentos, pagamentos, renovações e cortesias.
         </p>
 
-        <div className="mt-7 grid gap-4 md:grid-cols-4">
+        <div className="mt-7 grid gap-4 md:grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <div className="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-5">
             <p className="text-sm text-emerald-200">● Em dia</p>
             <p className="mt-2 text-3xl font-extrabold">{resumo.emDia}</p>
@@ -559,6 +573,16 @@ if (carregando) {
           <div className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 p-5">
             <p className="text-sm text-cyan-200">● Anuais válidas</p>
             <p className="mt-2 text-3xl font-extrabold">{resumo.anual}</p>
+          </div>
+
+          <div className="rounded-2xl border border-yellow-400/50 bg-yellow-500/10 p-5">
+            <p className="text-sm text-yellow-200">💰 Previsão mensal</p>
+            <p className="mt-2 text-3xl font-extrabold text-yellow-400">
+              {formatarValor(resumo.previsaoMensal)}
+            </p>
+            <p className="mt-1 text-xs text-yellow-100/70">
+              Mensais ativos · anuais e cortesias excluídos
+            </p>
           </div>
         </div>
 
