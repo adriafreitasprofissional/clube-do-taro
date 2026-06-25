@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const menu = [
   { href: "/admin", icon: "🏠", label: "Dashboard" },
   { href: "/admin/assinantes", icon: "👥", label: "Assinantes" },
+  { href: "/admin/financeiro", icon: "💳", label: "Financeiro" },
   { href: "/admin/perguntas", icon: "📩", label: "Perguntas" },
   { href: "/admin/direcionamentos", icon: "🔮", label: "Direcionamentos" },
   { href: "/admin/recados", icon: "📢", label: "Recados" },
