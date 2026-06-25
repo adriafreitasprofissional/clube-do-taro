@@ -53,7 +53,7 @@ export default function LoginPage() {
     return;
   }
 
-  window.location.href = `/cliente/${clienteData.slug}/portal`;
+ window.location.href = `/cliente/${clienteData.slug}`;
   return;
 }
 
