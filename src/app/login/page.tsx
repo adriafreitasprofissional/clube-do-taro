@@ -43,19 +43,19 @@ export default function LoginPage() {
       return;
     }
 
-    if (clienteData?.slug) {
-      if (clienteData.status !== "ativo") {
-        await supabase.auth.signOut();
-        alert(
-          "Seu acesso está temporariamente indisponível. Entre em contato com o Clube do Tarô."
-        );
-        setLoading(false);
-        return;
-      }
+   if (clienteData?.slug) {
+  if (clienteData.status !== "ativo") {
+    await supabase.auth.signOut();
+    alert(
+      "Seu acesso está temporariamente indisponível. Entre em contato com o Clube do Tarô."
+    );
+    setLoading(false);
+    return;
+  }
 
-      window.location.href = `/cliente/${clienteData.slug}/portal`;
-      return;
-    }
+  window.location.href = `/cliente/${clienteData.slug}/portal`;
+  return;
+}
 
     const { data: alunoData } = await supabase
       .from("course_students")
