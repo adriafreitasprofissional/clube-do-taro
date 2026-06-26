@@ -609,7 +609,7 @@ function baixarPdfJunho(semana: string) {
               💳 Meus Pagamentos
             </button>
 
-            <button
+           <button
   onClick={() => (window.location.href = "/cursos/pombagira")}
   style={{
     background: "#d4af37",
