@@ -167,13 +167,12 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
               💳 Minhas Mensalidades
             </Link>
 
-            <L<Link
+<Link
   href="/cursos"
   className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
 >
   📚 Meus Cursos
 </Link>
-
           </nav>
 
           <Link
