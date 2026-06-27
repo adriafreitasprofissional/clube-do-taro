@@ -132,7 +132,7 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
               href={`/cliente/${slug}/bonus`}
               className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
             >
-              🎁 
+              🎁 Meus Bônus
             </Link>
 
             <Link

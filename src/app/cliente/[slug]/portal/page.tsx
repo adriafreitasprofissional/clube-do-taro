@@ -616,7 +616,7 @@ function baixarPdfJunho(semana: string) {
     color: "#ff0000",
   }}
 >
-  TESTE NOVA PÁGINA POMBAGIRA
+  Meus Cursos
 </h1>
 
             <button
