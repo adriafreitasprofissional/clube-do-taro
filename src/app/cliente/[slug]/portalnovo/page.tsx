@@ -609,38 +609,33 @@ function baixarPdfJunho(semana: string) {
               💳 Meus Pagamentos
             </button>
 
-            <button
-              onClick={() => (window.location.href = "/minha-area")}
-              style={{
-                background: "#d4af37",
-                border: "none",
-                color: "#1a001a",
-                padding: "10px 16px",
-                borderRadius: "999px",
-                cursor: "pointer",
-                fontWeight: 800,
-              }}
-            >
-              📚 Meus Cursos
-            </button>
+         <h1
+  style={{
+    margin: 0,
+    fontSize: "28px",
+    color: "#ff0000",
+  }}
+>
+  Meus Cursos
+</h1>
 
             <button
-              onClick={() => {
-                localStorage.clear();
-                window.location.href = "/login";
-              }}
-              style={{
-                background: "#5b0c8c",
-                border: "none",
-                color: "#fff",
-                padding: "10px 16px",
-                borderRadius: "999px",
-                cursor: "pointer",
-                fontWeight: 700,
-              }}
-            >
-              🚪 Sair
-            </button>
+  onClick={() => {
+    window.location.href = `/cliente/${slug}`;
+  }}
+  style={{
+    background: "#5b0c8c",
+    border: "none",
+    color: "#fff",
+    padding: "10px 16px",
+    borderRadius: "999px",
+    cursor: "pointer",
+    fontWeight: 700,
+  }}
+>
+  ← Voltar ao Portal
+</button>
+          
           </div>
         </div>
 

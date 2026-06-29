@@ -128,22 +128,8 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
               ✨ Meus Direcionamentos
             </Link>
 
-            <Link
-              href={`/cliente/${slug}/bonus`}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
-            >
-              🎁 Meus Bônus
-            </Link>
-
-            <Link
-              href={`/cliente/${slug}/mensagem-especial`}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
-            >
-              💌 Mensagem Especial
-            </Link>
-
             <a
-              href={LINK_SORTEIOS}
+              href="https://mystic-draw-fix.lovable.app"
               target="_blank"
               rel="noreferrer"
               className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
@@ -167,12 +153,7 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
               💳 Minhas Mensalidades
             </Link>
 
-<Link
-  href="/cursos/pombagira"
-  className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
->
-  📚 Meus Cursos
-</Link>
+           
           </nav>
 
           <Link
@@ -203,7 +184,7 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
               </p>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid max-w-4xl gap-6 md:grid-cols-2">
               <Link
                 href={`/cliente/${slug}/portal`}
                 className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
@@ -219,75 +200,29 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
                   Abrir direcionamentos →
                 </p>
               </Link>
+<Link href={`/cliente/${slug}/portal`}>
 
-              <Link
-                href={`/cliente/${slug}/bonus`}
-                className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
-              >
-                <p className="text-3xl">🎁</p>
-                <h3 className="mt-4 text-xl font-extrabold text-yellow-400">
-                  
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-purple-100">
-                  Veja seus benefícios, conteúdos liberados e presentes da sua
-                  jornada.
-                </p>
-                <p className="mt-5 text-sm font-bold text-yellow-300">
-                  Ver meus bônus →
-                </p>
-              </Link>
+</Link>
 
-              <Link
-                href={`/cliente/${slug}/mensagem-especial`}
-                className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
-              >
-                <p className="text-3xl">💌</p>
-                <h3 className="mt-4 text-xl font-extrabold text-yellow-400">
-                  Mensagem Especial
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-purple-100">
-                  Uma mensagem reservada para acompanhar sua caminhada.
-                </p>
-                <p className="mt-5 text-sm font-bold text-yellow-300">
-                  Abrir mensagem →
-                </p>
-              </Link>
+<Link
+  href="https://cursos-adria-freitas.vercel.app/login"
+  target="_blank"
+  className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
+>
+  <p className="text-3xl">📚</p>
 
-              <a
-                href={LINK_SORTEIOS}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
-              >
-                <p className="text-3xl">🎲</p>
-                <h3 className="mt-4 text-xl font-extrabold text-yellow-400">
-                  Sorteios do Clube
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-purple-100">
-                  Participe dos sorteios exclusivos do Clube do Tarô.
-                </p>
-                <p className="mt-5 text-sm font-bold text-yellow-300">
-                  Ir para sorteios →
-                </p>
-              </a>
+  <h3 className="mt-4 text-xl font-extrabold text-yellow-400">
+    Meus Cursos
+  </h3>
 
-              <a
-                href={WHATSAPP_CLUBE_VIP}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
-              >
-                <p className="text-3xl">💬</p>
-                <h3 className="mt-4 text-xl font-extrabold text-yellow-400">
-                  Clube VIP do Tarô
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-purple-100">
-                  Entre no grupo quando desejar e receba revelações semanais.
-                </p>
-                <p className="mt-5 text-sm font-bold text-yellow-300">
-                  Entrar no grupo →
-                </p>
-              </a>
+  <p className="mt-3 text-sm leading-6 text-purple-100">
+    Acesse todos os seus cursos exclusivos.
+  </p>
+
+  <p className="mt-5 text-sm font-bold text-yellow-300">
+    Abrir meus cursos →
+  </p>
+</Link>
 
               {temConvites && (
                 <Link
@@ -308,45 +243,28 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
               )}
 
               {ehDiamante && (
-                <>
-                  <a
-                    href={WHATSAPP_DIAMANTE}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-2xl border border-cyan-400/40 bg-[#101827] p-6 shadow-xl transition hover:-translate-y-1 hover:border-cyan-300"
-                  >
-                    <p className="text-3xl">💎</p>
-                    <h3 className="mt-4 text-xl font-extrabold text-cyan-300">
-                      Grupo Exclusivo Diamante
-                    </h3>
-                    <p className="mt-3 text-sm leading-6 text-purple-100">
-                      Seu grupo reservado para avisos, bônus e conteúdos do
-                      Plano Diamante.
-                    </p>
-                    <p className="mt-5 text-sm font-bold text-cyan-200">
-                      Entrar no grupo Diamante →
-                    </p>
-                  </a>
+  <a
+    href={LINK_MENTORIA}
+    target="_blank"
+    rel="noreferrer"
+    className="rounded-2xl border border-yellow-400/50 bg-yellow-500/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-300"
+  >
+    <p className="text-3xl">🗓️</p>
 
-                  <a
-                    href={LINK_MENTORIA}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-2xl border border-yellow-400/50 bg-yellow-500/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-300"
-                  >
-                    <p className="text-3xl">🗓️</p>
-                    <h3 className="mt-4 text-xl font-extrabold text-yellow-300">
-                      Agendamento de Mentoria
-                    </h3>
-                    <p className="mt-3 text-sm leading-6 text-purple-50">
-                      Escolha o melhor horário para sua mentoria exclusiva.
-                    </p>
-                    <p className="mt-5 text-sm font-bold text-yellow-200">
-                      Agendar mentoria →
-                    </p>
-                  </a>
-                </>
-              )}
+    <h3 className="mt-4 text-xl font-extrabold text-yellow-300">
+      Agendamento de Mentoria
+    </h3>
+
+    <p className="mt-3 text-sm leading-6 text-purple-50">
+      Escolha o melhor horário para sua mentoria exclusiva.
+    </p>
+
+    <p className="mt-5 text-sm font-bold text-yellow-200">
+      Agendar mentoria →
+    </p>
+  </a>
+)}
+        
             </div>
           </div>
         </section>
