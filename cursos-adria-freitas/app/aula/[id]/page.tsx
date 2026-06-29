@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { pombagira } from "@/lib/courses/pombagira";
-
+import { pombagira } from "../../../lib/courses/pombagira";
 export default async function AulaPage({
   params,
 }: {
