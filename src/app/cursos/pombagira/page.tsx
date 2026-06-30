@@ -182,6 +182,8 @@ export default function CursoPombagira() {
     position: "relative",
   }}
 >
+
+  
   {/* BANNER DO MÓDULO (clicável inteiro) */}
   <img
     src={aula.imagem}
