@@ -130,7 +130,7 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
             </Link>
 
             <a
-             href={`https://cursos-adria-freitas-j3ox.vercel.app/?slug=${slug}`}
+             href={`${LINK_SORTEIOS}?slug=${slug}`}
               
               rel="noreferrer"target="_blank"
               className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
@@ -204,7 +204,8 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
 
               <Link
 
-  href="https://cursos.magiaoriente.com.br"
+
+  href={`https://cursos.magiaoriente.com.br?slug=${slug}`}
   
   className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
 >
