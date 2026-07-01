@@ -130,7 +130,7 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
             </Link>
 
             <a
-              href="https://mystic-draw-fix.lovable.app"
+             href={`https://cursos-adria-freitas-j3ox.vercel.app/?slug=${slug}`}
               
               rel="noreferrer"target="_blank"
               className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
