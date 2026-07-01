@@ -83,7 +83,8 @@ export default function PortalDaAssinantePage() {
 
   const plano = String(cliente.plano || "bronze").toLowerCase();
   const primeiroNome =
-  slug.charAt(0).toUpperCase() + slug.slice(1).toLowerCase();
+  (cliente.nome || slug).split(" ")[0];
+
 const generoNormalizado = String(cliente.genero || "")
   .trim()
   .toLowerCase();
@@ -130,8 +131,8 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
 
             <a
               href="https://mystic-draw-fix.lovable.app"
-              target="_blank"
-              rel="noreferrer"
+              
+              rel="noreferrer"target="_blank"
               className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800/40"
             >
               🎲 Sorteios do Clube
@@ -200,14 +201,11 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
                   Abrir direcionamentos →
                 </p>
               </Link>
-<Link href={`/cliente/${slug}/portal`}>
 
-</Link>
+              <Link
 
-<Link
   href="https://cursos-adria-freitas-j3ox.vercel.app/"
-  target="_blank"
-  rel="noopener noreferrer"
+  
   className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
 >
   <p className="text-3xl">📚</p>
