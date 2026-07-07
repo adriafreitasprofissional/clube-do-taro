@@ -151,6 +151,7 @@ useEffect(() => {
         });
 
         setConteudosPlanilha(conteudos);
+        console.log(conteudos);
       } catch (err) {
         console.error("Erro ao carregar planilha:", err);
       } finally {
@@ -253,15 +254,8 @@ function abrirAudio(mes: string, semana: string) {
     return;
   }
 
-  console.log("===== PDF =====");
-  console.log(conteudo);
-  console.log("LINK:", conteudo.drive_file);
-
-  alert(conteudo.drive_file);
-
   window.open(conteudo.drive_file, "_blank");
 }
-
 if (loading) {
   return <div>Carregando...</div>;
 }
