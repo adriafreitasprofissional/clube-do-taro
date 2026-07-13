@@ -62,6 +62,7 @@ function linkDrive(valor: string, tipo: string) {
 export default function PortalPremium() {
   const params = useParams();
   const slug = params.slug as string;
+
 const router = useRouter();
   const [audioAberto, setAudioAberto] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
@@ -74,9 +75,24 @@ const [mesAberto, setMesAberto] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+
+
+  
 const [conteudosPlanilha, setConteudosPlanilha] = useState<ConteudoPlanilha[]>([]);
 const [carregandoConteudos, setCarregandoConteudos] = useState(true);
   
+const limitePerguntas =
+  plano.toLowerCase() === "bronze"
+    ? 1
+    : plano.toLowerCase() === "prata"
+    ? 2
+    : plano.toLowerCase() === "ouro"
+    ? 2
+    : plano.toLowerCase() === "diamante"
+    ? 3
+    : 0;
+
 useEffect(() => {
     async function carregarCliente() {
       setLoading(true);
@@ -137,17 +153,6 @@ useEffect(() => {
           cabecalho.forEach((coluna, indice) => {
             item[coluna] = valores[indice] || "";
           });
-
-const limitePerguntas =
-  plano.toLowerCase() === "bronze"
-    ? 1
-    : plano.toLowerCase() === "prata"
-    ? 2
-    : plano.toLowerCase() === "ouro"
-    ? 2
-    : plano.toLowerCase() === "diamante"
-    ? 3
-    : 0;
 
 
           return {
