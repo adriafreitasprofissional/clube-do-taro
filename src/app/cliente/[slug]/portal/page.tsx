@@ -69,6 +69,7 @@ const router = useRouter();
 const [mesAberto, setMesAberto] = useState<string | null>(null);
   const [direcionamentoAberto, setDirecionamentoAberto] = useState(false);
   const [categoria, setCategoria] = useState("");
+  const [urgente, setUrgente] = useState(false);
   const [pergunta, setPergunta] = useState("");
   const [nome, setNome] = useState("");
   const [plano, setPlano] = useState("");
@@ -696,6 +697,59 @@ return (
         <option>🧠 Emocional</option>
       </select>
 
+<div
+  style={{
+    marginBottom: 20,
+  }}
+>
+  <p
+    style={{
+      color: "#fff",
+      marginBottom: 10,
+      fontWeight: 600,
+    }}
+  >
+    Sua situação precisa de uma resposta antes da próxima leitura semanal?
+  </p>
+
+  <label
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      color: "#fff",
+      marginBottom: 8,
+      cursor: "pointer",
+    }}
+  >
+    <input
+      type="radio"
+      name="urgente"
+      checked={urgente === true}
+      onChange={() => setUrgente(true)}
+    />
+    Sim, preciso de uma orientação com urgência.
+  </label>
+
+  <label
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      color: "#fff",
+      cursor: "pointer",
+    }}
+  >
+    <input
+      type="radio"
+      name="urgente"
+      checked={urgente === false}
+      onChange={() => setUrgente(false)}
+    />
+    Não, posso aguardar normalmente.
+  </label>
+</div>
+
       <textarea
         value={pergunta}
         onChange={(e) => setPergunta(e.target.value)}
@@ -729,12 +783,15 @@ return (
     const { error } = await supabase
       .from("exclusive_questions")
       .insert({
-        slug,
-        nome,
-        categoria,
-        pergunta,
-        status: "pendente",
-      });
+  slug,
+  nome,
+  plano,
+  categoria,
+  pergunta,
+  urgente,
+  referencia_mes: new Date().toISOString().slice(0, 7),
+  status: "pendente",
+});
 
     if (error) {
       alert("Erro ao enviar sua pergunta.");
