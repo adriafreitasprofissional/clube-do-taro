@@ -793,11 +793,15 @@ return (
   status: "pendente",
 });
 
-    if (error) {
-      alert("Erro ao enviar sua pergunta.");
-      console.error(error);
-      return;
-    }
+   if (error) {
+  console.error(error);
+
+  alert(
+    `Erro: ${error.message}\nCódigo: ${error.code ?? ""}`
+  );
+
+  return;
+}
 
     alert("Pergunta enviada com sucesso! 💜");
 
