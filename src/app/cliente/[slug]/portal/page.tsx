@@ -138,6 +138,18 @@ useEffect(() => {
             item[coluna] = valores[indice] || "";
           });
 
+const limitePerguntas =
+  plano.toLowerCase() === "bronze"
+    ? 1
+    : plano.toLowerCase() === "prata"
+    ? 2
+    : plano.toLowerCase() === "ouro"
+    ? 2
+    : plano.toLowerCase() === "diamante"
+    ? 3
+    : 0;
+
+
           return {
             slug: (item.slug || "").toLowerCase().trim(),
             ano: (item.ano || "").trim(),
@@ -380,7 +392,8 @@ return (
       marginBottom: 6,
     }}
   >
-    2 perguntas
+   {limitePerguntas} pergunta{limitePerguntas > 1 ? "s" : ""}
+
   </div>
 
   <div
@@ -390,7 +403,7 @@ return (
       marginBottom: 18,
     }}
   >
-    disponíveis neste mês.
+    disponível{limitePerguntas > 1 ? "is" : ""} neste mês.
   </div>
 
   <button
