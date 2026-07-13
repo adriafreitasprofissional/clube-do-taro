@@ -66,6 +66,7 @@ export default function PortalPremium() {
 const router = useRouter();
   const [audioAberto, setAudioAberto] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
+  const [direcionamentoExclusivo, setDirecionamentoExclusivo] = useState<any>(null);
 const [mesAberto, setMesAberto] = useState<string | null>(null);
   const [direcionamentoAberto, setDirecionamentoAberto] = useState(false);
   const [categoria, setCategoria] = useState("");
@@ -76,8 +77,6 @@ const [mesAberto, setMesAberto] = useState<string | null>(null);
 const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-
 
   
 const [conteudosPlanilha, setConteudosPlanilha] = useState<ConteudoPlanilha[]>([]);
@@ -95,51 +94,53 @@ const limitePerguntas =
     : 0;
 
 useEffect(() => {
-    async function carregarCliente() {
-      setLoading(true);
-      setError(null);
+  async function carregarCliente() {
+    setLoading(true);
+    setError(null);
 
-      try {
-        const { data, error } = await supabase
-          .from("club_clients")
-          .select("plano, nome, slug")
-          .eq("slug", slug)
+    try {
+      const { data, error } = await supabase
+        .from("club_clients")
+        .select("plano, nome, slug")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (error) throw new Error(error.message);
+
+      if (data) {
+        setNome(
+          data.slug.charAt(0).toUpperCase() + data.slug.slice(1)
+        );
+
+        setPlano(data.plano || "");
+
+        const referenciaMes = `${new Date().getFullYear()}-${String(
+          new Date().getMonth() + 1
+        ).padStart(2, "0")}`;
+
+        const { data: exclusivo } = await supabase
+          .from("exclusive_questions")
+          .select("*")
+          .eq("nome_cliente", data.nome)
+          .eq("referencia_mes", referenciaMes)
+          .eq("ativo", true)
           .maybeSingle();
-        if (error) throw new Error(error.message);
 
-       if (data) {
+        setDirecionamentoExclusivo(exclusivo);
 
-  setNome(
-    data.slug.charAt(0).toUpperCase() + data.slug.slice(1)
-  );
+        console.log("Nome do cliente:", data.nome);
+        console.log("Referência do mês:", referenciaMes);
+        console.log("Direcionamento encontrado:", exclusivo);
+      }
+    } catch (err: any) {
+      setError(err.message || "Erro ao carregar dados do cliente.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  setPlano(data.plano || "");
-
-  const mesAtual = new Date()
-    .toLocaleString("pt-BR", { month: "long" })
-    .toLowerCase();
-
-  const referenciaMes = `${new Date().getFullYear()}-${String(
-    new Date().getMonth() + 1
-  ).padStart(2, "0")}`;
-
-  const { data: exclusivo } = await supabase
-    .from("exclusive_questions")
-    .select("*")
-    .eq("nome_cliente", data.nome)
-    .eq("referencia_mes", referenciaMes)
-    .eq("ativo", true)
-    .maybeSingle();
-
-  setDirecionamentoExclusivo(exclusivo);
-}
-
-console.log("Nome do cliente:", data.nome);
-console.log("Referência do mês:", referenciaMes);
-console.log("Direcionamento encontrado:", exclusivo);
-
-    if (slug) carregarCliente();
-  }, [slug]);
+  if (slug) carregarCliente();
+}, [slug]);
 
   useEffect(() => {
     async function carregarConteudosDaPlanilha() {
