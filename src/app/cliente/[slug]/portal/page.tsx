@@ -783,8 +783,8 @@ return (
     const { error } = await supabase
       .from("exclusive_questions")
      .insert({
-  slug,
   nome_cliente: nome,
+  email_cliente: email,
   plano,
   categoria,
   pergunta,
@@ -792,7 +792,6 @@ return (
   referencia_mes: new Date().toISOString().slice(0, 7),
   status: "Pendente",
 });
-
    if (error) {
   console.error(error);
 
