@@ -115,13 +115,28 @@ useEffect(() => {
 
   setPlano(data.plano || "");
 
+  const mesAtual = new Date()
+    .toLocaleString("pt-BR", { month: "long" })
+    .toLowerCase();
+
+  const referenciaMes = `${new Date().getFullYear()}-${String(
+    new Date().getMonth() + 1
+  ).padStart(2, "0")}`;
+
+  const { data: exclusivo } = await supabase
+    .from("exclusive_questions")
+    .select("*")
+    .eq("nome_cliente", data.nome)
+    .eq("referencia_mes", referenciaMes)
+    .eq("ativo", true)
+    .maybeSingle();
+
+  setDirecionamentoExclusivo(exclusivo);
 }
-      } catch (err: any) {
-        setError(err.message || "Erro ao carregar dados do cliente.");
-      } finally {
-        setLoading(false);
-      }
-    }
+
+console.log("Nome do cliente:", data.nome);
+console.log("Referência do mês:", referenciaMes);
+console.log("Direcionamento encontrado:", exclusivo);
 
     if (slug) carregarCliente();
   }, [slug]);
@@ -501,7 +516,66 @@ return (
                 gap: 10,
               }}
             >
-              
+{direcionamentoExclusivo && (
+  <div
+    style={{
+      background: "#1b0227",
+      borderRadius: 20,
+      padding: 24,
+      border: "1px solid rgba(244,212,106,.20)",
+      marginBottom: 20,
+    }}
+  >
+    <h3
+      style={{
+        color: "#f4d46a",
+        marginBottom: 10,
+      }}
+    >
+      🔮 Direcionamento Exclusivo
+    </h3>
+
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        flexWrap: "wrap",
+      }}
+    >
+      <button
+        onClick={() => window.open(direcionamentoExclusivo.audio_url, "_blank")}
+        style={{
+          background: "#6d28d9",
+          color: "#fff",
+          border: "none",
+          borderRadius: 999,
+          padding: "12px 20px",
+          cursor: "pointer",
+        }}
+      >
+        🎧 Ouvir Direcionamento
+      </button>
+
+      <button
+        onClick={() => window.open(direcionamentoExclusivo.pdf_url, "_blank")}
+        style={{
+          background: "#6aa1f4",
+          color: "#2a0738",
+          border: "none",
+          borderRadius: 999,
+          padding: "12px 20px",
+          cursor: "pointer",
+          fontWeight: 700,
+        }}
+      >
+        📄 Baixar PDF
+      </button>
+    </div>
+  </div>
+)}
+
+
+
 {Array.from(
   new Set(conteudos.map((c) => c.semana))
 ).map((semana) => (
