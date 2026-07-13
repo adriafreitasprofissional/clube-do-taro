@@ -73,7 +73,7 @@ const [mesAberto, setMesAberto] = useState<string | null>(null);
   const [pergunta, setPergunta] = useState("");
   const [nome, setNome] = useState("");
   const [plano, setPlano] = useState("");
-
+const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
