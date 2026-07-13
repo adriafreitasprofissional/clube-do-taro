@@ -330,6 +330,87 @@ return (
 >
   💎 Plano {plano}
 </div>
+<div
+  style={{
+    marginTop: 35,
+    padding: 18,
+    borderRadius: 18,
+    border: "1px solid rgba(244,212,106,.20)",
+    background: "rgba(255,255,255,.03)",
+  }}
+>
+  <div
+    style={{
+      color: "#f4d46a",
+      fontWeight: 700,
+      fontSize: 17,
+      marginBottom: 12,
+    }}
+  >
+    🔮 Direcionamento Particular
+  </div>
+
+  <p
+    style={{
+      color: "#ddd",
+      fontSize: 14,
+      lineHeight: 1.6,
+      marginBottom: 16,
+    }}
+  >
+    Receba uma orientação exclusiva da Cigana Estella.
+  </p>
+
+  <div
+    style={{
+      color: "#f4d46a",
+      fontWeight: 600,
+      fontSize: 14,
+      marginBottom: 6,
+    }}
+  >
+    Você possui
+  </div>
+
+  <div
+    style={{
+      color: "#fff",
+      fontSize: 26,
+      fontWeight: 700,
+      marginBottom: 6,
+    }}
+  >
+    2 perguntas
+  </div>
+
+  <div
+    style={{
+      color: "#bbb",
+      fontSize: 14,
+      marginBottom: 18,
+    }}
+  >
+    disponíveis neste mês.
+  </div>
+
+  <button
+    onClick={() => setDirecionamentoAberto(true)}
+    style={{
+      width: "100%",
+      padding: 14,
+      borderRadius: 999,
+      border: "none",
+      cursor: "pointer",
+      background: "linear-gradient(90deg,#6d28d9,#8b5cf6)",
+      color: "#fff",
+      fontWeight: 700,
+      fontSize: 15,
+    }}
+  >
+    ✨ Fazer minha pergunta
+  </button>
+</div>
+
       <button
        onClick={() => router.push(`/cliente/${slug}`)}
         style={{
@@ -405,7 +486,6 @@ return (
 {Array.from(
   new Set(conteudos.map((c) => c.semana))
 ).map((semana) => (
-
   <div
     key={semana}
     style={{
@@ -416,7 +496,6 @@ return (
       marginBottom: 20,
     }}
   >
-
     <h3
       style={{
         color: "#f4d46a",
@@ -433,20 +512,19 @@ return (
         flexWrap: "wrap",
       }}
     >
-
       <button
-  onClick={() => abrirAudio(mes, semana)}
-  style={{
-    background: "#6d28d9",
-    color: "#fff",
-    border: "none",
-    borderRadius: 999,
-    padding: "12px 20px",
-    cursor: "pointer",
-  }}
->
-  🎧 Ouvir Direcionamento
-</button>
+        onClick={() => abrirAudio(mes, semana)}
+        style={{
+          background: "#6d28d9",
+          color: "#fff",
+          border: "none",
+          borderRadius: 999,
+          padding: "12px 20px",
+          cursor: "pointer",
+        }}
+      >
+        🎧 Ouvir Direcionamento
+      </button>
 
       <button
         onClick={() => abrirPdf(mes, semana)}
@@ -461,30 +539,11 @@ return (
         }}
       >
         📄 Baixar PDF
+      
       </button>
-
-            {semana === "3" && (
-        <button
-          onClick={() => setDirecionamentoAberto(true)}
-          style={{
-            background: "#6d28d9",
-            color: "#fff",
-            border: "none",
-            borderRadius: 999,
-            padding: "12px 20px",
-            cursor: "pointer",
-          }}
-        >
-          🔮 Direcionamento Exclusivo
-        </button>
-      )}
-
     </div>
-
   </div>
-
 ))}
-
             </div>
           )}
         </div>
