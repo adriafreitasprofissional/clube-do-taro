@@ -288,3 +288,12 @@ const toggleGrupo = (grupo: keyof typeof abertos) => {
     </div>
   );
 }
+const campo = {
+  width: "100%",
+  padding: "14px",
+  marginBottom: "15px",
+  borderRadius: "12px",
+  border: "1px solid rgba(244,212,106,.2)",
+  background: "#1a001f",
+  color: "#fff",
+};
