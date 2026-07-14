@@ -69,11 +69,11 @@ export default function AssinantesPage() {
   }
 
 const [abertos, setAbertos] = useState({
-  bronze: true,
-  prata: true,
-  ouro: true,
-  diamante: true,
-  cursos: true,
+  bronze: false,
+  prata: false,
+  ouro: false,
+  diamante: false,
+  cursos: false,
 });
 
 const grupos = {
