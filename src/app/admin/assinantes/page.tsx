@@ -281,8 +281,7 @@ const toggleGrupo = (grupo: keyof typeof abertos) => {
                 {cliente.plano} • {cliente.status}
               </span>
             </div>
-          ))}
-        </div>
+                 ))}
       </div>
     </div>
   );
