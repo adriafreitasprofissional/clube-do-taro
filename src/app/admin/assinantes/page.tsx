@@ -235,64 +235,56 @@ const toggleGrupo = (grupo: keyof typeof abertos) => {
           <p style={{ color: "#fff" }}>
             Total: {clientes.length}
           </p>
-{Object.entries(grupos).map(([plano, lista]) => (
-  <div key={plano} style={{ marginBottom: 18 }}>
 
-    <div
-      onClick={() => toggleGrupo(plano as keyof typeof abertos)}
-      style={{
-        cursor: "pointer",
-        fontWeight: "bold",
-        display: "flex",
-        justifyContent: "space-between",
-        padding: "10px 0",
-        borderBottom: "1px solid rgba(255,255,255,.15)",
-      }}
-    >
-      <span>
-        {abertos[plano as keyof typeof abertos] ? "▼" : "▶"}{" "}
-        {plano.charAt(0).toUpperCase() + plano.slice(1)}
-      </span>
+          {Object.entries(grupos).map(([plano, lista]) => (
+            <div key={plano} style={{ marginBottom: 18 }}>
+              <div
+                onClick={() =>
+                  toggleGrupo(plano as keyof typeof abertos)
+                }
+                style={{
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "10px 0",
+                  borderBottom:
+                    "1px solid rgba(255,255,255,.15)",
+                }}
+              >
+                <span>
+                  {abertos[plano as keyof typeof abertos]
+                    ? "▼"
+                    : "▶"}{" "}
+                  {plano.charAt(0).toUpperCase() +
+                    plano.slice(1)}
+                </span>
 
-      <span>{lista.length}</span>
-    </div>
+                <span>{lista.length}</span>
+              </div>
 
-    {abertos[plano as keyof typeof abertos] &&
-      lista.map((cliente: any) => (
-        <div
-          key={cliente.id}
-          style={{
-            padding: "12px 0",
-            borderBottom: "1px solid rgba(255,255,255,.08)",
-            paddingLeft: 18,
-          }}
-        >
-          <strong>{cliente.nome}</strong>
-          <br />
-          {cliente.status === "ativo" ? "🟢" : "🔴"} {cliente.status}
-        </div>
-      ))}
-  </div>
-))}
-
-              <strong>{cliente.nome}</strong>
-              <br />
-              <span style={{ color: "#ccc" }}>
-                {cliente.plano} • {cliente.status}
-              </span>
+              {abertos[plano as keyof typeof abertos] &&
+                lista.map((cliente: any) => (
+                  <div
+                    key={cliente.id}
+                    style={{
+                      padding: "12px 0",
+                      borderBottom:
+                        "1px solid rgba(255,255,255,.08)",
+                      paddingLeft: 18,
+                    }}
+                  >
+                    <strong>{cliente.nome}</strong>
+                    <br />
+                    <span style={{ color: "#ccc" }}>
+                      {cliente.status}
+                    </span>
+                  </div>
+                ))}
             </div>
-                 ))}
+          ))}
+        </div>
       </div>
     </div>
   );
 }
-
-const campo = {
-  width: "100%",
-  padding: "14px",
-  marginBottom: "15px",
-  borderRadius: "12px",
-  border: "1px solid rgba(244,212,106,.2)",
-  background: "#1a001f",
-  color: "#fff",
-};
