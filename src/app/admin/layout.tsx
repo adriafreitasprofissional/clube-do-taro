@@ -12,9 +12,7 @@ const menu = [
 
   { href: "/admin/perguntas", icon: "📩", label: "Perguntas" },
 
-  { href: "/admin/direcionamentos", icon: "🎧", label: "Direcionamentos Semanais" },
-
-  {
+   {
   href: "/admin/direcionamentos",
   icon: "🔮",
   label: "Direcionamentos Exclusivos",
