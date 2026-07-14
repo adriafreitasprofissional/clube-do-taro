@@ -9,8 +9,9 @@ export async function GET() {
   console.log("DADOS:", data);
   console.log("ERRO:", error);
 
-  return NextResponse.json({
-    data,
-    error,
-  });
+  if (error) {
+  return NextResponse.json([]);
+}
+
+return NextResponse.json(data);
 }
