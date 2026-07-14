@@ -68,6 +68,31 @@ export default function AssinantesPage() {
     setGenero("Mulher");
   }
 
+const [abertos, setAbertos] = useState({
+  bronze: true,
+  prata: true,
+  ouro: true,
+  diamante: true,
+  cursos: true,
+});
+
+const grupos = {
+  bronze: clientes.filter((c: any) => c.plano === "bronze"),
+  prata: clientes.filter((c: any) => c.plano === "prata"),
+  ouro: clientes.filter((c: any) => c.plano === "ouro"),
+  diamante: clientes.filter((c: any) => c.plano === "diamante"),
+  cursos: clientes.filter((c: any) => c.plano === "cursos"),
+};
+
+const toggleGrupo = (grupo: keyof typeof abertos) => {
+  setAbertos((prev) => ({
+    ...prev,
+    [grupo]: !prev[grupo],
+  }));
+};
+
+
+
   return (
     <div>
       <h1
@@ -210,16 +235,46 @@ export default function AssinantesPage() {
           <p style={{ color: "#fff" }}>
             Total: {clientes.length}
           </p>
+{Object.entries(grupos).map(([plano, lista]) => (
+  <div key={plano} style={{ marginBottom: 18 }}>
 
-          {clientes.map((cliente: any) => (
-            <div
-              key={cliente.id}
-              style={{
-                padding: "12px 0",
-                borderBottom:
-                  "1px solid rgba(255,255,255,.08)",
-              }}
-            >
+    <div
+      onClick={() => toggleGrupo(plano as keyof typeof abertos)}
+      style={{
+        cursor: "pointer",
+        fontWeight: "bold",
+        display: "flex",
+        justifyContent: "space-between",
+        padding: "10px 0",
+        borderBottom: "1px solid rgba(255,255,255,.15)",
+      }}
+    >
+      <span>
+        {abertos[plano as keyof typeof abertos] ? "▼" : "▶"}{" "}
+        {plano.charAt(0).toUpperCase() + plano.slice(1)}
+      </span>
+
+      <span>{lista.length}</span>
+    </div>
+
+    {abertos[plano as keyof typeof abertos] &&
+      lista.map((cliente: any) => (
+        <div
+          key={cliente.id}
+          style={{
+            padding: "12px 0",
+            borderBottom: "1px solid rgba(255,255,255,.08)",
+            paddingLeft: 18,
+          }}
+        >
+          <strong>{cliente.nome}</strong>
+          <br />
+          {cliente.status === "ativo" ? "🟢" : "🔴"} {cliente.status}
+        </div>
+      ))}
+  </div>
+))}
+
               <strong>{cliente.nome}</strong>
               <br />
               <span style={{ color: "#ccc" }}>
