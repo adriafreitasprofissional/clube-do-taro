@@ -125,7 +125,12 @@ if (!clienteExistente) {
   });
 }
 
-return NextResponse.json(
+return NextResponse.json({ received: true }, { status: 200 });
+
+} catch (error) {
+  console.error("Erro no webhook InfinitePay:", error);
+
+  return NextResponse.json(
     { error: "Webhook inválido." },
     { status: 400 }
   );
