@@ -478,17 +478,18 @@ async function carregarHistorico(questionId: string) {
 }
 
 function botaoAba(
-  ativo: boolean
+  ativo: boolean,
+  cor: string
 ): CSSProperties {
   return {
     width: "100%",
     padding: "14px 18px",
     borderRadius: "14px",
     border: ativo
-      ? "1px solid #E7C96F"
+      ? `1px solid ${cor}`
       : "1px solid rgba(231,201,111,.18)",
     background: ativo
-      ? "rgba(231,201,111,.08)"
+      ? cor
       : "transparent",
     color: "#fff",
     textAlign: "left",
