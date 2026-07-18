@@ -2,14 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import {
-  BookOpen,
-  GraduationCap,
-  Headphones,
-  ShoppingBag,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react";
+import Link from "next/link";
 import CelestialBackground from "./components/CelestialBackground";
 import { div } from "framer-motion/m";
 function PortalCard({
@@ -112,22 +105,22 @@ export default function Home() {
           </p>
 
           <div className="mt-12 flex flex-col gap-4 md:flex-row">
-            <a
-  href="/login"
-  target="_blank"
-  className="rounded-full border border-white/20 bg-white/10 px-8 py-5 text-center backdrop-blur-xl transition hover:bg-white/20"
->
-  SOU MEMBRO DO CLUBE DO TARÔ
-</a>
+  <Link
+    href="/login"
+    className="rounded-full border border-white/20 bg-white/10 px-8 py-5 text-center backdrop-blur-xl transition hover:bg-white/20"
+  >
+    SOU MEMBRO DO CLUBE DO TARÔ
+  </Link>
 
-            <a
-  href="https://clube-do-taro-landing.vercel.app"
-  target="_blank"
-  rel="noopener noreferrer"
->
-  QUERO FAZER PARTE DO CLUBE
-</a>
-          </div>
+  <Link
+    href="/cadastro"
+    className="rounded-full border border-[#D4AF37] bg-[#D4AF37] px-8 py-5 text-center font-semibold text-[#1B1235] transition hover:opacity-90"
+  >
+    QUERO FAZER PARTE DO CLUBE
+  </Link>
+
+</div>
+
         </motion.div>
 
         <motion.div
