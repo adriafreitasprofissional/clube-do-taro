@@ -5,15 +5,21 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const {
-      nome,
-      email,
-      whatsapp,
-      plano,
-      genero,
-      senhaInicial,
-      dataInicio,
-    } = body;
+   const {
+  nome,
+  email,
+  whatsapp,
+  plano,
+  genero = "",
+  senha: senhaInicial,
+  dataInicio = new Date().toISOString().slice(0, 10),
+} = body;
+
+let senha = senhaInicial;
+
+if (!senha) {
+  senha = crypto.randomUUID().replace(/-/g, "").substring(0, 8);
+}
 
     // 1. Gerar o slug
     const slug = nome
@@ -26,7 +32,7 @@ export async function POST(req: Request) {
     const { data: authUser, error: authError } =
       await supabaseAdmin.auth.admin.createUser({
         email,
-        password: senhaInicial,
+        password: senha,
         email_confirm: true,
         user_metadata: {
           display_name: nome,
@@ -42,21 +48,21 @@ export async function POST(req: Request) {
     // 3. Inserir na tabela vinculando ao ID do Auth (Melhor Prática)
     // Se você quer que o ID da tabela seja o ID principal, passamos ele aqui.
     const { data: cliente, error: clientError } = await supabaseAdmin
-      .from("club_clients")
-      .insert({
-        id: authId, // <--- ISSO GARANTE QUE O ID DA TABELA SEJA IGUAL AO DO AUTH
-        nome,
-        email,
-        whatsapp,
-        plano,
-        genero,
-        senha_inicial: senhaInicial,
-        data_inicio: dataInicio,
-        slug,
-        status: "Ativo",
-      })
-      .select()
-      .single();
+  .from("club_clients")
+  .insert({
+    id: authId,
+    nome,
+    email,
+    whatsapp,
+    plano,
+    genero,
+    senha_inicial: senha,
+    data_inicio: dataInicio,
+    slug,
+    status: "Ativo",
+  })
+  .select()
+  .single();
 
     if (clientError) {
       // Se der erro na tabela, idealmente você deveria deletar o usuário do Auth criado acima

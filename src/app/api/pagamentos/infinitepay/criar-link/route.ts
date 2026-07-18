@@ -1,32 +1,44 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const PRODUTOS = {
   pombogira_publico: {
-    descricao: "Portal do Poder da Sua Pombogira",
+    descricao: "...",
     preco: 4700,
   },
+
   pombogira_assinante: {
-    descricao: "Portal do Poder da Sua Pombogira — valor especial para assinante",
+    descricao: "...",
     preco: 2720,
+  },
+
+  bronze: {
+    plano: "Bronze",
+    descricao: "Clube do Tarô - Plano Bronze",
+    preco: 2720,
+  },
+
+  prata: {
+    plano: "Prata",
+    descricao: "Clube do Tarô - Plano Prata",
+    preco: 4700,
+  },
+
+  ouro: {
+    plano: "Ouro",
+    descricao: "Clube do Tarô - Plano Ouro",
+    preco: 6700,
+  },
+
+  diamante: {
+    plano: "Diamante",
+    descricao: "Clube do Tarô - Plano Diamante",
+    preco: 14700,
   },
 } as const;
 
 type ProdutoId = keyof typeof PRODUTOS;
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const supabaseAdmin = createClient(
-  supabaseUrl,
-  supabaseServiceRoleKey,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
 
 export async function POST(request: Request) {
   try {
@@ -50,12 +62,13 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
         const { error: erroPedido } = await supabaseAdmin.from("infinitepay_orders").insert({
-      order_nsu: orderNsu,
-      produto_id: produtoId,
-      descricao: produto.descricao,
-      valor: produto.preco,
-      status: "pendente",
-    });
+  order_nsu: orderNsu,
+  produto_id: produtoId,
+  descricao: produto.descricao,
+  valor: produto.preco,
+ plano: "plano" in produto ? produto.plano : null,
+  status: "pendente",
+});
 
     if (erroPedido) {
       console.error("Erro ao criar pedido:", erroPedido);
@@ -104,20 +117,6 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-
-    await supabaseAdmin
-  .from("infinitepay_orders")
-  .insert({
-    order_nsu: orderNsu,
-    produto_id: produtoId,
-    descricao: produto.descricao,
-    valor: produto.preco,
-    moeda: "BRL",
-    status: "pendente",
-    checkout_url: dados.url,
-
-  });
-
 
 const { data: pedidoCompleto } = await supabaseAdmin
   .from("infinitepay_orders")

@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 
     const { data: pedido, error: erroPedido } = await supabaseAdmin
       .from("infinitepay_orders")
-      .select("id, valor, status")
+      .select("id, valor, status, plano, cliente_nome, cliente_email, cliente_telefone")
       .eq("order_nsu", orderNsu)
       .single();
 
@@ -93,6 +93,7 @@ export async function POST(request: Request) {
       })
       .eq("order_nsu", orderNsu);
 
+
     if (erroAtualizacao) {
       console.error("Erro ao atualizar pedido:", erroAtualizacao);
 
@@ -101,14 +102,31 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+const { data: clienteExistente } = await supabaseAdmin
+  .from("club_clients")
+  .select("id")
+  .eq("email", pedido.cliente_email)
+  .maybeSingle();
 
-    return NextResponse.json({ received: true }, { status: 200 });
-  } catch (error) {
-    console.error("Erro no webhook InfinitePay:", error);
+const { data: clienteExistente } = await supabaseAdmin
+  .from("club_clients")
+  .select("id")
+  .eq("email", pedido.cliente_email)
+  .maybeSingle();
 
-    return NextResponse.json(
-      { error: "Webhook inválido." },
-      { status: 400 }
-    );
-  }
+if (!clienteExistente) {
+  await fetch(new URL("/api/admin/criar-assinante", request.url), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      nome: pedido.cliente_nome,
+      email: pedido.cliente_email,
+      whatsapp: pedido.cliente_telefone,
+      plano: pedido.plano,
+    }),
+  });
 }
+
+return NextResponse.json({ received: true }, { status: 200 });
