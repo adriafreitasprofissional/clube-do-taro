@@ -102,11 +102,7 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-const { data: clienteExistente } = await supabaseAdmin
-  .from("club_clients")
-  .select("id")
-  .eq("email", pedido.cliente_email)
-  .maybeSingle();
+
 
 const { data: clienteExistente } = await supabaseAdmin
   .from("club_clients")
@@ -129,4 +125,9 @@ if (!clienteExistente) {
   });
 }
 
-return NextResponse.json({ received: true }, { status: 200 });
+return NextResponse.json(
+    { error: "Webhook inválido." },
+    { status: 400 }
+  );
+}
+}
