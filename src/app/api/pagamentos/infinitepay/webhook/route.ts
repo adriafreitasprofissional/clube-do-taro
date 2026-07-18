@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     );
 
     const pagamento = await resposta.json();
-
+console.log(pagamento);
     if (!resposta.ok || pagamento.success !== true || pagamento.paid !== true) {
       console.error("Pagamento não confirmado pela InfinitePay:", pagamento);
 
