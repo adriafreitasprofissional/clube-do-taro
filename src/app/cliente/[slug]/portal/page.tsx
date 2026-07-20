@@ -79,10 +79,10 @@ const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 const [clienteId, setClienteId] = useState("");
-  
+const [perguntasRestantes, setPerguntasRestantes] = useState(0);  
 const [conteudosPlanilha, setConteudosPlanilha] = useState<ConteudoPlanilha[]>([]);
 const [carregandoConteudos, setCarregandoConteudos] = useState(true);
-  
+ 
 const limitePerguntas =
   plano.toLowerCase() === "bronze"
     ? 1
@@ -120,20 +120,33 @@ useEffect(() => {
           new Date().getMonth() + 1
         ).padStart(2, "0")}`;
 
-        const { data: exclusivo } = await supabase
+        
+  const { data: perguntas } = await supabase
   .from("exclusive_questions")
   .select("*")
   .eq("cliente_id", data.id)
   .eq("referencia_mes", referenciaMes)
-  .eq("ativo", true)
-  .maybeSingle();
+  .eq("ativo", true);
 
-        setDirecionamentoExclusivo(exclusivo);
-        console.log("EXCLUSIVO:", exclusivo);
+const usadas = perguntas?.length || 0;
+
+setPerguntasRestantes(
+  Math.max(0, limitePerguntas - usadas)
+);
+
+
+const exclusivo =
+  perguntas?.find((p) => p.ativo) ?? null;
+
+setDirecionamentoExclusivo(exclusivo);
+
+console.log("EXCLUSIVO:", exclusivo);
+
 if (
   exclusivo &&
   exclusivo.status === "Aguardando resposta da assinante"
-) {
+) {    
+
   const { data: recado } = await supabase
     .from("exclusive_messages")
     .select("*")
@@ -432,7 +445,7 @@ return (
       marginBottom: 6,
     }}
   >
-   {limitePerguntas} pergunta{limitePerguntas > 1 ? "s" : ""}
+   {perguntasRestantes} pergunta{perguntasRestantes > 1 ? "s" : ""}
 
   </div>
 
@@ -443,26 +456,36 @@ return (
       marginBottom: 18,
     }}
   >
-    disponível{limitePerguntas > 1 ? "is" : ""} neste mês.
+    disponível{perguntasRestantes > 1 ? "is" : ""} neste mês.
   </div>
 
   {!reformulacao ? (
   <button
-    onClick={() => setDirecionamentoAberto(true)}
-    style={{
-      width: "100%",
-      padding: 14,
-      borderRadius: 999,
-      border: "none",
-      cursor: "pointer",
-      background: "linear-gradient(90deg,#6d28d9,#8b5cf6)",
-      color: "#fff",
-      fontWeight: 700,
-      fontSize: 15,
-    }}
-  >
-    ✨ Fazer minha pergunta
-  </button>
+  disabled={perguntasRestantes === 0}
+  onClick={() => {
+    if (perguntasRestantes === 0) return;
+    setDirecionamentoAberto(true);
+  }}
+  style={{
+    width: "100%",
+    padding: 14,
+    borderRadius: 999,
+    border: "none",
+    cursor: perguntasRestantes === 0 ? "not-allowed" : "pointer",
+    background:
+      perguntasRestantes === 0
+        ? "#666"
+        : "linear-gradient(90deg,#6d28d9,#8b5cf6)",
+    color: "#fff",
+    fontWeight: 700,
+    fontSize: 15,
+    opacity: perguntasRestantes === 0 ? 0.6 : 1,
+  }}
+>
+  {perguntasRestantes === 0
+    ? "Limite mensal atingido"
+    : "✨ Fazer minha pergunta"}
+</button>
 ) : (
   <button
     onClick={() => {
