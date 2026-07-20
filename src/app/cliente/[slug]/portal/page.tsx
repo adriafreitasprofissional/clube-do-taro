@@ -83,16 +83,7 @@ const [perguntasRestantes, setPerguntasRestantes] = useState(0);
 const [conteudosPlanilha, setConteudosPlanilha] = useState<ConteudoPlanilha[]>([]);
 const [carregandoConteudos, setCarregandoConteudos] = useState(true);
  
-const limitePerguntas =
-  plano.toLowerCase() === "bronze"
-    ? 1
-    : plano.toLowerCase() === "prata"
-    ? 2
-    : plano.toLowerCase() === "ouro"
-    ? 2
-    : plano.toLowerCase() === "diamante"
-    ? 3
-    : 0;
+
 
 useEffect(() => {
   async function carregarCliente() {
@@ -114,9 +105,25 @@ useEffect(() => {
           data.slug.charAt(0).toUpperCase() + data.slug.slice(1)
         );
 
-        setPlano(data.plano || "");
+        
 
-        const referenciaMes = `${new Date().getFullYear()}-${String(
+        const planoCliente = (data.plano || "").toLowerCase();
+
+setPlano(planoCliente);
+
+const limitePerguntas =
+  planoCliente === "bronze"
+    ? 1
+    : planoCliente === "prata"
+    ? 2
+    : planoCliente === "ouro"
+    ? 2
+    : planoCliente === "diamante"
+    ? 3
+    : 0;
+
+const referenciaMes = `${new Date().getFullYear()}-${String(
+  
           new Date().getMonth() + 1
         ).padStart(2, "0")}`;
 
@@ -127,6 +134,8 @@ useEffect(() => {
   .eq("cliente_id", data.id)
   .eq("referencia_mes", referenciaMes)
   .eq("ativo", true);
+
+console.log("PERGUNTAS DO MÊS:", perguntas);
 
 const usadas = perguntas?.length || 0;
 
