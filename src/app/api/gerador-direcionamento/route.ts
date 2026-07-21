@@ -1,11 +1,18 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import type { Direcionamento } from "@/types/direcionamento";
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function getOpenAI() {
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 export async function POST(req: Request) {
+  const openai = getOpenAI();
   try {
     const body = await req.json();
 
@@ -17,6 +24,7 @@ export async function POST(req: Request) {
     } = body;
 
     const prompt = `
+
 Você é Ádria Freitas, mentora espiritual, taróloga, especialista em Cartas Ciganas, Tarot, Numerologia, Umbanda e Orixás.
 
 Sua missão é criar um direcionamento semanal EXCLUSIVO.
@@ -123,7 +131,7 @@ Formato obrigatório:
 Retorne apenas o JSON.
 `;
 
-    const response = await openai.responses.create({
+  const response = await openai.responses.create({
       model: "gpt-5.5",
       input: prompt,
       text: {
