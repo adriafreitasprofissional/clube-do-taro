@@ -9,24 +9,31 @@ export async function POST(req: Request) {
     const preference = new Preference(mpClient);
 
     const response = await preference.create({
-      body: {
-        items: [
-          {
-            id: plano,
-            title: `Clube do Tarô - ${plano}`,
-            quantity: 1,
-            currency_id: "BRL",
-            unit_price: Number(valor),
-          },
-        ],
-        payer: {
-          name: nome,
-          email,
-        },
-        external_reference: crypto.randomUUID(),
+  body: {
+    items: [
+      {
+        id: plano,
+        title: `Clube do Tarô - ${plano}`,
+        quantity: 1,
+        currency_id: "BRL",
+        unit_price: Number(valor),
       },
-    });
+    ],
 
+    payer: {
+      name: nome,
+      email,
+    },
+
+    external_reference: crypto.randomUUID(),
+
+    metadata: {
+      produto: "clube",
+      plano,
+      tipo_usuario: "assinante",
+    },
+  },
+});
     return NextResponse.json({
       ok: true,
       preferenceId: response.id,
