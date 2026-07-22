@@ -29,6 +29,7 @@ export async function POST(req: Request) {
 
     const preference = new Preference(mpClient);
     const response = await preference.create({
+      
       body: {
         items: [
           {
@@ -39,10 +40,6 @@ export async function POST(req: Request) {
             unit_price: Number(valor),
           },
         ],
-
-       payer: {
-  email: "teste@clubedotaro.com.br",
-},
 
         metadata: {
           produto: "clube",
@@ -63,6 +60,7 @@ export async function POST(req: Request) {
 
         external_reference: crypto.randomUUID(),
       },
+      
     });
 
 console.log("=== PREFERENCE CRIADA ===");
