@@ -65,6 +65,9 @@ export async function POST(req: Request) {
       },
     });
 
+console.log("=== PREFERENCE CRIADA ===");
+console.dir(response, { depth: null });
+
         return NextResponse.json(
       {
         ok: true,
