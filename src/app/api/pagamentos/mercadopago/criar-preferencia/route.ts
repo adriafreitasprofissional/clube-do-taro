@@ -21,8 +21,13 @@ export async function POST(req: Request) {
   try {
     const { plano, valor } = await req.json();
 
-    const preference = new Preference(mpClient);
+    console.log("=== DADOS RECEBIDOS ===");
+    console.log({
+      plano,
+      valor,
+    });
 
+    const preference = new Preference(mpClient);
     const response = await preference.create({
       body: {
         items: [
@@ -35,7 +40,9 @@ export async function POST(req: Request) {
           },
         ],
 
-        payer: {},
+       payer: {
+  email: "teste@clubedotaro.com.br",
+},
 
         metadata: {
           produto: "clube",
