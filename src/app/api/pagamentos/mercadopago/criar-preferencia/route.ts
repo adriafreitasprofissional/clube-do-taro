@@ -9,16 +9,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-export async function OPTIONS() {
-  
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders,
-  });
-}
+
 
 export async function POST(req: Request) {
+  console.log("🔥 ENTREI NA API criar-preferencia");
   try {
+
+    
     const { plano, valor } = await req.json();
 
     console.log("=== DADOS RECEBIDOS ===");
@@ -28,45 +25,49 @@ export async function POST(req: Request) {
     });
 
     const preference = new Preference(mpClient);
-    const response = await preference.create({
-      
-      body: {
-        items: [
-          {
-            id: plano,
-            title: `Clube do Tarô - ${plano}`,
-            quantity: 1,
-            currency_id: "BRL",
-            unit_price: Number(valor),
-          },
-        ],
 
-        metadata: {
-          produto: "clube",
-          plano,
-          tipo_usuario: "assinante",
+    const body = {
+      items: [
+        {
+          id: plano,
+          title: `Clube do Tarô - ${plano}`,
+          quantity: 1,
+          currency_id: "BRL",
+          unit_price: Number(valor),
         },
+      ],
 
-        back_urls: {
-          success: "https://www.magiaoriente.com.br/pagamento/sucesso",
-          failure: "https://www.magiaoriente.com.br/pagamento/falha",
-          pending: "https://www.magiaoriente.com.br/pagamento/pendente",
-        },
-
-        auto_return: "approved",
-
-        notification_url:
-          "https://www.magiaoriente.com.br/api/pagamentos/mercadopago/webhook",
-
-        external_reference: crypto.randomUUID(),
+      metadata: {
+        produto: "clube",
+        plano,
+        tipo_usuario: "assinante",
       },
-      
+
+      back_urls: {
+        success: "https://www.magiaoriente.com.br/pagamento/sucesso",
+        failure: "https://www.magiaoriente.com.br/pagamento/falha",
+        pending: "https://www.magiaoriente.com.br/pagamento/pendente",
+      },
+
+      auto_return: "approved",
+
+      notification_url:
+        "https://www.magiaoriente.com.br/api/pagamentos/mercadopago/webhook",
+
+      external_reference: crypto.randomUUID(),
+    };
+
+    console.log("=== BODY ENVIADO ===");
+    console.dir(body, { depth: null });
+
+    const response = await preference.create({
+      body,
     });
 
-console.log("=== PREFERENCE CRIADA ===");
-console.dir(response, { depth: null });
+    console.log("=== PREFERENCE CRIADA ===");
+    console.dir(response, { depth: null });
 
-        return NextResponse.json(
+    return NextResponse.json(
       {
         ok: true,
         preferenceId: response.id,
