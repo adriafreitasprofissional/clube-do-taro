@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import CopiarPixButton from "@/components/CopiarPixButton";
-
+import CopiarPixButton from "@/app/components/CopiarPixButton";
 const pagamentosPorPlano = {
   bronze: {
     nome: "Plano Bronze",
