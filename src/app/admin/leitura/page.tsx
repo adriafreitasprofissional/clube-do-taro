@@ -1,4 +1,4 @@
-import Acoes from "@/components/acoes";
+import Acoes from "@/app/components/acoes";
 
 export default function LeituraPage() {
    
