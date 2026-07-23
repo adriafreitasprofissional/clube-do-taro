@@ -22,13 +22,13 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [
+    "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "../Projetos/clube-do-taro-landing/app/layout.tsx", "../Projetos/clube-do-taro-landing/app/page.tsx"  ],
+  ],
   "exclude": ["node_modules"]
 }

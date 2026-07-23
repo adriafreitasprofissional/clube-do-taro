@@ -1,6 +1,6 @@
 "use client";
 
-import BotaoPDF from "@/components/pdf/BotaoPDF";
+import BotaoPDF from "@/app/components/pdf/BotaoPDF";
 
 type Props = {
   leitura: any;
