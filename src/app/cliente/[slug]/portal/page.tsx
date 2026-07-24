@@ -83,7 +83,20 @@ const [perguntasRestantes, setPerguntasRestantes] = useState(0);
 const [conteudosPlanilha, setConteudosPlanilha] = useState<ConteudoPlanilha[]>([]);
 const [carregandoConteudos, setCarregandoConteudos] = useState(true);
  
+const [mobile, setMobile] = useState(false);
 
+useEffect(() => {
+  const verificar = () => {
+    setMobile(window.innerWidth <= 900);
+  };
+
+  verificar();
+
+  window.addEventListener("resize", verificar);
+
+  return () =>
+    window.removeEventListener("resize", verificar);
+}, []);
 
 useEffect(() => {
   async function carregarCliente() {
@@ -341,11 +354,11 @@ if (error) {
 return (
   <main
     style={{
-      padding: 40,
-      display: "grid",
-      gridTemplateColumns: "280px 1fr",
-      gap: 30,
-      alignItems: "start",
+       display: "grid",
+gridTemplateColumns: mobile ? "1fr" : "280px 1fr",
+gap: mobile ? 20 : 30,
+alignItems: "start",
+padding: mobile ? 15 : 40,
     }}
   >
     {/* MENU ESQUERDO */}
@@ -356,9 +369,10 @@ return (
     borderRadius: 22,
     padding: 30,
     border: "1px solid rgba(244,212,106,.20)",
-    position: "sticky",
-    top: 30,
-    minHeight: "calc(100vh - 80px)",
+    position: mobile ? "relative" : "sticky",
+top: mobile ? 0 : 30,
+minHeight: mobile ? "auto" : "calc(100vh - 80px)",
+marginBottom: mobile ? 20 : 0,
     display: "flex",
     flexDirection: "column",
   }}
