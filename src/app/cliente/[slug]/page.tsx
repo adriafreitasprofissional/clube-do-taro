@@ -104,8 +104,7 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
     <main className="min-h-screen bg-[#08070f] text-white">
       <div className="flex min-h-screen w-full flex-col md:flex-row">
         
-        <aside className="flex flex-col w-full md:w-72 border-b md:border-b-0 md:border-r border-purple-900/40 bg-[#100d24] p-6"
-
+        <aside className="flex flex-col w-full md:w-72 border-b md:border-b-0 md:border-r border-purple-900/40 bg-[#100d24] p-6">
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.25em] text-purple-300">
               Clube do Tarô
