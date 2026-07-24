@@ -165,7 +165,57 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
 </Link>
 
         </aside>
+<div className="md:hidden border-b border-purple-900/40 bg-[#100d24] p-4">
+  <div className="grid gap-3">
 
+    <Link
+      href={`/cliente/${slug}`}
+      className="rounded-xl bg-purple-800 px-4 py-3 text-center font-bold text-white"
+    >
+      🔮 Meu Portal
+    </Link>
+
+    <Link
+      href={`/cliente/${slug}/portal`}
+      className="rounded-xl bg-[#19172f] px-4 py-3 text-center text-white"
+    >
+      ✨ Meus Direcionamentos
+    </Link>
+
+    <Link
+      href={`/cliente/${slug}/mensalidades`}
+      className="rounded-xl bg-[#19172f] px-4 py-3 text-center text-white"
+    >
+      💳 Minhas Mensalidades
+    </Link>
+
+    <a
+      href={`${LINK_SORTEIOS}?slug=${slug}`}
+      target="_blank"
+      rel="noreferrer"
+      className="rounded-xl bg-[#19172f] px-4 py-3 text-center text-white"
+    >
+      🎲 Sorteios do Clube
+    </a>
+
+    <a
+      href={WHATSAPP_CLUBE_VIP}
+      target="_blank"
+      rel="noreferrer"
+      className="rounded-xl bg-[#19172f] px-4 py-3 text-center text-white"
+    >
+      💬 Grupo WhatsApp
+    </a>
+
+    <Link
+      href="/login"
+      className="rounded-xl border border-yellow-500 bg-yellow-500/10 px-4 py-3 text-center font-bold text-yellow-300"
+    >
+      🚪 Sair
+    </Link>
+
+  </div>
+</div>
         <section className="flex-1 px-5 py-8 md:px-10">
           <div className="mx-auto max-w-5xl">
             <div className="mb-8">
