@@ -7,26 +7,10 @@ import { supabase } from "@/lib/supabase";
 import CopiarPixButton from "@/app/components/CopiarPixButton";
 
 const pagamentosPorPlano = {
-  bronze: {
-    nome: "Plano Bronze",
-    linkPagamento:
-      "https://invoice.infinitepay.io/plans/adriaescritora/fC6YXan9aP",
-  },
-  prata: {
-    nome: "Plano Prata",
-    linkPagamento:
-      "https://app.infinitepay.io/plans/share/fpn2fMg9Qd",
-  },
-  ouro: {
-    nome: "Plano Ouro",
-    linkPagamento:
-      "https://invoice.infinitepay.io/plans/adriaescritora/fvbXy2rRsn",
-  },
-  diamante: {
-    nome: "Plano Diamante",
-    linkPagamento:
-      "https://invoice.infinitepay.io/plans/adriaescritora/UM4UHqFNPD",
-  },
+  bronze: { nome: "Plano Bronze" },
+  prata: { nome: "Plano Prata" },
+  ouro: { nome: "Plano Ouro" },
+  diamante: { nome: "Plano Diamante" },
 } as const;
 
 function formatarData(data?: string | null) {
@@ -205,6 +189,35 @@ export default function MensalidadesPage() {
 
   const mostrarPagamento = tipoAssinatura === "mensal";
 
+  async function abrirCheckoutMercadoPago() {
+  try {
+  const resposta = await fetch(
+  "/api/pagamentos/mercadopago/criar-preferencia",
+  {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        plano: planoCliente,
+        valor: valorExibido,
+      }),
+    });
+
+    const dados = await resposta.json();
+
+    if (!dados.initPoint) {
+      alert("Não foi possível iniciar o pagamento.");
+      return;
+    }
+
+    window.location.href = dados.initPoint;
+  } catch (error) {
+    console.error(error);
+    alert("Erro ao conectar com o Mercado Pago.");
+  }
+}
+
   return (
     <main className="min-h-screen bg-[#08070f] text-white">
       <div className="flex min-h-screen w-full">
@@ -236,7 +249,72 @@ export default function MensalidadesPage() {
         </aside>
 
         <section className="flex-1 px-5 py-8 md:px-10">
+{/* MENU MOBILE */}
+<div className="mb-8 grid grid-cols-2 gap-3 md:hidden">
+
+  <Link
+    href={`/cliente/${slug}`}
+    className="rounded-xl bg-purple-800 p-4 text-center font-bold text-white"
+  >
+    🔮<br />
+    Meu Portal
+  </Link>
+
+  <Link
+    href={`/cliente/${slug}/portal`}
+    className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
+  >
+    ✨<br />
+    Direcionamentos
+  </Link>
+
+  <Link
+    href={`https://cursos.magiaoriente.com.br/meus-cursos?slug=${slug}`}
+    className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
+  >
+    📚<br />
+    Meus Cursos
+  </Link>
+
+  <Link
+    href={`/cliente/${slug}/mensalidades`}
+    className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
+  >
+    💳<br />
+    Mensalidades
+  </Link>
+
+  <a
+    href={WHATSAPP_CLUBE_VIP}
+    target="_blank"
+    rel="noreferrer"
+    className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
+  >
+    💬<br />
+    WhatsApp
+  </a>
+
+  <a
+    href={`${LINK_SORTEIOS}?slug=${slug}`}
+    target="_blank"
+    rel="noreferrer"
+    className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
+  >
+    🎲<br />
+    Sorteios
+  </a>
+
+  <Link
+    href="/login"
+    className="col-span-2 rounded-xl border border-yellow-500 bg-yellow-500/10 p-4 text-center font-bold text-yellow-300"
+  >
+    🚪 Sair
+  </Link>
+
+</div>
+
           <div className="mx-auto max-w-2xl">
+          
             <Link
              href={`/cliente/${slug}/portal`}
               className="mb-6 inline-flex rounded-xl border border-purple-500/40 bg-[#17142d] px-4 py-3 text-sm font-bold text-purple-200 md:hidden"
@@ -298,25 +376,23 @@ export default function MensalidadesPage() {
               {mostrarPagamento && (
                 <>
                   <div className="mt-7 flex flex-col gap-3">
-                    <a
-                      href={pagamentoAtual.linkPagamento}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-xl bg-red-600 px-5 py-4 text-center text-sm font-extrabold transition hover:bg-red-500"
-                    >
-                      PAGAR AGORA
-                    </a>
+                  <button
+  type="button"
+  onClick={abrirCheckoutMercadoPago}
+  className="rounded-xl bg-red-600 px-5 py-4 text-center text-sm font-extrabold transition hover:bg-red-500"
+>
+  PAGAR AGORA
+</button>
 
                     <CopiarPixButton chavePix="@adriaescritora@jim.com" />
 
-                    <a
-                      href={pagamentoAtual.linkPagamento}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-xl bg-cyan-600 px-5 py-4 text-center text-sm font-extrabold transition hover:bg-cyan-500"
-                    >
-                      PAGAR COM CARTÃO
-                    </a>
+                    <button
+  type="button"
+  onClick={abrirCheckoutMercadoPago}
+  className="rounded-xl bg-cyan-600 px-5 py-4 text-center text-sm font-extrabold transition hover:bg-cyan-500"
+>
+  PAGAR COM CARTÃO
+</button>
 
                     <button
                       type="button"
