@@ -52,14 +52,15 @@ export default function AdminLayout({
     <div
       style={{
         minHeight: "100vh",
-        display: "flex",
+       display: "flex",
+flexDirection: "column",
         background: "#120018",
         color: "#ffffff",
       }}
     >
       <aside
         style={{
-          width: "272px",
+        width: "100%",
           flexShrink: 0,
           padding: "22px 16px",
           background:
