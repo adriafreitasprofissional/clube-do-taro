@@ -64,35 +64,46 @@ export default function PlanosMensais() {
 async function comprar(plano: (typeof planos)[number]) {
   try {
     const resposta = await fetch(
-      "https://www.magiaoriente.com.br/api/pagamentos/mercadopago/criar-preferencia",
+      "/api/pagamentos/pagbank/checkout",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          plano: plano.produtoId,
-          valor: plano.valor,
+          nome: "Cliente Clube do Tarô",
+          email: "teste@teste.com",
+          cpf: "12345678909",
+          plano: plano.nome,
+          valor: Math.round(plano.valor * 100),
         }),
       }
     );
 
     const dados = await resposta.json();
 
-    console.log("STATUS:", resposta.status);
-    console.log("RESPOSTA:", dados);
+    console.log(dados);
 
-    if (!resposta.ok || !dados.ok) {
-      alert(JSON.stringify(dados, null, 2));
+    if (!resposta.ok) {
+      alert("Erro ao criar checkout.");
       return;
     }
 
-    window.location.href = dados.initPoint;
+    const link = dados.links?.find(
+      (item: any) => item.rel === "PAY"
+    );
+
+    if (!link) {
+      alert("Link de pagamento não encontrado.");
+      return;
+    }
+
+    window.location.href = link.href;
   } catch (erro) {
     console.error(erro);
-    alert("Erro ao iniciar o pagamento.");
+    alert("Erro ao iniciar pagamento.");
   }
- }
+}
   return (
     <section
       id="planos-mensais"
