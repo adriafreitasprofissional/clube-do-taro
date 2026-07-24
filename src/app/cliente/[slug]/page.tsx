@@ -102,7 +102,7 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
 
   return (
     <main className="min-h-screen bg-[#08070f] text-white">
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full flex-col md:flex-row">
         <aside className="hidden w-72 flex-col border-r border-purple-900/40 bg-[#100d24] p-6 md:flex">
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.25em] text-purple-300">
