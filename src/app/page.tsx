@@ -122,7 +122,7 @@ export default function Home() {
   </Link>
 
   <a
-  href="https://clube-do-taro-landing.vercel.app"
+  href="/"
   target="_blank"
   rel="noopener noreferrer"
   className="rounded-full bg-[#D4AF37] px-8 py-5 text-center font-semibold text-[#1B1235] transition hover:opacity-90"

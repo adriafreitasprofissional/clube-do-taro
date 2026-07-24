@@ -3,8 +3,7 @@ import { Preference } from "mercadopago";
 import { mpClient } from "@/lib/mercadopago";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin":
-    "https://clube-do-taro-landing.vercel.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
