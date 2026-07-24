@@ -18,7 +18,7 @@ export async function OPTIONS() {
 export async function POST(req: Request) {
   console.log("🔥 ENTREI NA API criar-preferencia");
 
-  console.log("TOKEN:", process.env.MP_ACCESS_TOKEN?.slice(0, 15));
+ console.log("TOKEN:", process.env.MERCADOPAGO_ACCESS_TOKEN?.slice(0, 15));
 
   try {
 

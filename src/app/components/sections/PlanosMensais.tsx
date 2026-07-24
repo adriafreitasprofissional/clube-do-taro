@@ -61,49 +61,38 @@ const planos = [
 ];
 
 export default function PlanosMensais() {
-async function comprar(plano: (typeof planos)[number]) {
+
+  async function comprar(plano: (typeof planos)[number]) {
   try {
     const resposta = await fetch(
-      "/api/pagamentos/pagbank/checkout",
+      "/api/pagamentos/mercadopago/criar-preferencia",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nome: "Cliente Clube do Tarô",
-          email: "teste@teste.com",
-          cpf: "12345678909",
           plano: plano.nome,
-          valor: Math.round(plano.valor * 100),
+          valor: plano.valor,
         }),
       }
     );
 
     const dados = await resposta.json();
 
-    console.log(dados);
-
     if (!resposta.ok) {
-      alert("Erro ao criar checkout.");
+      console.error(dados);
+      alert("Erro ao criar pagamento.");
       return;
     }
 
-    const link = dados.links?.find(
-      (item: any) => item.rel === "PAY"
-    );
-
-    if (!link) {
-      alert("Link de pagamento não encontrado.");
-      return;
-    }
-
-    window.location.href = link.href;
+    window.location.href = dados.initPoint;
   } catch (erro) {
     console.error(erro);
     alert("Erro ao iniciar pagamento.");
   }
 }
+ 
   return (
     <section
       id="planos-mensais"
