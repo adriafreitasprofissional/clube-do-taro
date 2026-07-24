@@ -284,25 +284,21 @@ export default function MensalidadesPage() {
     Mensalidades
   </Link>
 
-  <a
-    href={WHATSAPP_CLUBE_VIP}
-    target="_blank"
-    rel="noreferrer"
-    className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
-  >
-    💬<br />
-    WhatsApp
-  </a>
+ <Link
+  href={`/cliente/${slug}/whatsapp`}
+  className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
+>
+  💬<br />
+  WhatsApp
+</Link>
 
-  <a
-    href={`${LINK_SORTEIOS}?slug=${slug}`}
-    target="_blank"
-    rel="noreferrer"
-    className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
-  >
-    🎲<br />
-    Sorteios
-  </a>
+<Link
+  href={`/cliente/${slug}/sorteios`}
+  className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
+>
+  🎲<br />
+  Sorteios
+</Link>
 
   <Link
     href="/login"
@@ -415,8 +411,8 @@ export default function MensalidadesPage() {
                   </div>
 
                   <p className="mt-6 text-center text-xs leading-relaxed text-purple-300">
-                    PIX direto: copie a chave e pague pelo aplicativo do seu banco.
-                    Cartão: use o checkout da InfinitePay.
+                   PIX direto: copie a chave e pague pelo aplicativo do seu banco.
+Cartão: use o checkout do Mercado Pago.
                   </p>
                 </>
               )}
