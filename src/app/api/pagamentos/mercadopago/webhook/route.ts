@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { processarWebhook } from "@/lib/mercadopago/processarWebhook";
 
 export async function POST(req: Request) {
   try {
@@ -7,9 +8,11 @@ export async function POST(req: Request) {
     console.log("====== WEBHOOK MP ======");
     console.log(JSON.stringify(body, null, 2));
 
-    return NextResponse.json({
-      ok: true,
-    });
+    if (body.type === "payment") {
+      await processarWebhook(body.data.id);
+    }
+
+    return NextResponse.json({ ok: true });
 
   } catch (error) {
     console.error(error);

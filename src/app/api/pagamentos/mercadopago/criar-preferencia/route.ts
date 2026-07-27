@@ -44,11 +44,12 @@ export async function POST(req: Request) {
         },
       ],
 
-      metadata: {
-        produto: "clube",
-        plano,
-        tipo_usuario: "assinante",
-      },
+     metadata: {
+  produto: "clube",
+  plano,
+  tipo_usuario: "assinante",
+  origem: "landing",
+},
 
       back_urls: {
         success: "https://www.magiaoriente.com.br/pagamento/sucesso",
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
       notification_url:
         "https://www.magiaoriente.com.br/api/pagamentos/mercadopago/webhook",
 
-      external_reference: crypto.randomUUID(),
+      external_reference: `novo-${Date.now()}`,
     };
 
     console.log("=== BODY ENVIADO ===");
