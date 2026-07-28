@@ -5,14 +5,19 @@ export async function POST(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
-    const paymentId = searchParams.get("data.id");
-    const type = searchParams.get("type");
+const paymentId =
+  searchParams.get("data.id") ??
+  searchParams.get("id");
 
-    console.log({ paymentId, type });
+const type =
+  searchParams.get("type") ??
+  searchParams.get("topic");
 
-    if (type === "payment" && paymentId) {
-      await processarWebhook(paymentId);
-    }
+console.log({ paymentId, type });
+
+if (paymentId) {
+  await processarWebhook(paymentId);
+}
 
     return NextResponse.json({ ok: true });
 
