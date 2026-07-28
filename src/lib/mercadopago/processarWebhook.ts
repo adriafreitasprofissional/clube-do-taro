@@ -3,8 +3,7 @@ import { mpClient } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function processarWebhook(paymentId: string) {
-  console.log("CHEGUEI NO PROCESSAR WEBHOOK");
-
+ console.log("VERSAO 2 - 01:35");
   const payment = new Payment(mpClient);
 
   const pagamento = await payment.get({
