@@ -103,7 +103,7 @@ const { error: erroInsert } = await supabaseAdmin
     plano: checkout.plano.toLowerCase(),
     status: "ativo",
     slug: email.split("@")[0],
-    senha_inicial: "alterar-no-primeiro-login",
+   senha_inicial: senha,
     data_inicio: new Date().toISOString().slice(0, 10),
     role: "cliente",
     metodo_pagamento: "mercadopago",

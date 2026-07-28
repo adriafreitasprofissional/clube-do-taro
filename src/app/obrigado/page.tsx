@@ -28,7 +28,8 @@ export default function ObrigadoPage() {
             <li>✔ Confirmamos seu pagamento.</li>
             <li>✔ Criamos automaticamente sua conta.</li>
             <li>✔ Liberamos seu plano.</li>
-            <li>✔ Enviamos seu acesso por e-mail.</li>
+            <li>✔ Seu acesso foi criado automaticamente.</li>
+            <li>✔ Seu e-mail de acesso está sendo preparado.</li>
           </ul>
 
         </div>
@@ -62,8 +63,8 @@ export default function ObrigadoPage() {
     <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-400"></div>
 
     <span className="text-yellow-300 font-medium">
-      Processando sua assinatura...
-    </span>
+  Preparando seu acesso ao Clube do Tarô...
+</span>
 
   </div>
 
@@ -78,7 +79,9 @@ export default function ObrigadoPage() {
   </a>
 </div>
 
-        </div>
-    </main>
+</div> {/* fecha o container principal */}
+
+</main>
+
   );
 }

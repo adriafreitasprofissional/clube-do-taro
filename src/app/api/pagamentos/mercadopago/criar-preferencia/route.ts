@@ -64,10 +64,10 @@ const body = {
   },
 
   back_urls: {
-    success: "https://www.magiaoriente.com.br/pagamento/sucesso",
-    failure: "https://www.magiaoriente.com.br/pagamento/falha",
-    pending: "https://www.magiaoriente.com.br/pagamento/pendente",
-  },
+  success: "https://www.magiaoriente.com.br/pagamentos/sucesso",
+  failure: "https://www.magiaoriente.com.br/obrigado",
+  pending: "https://www.magiaoriente.com.br/pagamentos/pendente",
+},
 
   auto_return: "approved",
 

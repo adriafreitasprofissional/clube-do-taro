@@ -46,16 +46,17 @@ export default function PagamentoPendentePage() {
         </h1>
 
         <p
-          style={{
-            color: "rgba(255,255,255,.78)",
-            lineHeight: 1.7,
-            margin: 0,
-          }}
-        >
-          Se você pagou por Pix, a confirmação costuma ser rápida. Se pagou
-          com cartão, aguarde a aprovação da operadora. Assim que o pagamento
-          for confirmado, seu acesso será liberado.
-        </p>
+  style={{
+    color: "rgba(255,255,255,.78)",
+    lineHeight: 1.7,
+    margin: 0,
+  }}
+>
+  Seu pagamento ainda está sendo processado.
+  <br />
+  Assim que ele for aprovado, seu acesso ao Clube do Tarô será criado
+  automaticamente e você receberá um e-mail com seu login e sua senha.
+</p>
 
         <a
           href="/"

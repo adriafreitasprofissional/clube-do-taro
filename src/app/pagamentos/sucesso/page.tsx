@@ -46,15 +46,18 @@ export default function PagamentoSucessoPage() {
         </h1>
 
         <p
-          style={{
-            color: "rgba(255,255,255,.78)",
-            lineHeight: 1.7,
-            margin: 0,
-          }}
-        >
-          Seu pagamento foi recebido. Em breve seu acesso será liberado e você
-          receberá as orientações necessárias.
-        </p>
+  style={{
+    color: "rgba(255,255,255,.78)",
+    lineHeight: 1.7,
+    margin: 0,
+  }}
+>
+  Seu pagamento foi confirmado com sucesso.
+  <br />
+  Seu acesso ao Clube do Tarô já foi criado.
+  <br />
+  Você receberá em instantes um e-mail com seu login e sua senha de acesso.
+</p>
 
         <a
           href="/"
