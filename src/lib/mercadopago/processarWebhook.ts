@@ -18,17 +18,32 @@ console.log(JSON.stringify(pagamento, null, 2));
     return pagamento;
   }
 
-  const { data: cliente } = await supabaseAdmin
-    .from("club_clients")
-    .select("*")
-    .eq("email", pagamento.payer?.email ?? "")
-    .maybeSingle();
+  const referencia = pagamento.external_reference;
+
+const { data: checkout } = await supabaseAdmin
+  .from("checkout_pendentes")
+  .select("*")
+  .eq("external_reference", referencia)
+  .single();
+
+if (!checkout) {
+  console.log("Checkout pendente não encontrado.");
+  return pagamento;
+}
+
+const email = checkout.email;
+const nome = checkout.nome;
+
+const { data: cliente } = await supabaseAdmin
+  .from("club_clients")
+  .select("*")
+  .eq("email", email)
+  .maybeSingle();
 
    if (!cliente) {
   console.log("NOVO ASSINANTE");
 
-  const email = pagamento.payer?.email ?? "";
-
+ 
   console.log("PAYER:", JSON.stringify(pagamento.payer, null, 2));
 console.log(
   "ADDITIONAL_INFO:",
