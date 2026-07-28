@@ -26,8 +26,10 @@ export async function processarWebhook(paymentId: string) {
 
   const email = pagamento.payer?.email ?? "";
 
-  console.log("EMAIL RECEBIDO:", JSON.stringify(email));
-
+  console.log("PAYER:");
+console.dir(pagamento.payer, { depth: null });
+console.log("ADDITIONAL_INFO:");
+console.dir(pagamento.additional_info, { depth: null });
   const { data: novoUsuario, error } =
     await supabaseAdmin.auth.admin.createUser({
       email,
