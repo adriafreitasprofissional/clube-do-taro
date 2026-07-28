@@ -1,7 +1,8 @@
 import { Payment } from "mercadopago";
 import { mpClient } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-
+export async function processarWebhook(paymentId: string) {
+  console.log("CHEGUEI NO PROCESSAR WEBHOOK");
 export async function processarWebhook(paymentId: string) {
   const payment = new Payment(mpClient);
 
