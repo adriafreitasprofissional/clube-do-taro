@@ -39,12 +39,15 @@ console.log("EMAIL:", email);
 console.log("NOME:", nome);
 
 
-const { data: cliente } = await supabaseAdmin
-  .from("club_clients")
+const { data: checkout, error: erroCheckout } = await supabaseAdmin
+  .from("checkout_pendentes")
   .select("*")
-  .eq("email", email)
-  .maybeSingle();
+  .eq("external_reference", referencia)
+  .single();
 
+console.log("REFERÊNCIA:", referencia);
+console.log("CHECKOUT:", checkout);
+console.log("ERRO CHECKOUT:", erroCheckout);
    if (!cliente) {
   console.log("NOVO ASSINANTE");
 
