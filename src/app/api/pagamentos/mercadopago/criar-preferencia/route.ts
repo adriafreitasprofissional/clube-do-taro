@@ -46,6 +46,8 @@ await supabaseAdmin
     valor,
   });
 const body = {
+  purpose: "wallet_purchase",
+ 
   items: [
     {
       id: plano,
@@ -63,9 +65,9 @@ const body = {
     origem: "landing",
   },
 
-  back_urls: {
-  success: "https://www.magiaoriente.com.br/pagamentos/sucesso",
-  failure: "https://www.magiaoriente.com.br/obrigado",
+ back_urls: {
+  success: "https://www.magiaoriente.com.br/obrigado",
+  failure: "https://www.magiaoriente.com.br/pagamentos/falha",
   pending: "https://www.magiaoriente.com.br/pagamentos/pendente",
 },
 
@@ -84,8 +86,11 @@ const body = {
       body,
     });
 
-    console.log("=== PREFERENCE CRIADA ===");
-    console.dir(response, { depth: null });
+   console.log("========== PREFERENCE ==========");
+console.log("AUTO RETURN:", body.auto_return);
+console.log("BACK URLS:", body.back_urls);
+console.log("INIT POINT:", response.init_point);
+console.log("================================");
 
     return NextResponse.json(
       {
