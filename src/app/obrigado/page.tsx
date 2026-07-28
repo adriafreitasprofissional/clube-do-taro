@@ -33,21 +33,52 @@ export default function ObrigadoPage() {
 
         </div>
 
-        <div className="mt-10">
+<div className="mt-8 rounded-2xl border border-purple-700/30 bg-[#120B1D] p-6">
 
-          <div className="inline-flex items-center gap-3 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-6 py-3">
+  <h2 className="text-xl font-semibold text-white">
+    Fique tranquilo!
+  </h2>
 
-            <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-400"></div>
+  <p className="mt-4 text-gray-300 leading-7">
+    Em instantes você receberá um e-mail com:
+  </p>
 
-            <span className="text-yellow-300 font-medium">
-              Processando sua assinatura...
-            </span>
+  <ul className="mt-4 space-y-2 text-left text-gray-300">
+    <li>• Link para acessar o Portal</li>
+    <li>• Seu login</li>
+    <li>• Sua senha temporária</li>
+  </ul>
 
-          </div>
+  <p className="mt-5 text-sm text-gray-500">
+    Se não encontrar o e-mail, verifique também a caixa de Spam.
+  </p>
+
+</div>
+
+<div className="mt-10">
+
+  <div className="inline-flex items-center gap-3 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-6 py-3">
+
+    <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-400"></div>
+
+    <span className="text-yellow-300 font-medium">
+      Processando sua assinatura...
+    </span>
+
+  </div>
+
+</div>
+
+<div className="mt-10">
+  <a
+    href="/login"
+    className="inline-flex items-center justify-center rounded-xl bg-yellow-500 px-8 py-4 font-semibold text-[#1A1026] transition hover:bg-yellow-400"
+  >
+    Ir para o Portal
+  </a>
+</div>
 
         </div>
-
-      </div>
     </main>
   );
 }

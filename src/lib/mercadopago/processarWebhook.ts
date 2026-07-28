@@ -19,6 +19,22 @@ export async function processarWebhook(paymentId: string) {
     .eq("email", pagamento.payer?.email ?? "")
     .maybeSingle();
 
+    if (!cliente) {
+  console.log("NOVO ASSINANTE");
+
+  const { data: novoUsuario, error } =
+    await supabaseAdmin.auth.admin.createUser({
+      email: pagamento.payer?.email ?? "",
+      email_confirm: true,
+      password: Math.random().toString(36).slice(-10),
+    });
+
+  console.log("USUÁRIO:", novoUsuario);
+  console.log("ERRO:", error);
+
+  return pagamento;
+}
+
   console.log("CLIENTE:", cliente);
 
   console.log("=== PAGAMENTO ===");
