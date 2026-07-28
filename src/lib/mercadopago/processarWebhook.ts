@@ -59,20 +59,52 @@ console.log(
   "ADDITIONAL_INFO:",
   JSON.stringify(pagamento.additional_info, null, 2)
 );
+const senha = Math.random().toString(36).slice(-10);
 
+const { data: novoUsuario, error } =
+  await supabaseAdmin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    password: senha,
+  });
 
-  const { data: novoUsuario, error } =
-    await supabaseAdmin.auth.admin.createUser({
-      email,
-      email_confirm: true,
-      password: Math.random().toString(36).slice(-10),
-    });
-
-  console.log("USUÁRIO:", novoUsuario);
-  console.log("ERRO:", error);
-
+if (error && error.code !== "email_exists") {
+  console.error(error);
   return pagamento;
 }
+
+
+const userId =
+  novoUsuario?.user?.id ??
+  (
+    await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    })
+  ).data.users.find((u) => u.email === email)?.id;
+
+if (!userId) {
+  console.error("Não foi possível obter o ID do usuário.");
+  return pagamento;
+}
+
+const { error: erroInsert } = await supabaseAdmin
+  .from("club_clients")
+  .insert({
+    id: userId,
+    nome,
+    email,
+    plano: checkout.plano.toLowerCase(),
+    status: "ativo",
+    slug: email.split("@")[0],
+    senha_inicial: "alterar-no-primeiro-login",
+    data_inicio: new Date().toISOString().slice(0, 10),
+    role: "cliente",
+    metodo_pagamento: "mercadopago",
+    produto: "Clube do Tarô",
+  });
+
+console.log("ERRO INSERT:", erroInsert);
 
   console.log("CLIENTE:", cliente);
 
@@ -80,4 +112,9 @@ console.log(
   console.dir(pagamento, { depth: null });
 
   return pagamento;
+}
+
+console.log("CLIENTE:", cliente);
+
+return pagamento;
 }
