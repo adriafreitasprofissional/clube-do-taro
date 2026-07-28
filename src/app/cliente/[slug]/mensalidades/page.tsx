@@ -149,7 +149,7 @@ export default function MensalidadesPage() {
   if (carregando) {
     return (
       <main className="min-h-screen bg-[#08070f] p-10 text-center text-white">
-        Carregando mensalidades...
+        Carregando assinatura...
       </main>
     );
   }
@@ -236,7 +236,7 @@ export default function MensalidadesPage() {
     href={`/cliente/${slug}/mensalidades`}
     className="rounded-xl bg-purple-800 px-4 py-3 text-sm font-bold text-white shadow-lg"
   >
-    💳 Minhas Mensalidades
+    💳 Minha Assinatura
   </Link>
 </nav>
 
@@ -281,7 +281,7 @@ export default function MensalidadesPage() {
     className="rounded-xl bg-[#19172f] p-4 text-center font-semibold text-white"
   >
     💳<br />
-    Mensalidades
+    Assinatura
   </Link>
 
  <Link
@@ -323,7 +323,7 @@ export default function MensalidadesPage() {
                 Área financeira de {cliente.nome}
               </p>
               <h2 className="mt-1 text-2xl font-bold">
-                💳 Minhas Mensalidades
+                💳 Minhas Assinaturas
               </h2>
             </div>
 
@@ -380,7 +380,13 @@ export default function MensalidadesPage() {
   PAGAR AGORA
 </button>
 
-                    <CopiarPixButton chavePix="@adriaescritora@jim.com" />
+                   <button
+  type="button"
+  onClick={abrirCheckoutMercadoPago}
+  className="rounded-xl bg-blue-600 px-5 py-4 text-center text-sm font-extrabold transition hover:bg-blue-500"
+>
+  PIX
+</button>
 
                     <button
   type="button"
