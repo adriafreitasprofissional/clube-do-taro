@@ -20,7 +20,7 @@ console.log(JSON.stringify(pagamento, null, 2));
 
   const referencia = pagamento.external_reference;
 
-const { data: checkout } = await supabaseAdmin
+const { data: checkout, error: erroCheckout } = await supabaseAdmin
   .from("checkout_pendentes")
   .select("*")
   .eq("external_reference", referencia)
@@ -39,16 +39,18 @@ console.log("EMAIL:", email);
 console.log("NOME:", nome);
 
 
-const { data: checkout, error: erroCheckout } = await supabaseAdmin
-  .from("checkout_pendentes")
-  .select("*")
-  .eq("external_reference", referencia)
-  .single();
-
 console.log("REFERÊNCIA:", referencia);
 console.log("CHECKOUT:", checkout);
 console.log("ERRO CHECKOUT:", erroCheckout);
-   if (!cliente) {
+
+  const { data: cliente } = await supabaseAdmin
+  .from("club_clients")
+  .select("*")
+  .eq("email", email)
+  .maybeSingle();
+
+
+if (!cliente) {
   console.log("NOVO ASSINANTE");
 
  
