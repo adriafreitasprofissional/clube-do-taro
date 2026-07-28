@@ -1,6 +1,7 @@
 import { Payment } from "mercadopago";
 import { mpClient } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { enviarBoasVindas } from "@/lib/email/enviarBoasVindas";
 
 export async function processarWebhook(paymentId: string) {
  console.log("VERSAO 2 - 01:35");
@@ -120,8 +121,19 @@ if (!erroInsert) {
       payment_id: Number(pagamento.id),
     })
     .eq("external_reference", referencia);
-}
 
+  try {
+    await enviarBoasVindas({
+      nome,
+      email,
+      senha,
+    });
+
+    console.log("E-mail de boas-vindas enviado.");
+  } catch (erroEmail) {
+    console.error("Erro ao enviar e-mail:", erroEmail);
+  }
+}
   console.log("CLIENTE:", cliente);
 
   console.log("=== PAGAMENTO ===");
