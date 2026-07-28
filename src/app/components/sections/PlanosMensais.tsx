@@ -4,18 +4,6 @@ import Container from "../ui/Container";
 import { useState } from "react";
 
 const planos = [
-  {
-    nome: "Teste",
-    descricao: "Pagamento para validação do sistema",
-    valor: 1.00,
-    produtoId: "teste",
-    cor: "#999999",
-    glow: "rgba(153,153,153,.16)",
-    badge: "",
-    beneficios: [
-      "Validação do sistema"
-    ],
-  },
 
   {
     nome: "Bronze",

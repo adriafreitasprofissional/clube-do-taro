@@ -5,14 +5,14 @@ import { useState } from "react";
 
 const planos = [
   {
-  nome: "Bronze",
+  nome: "Bronze teste",
   produtoId: "bronze-anual",
   cor: "#C084FC",
   glow: "rgba(192,132,252,.28)",
   badge: "15% OFF",
-  parcelas: "12x",
-  valor: "24,91",
-  pix: "R$ 298,86",
+  parcelas: "0x",
+  valor: "0,00",
+  pix: "R$ 1,00",
   descricao: "Economize 15% escolhendo o plano anual.",
   beneficios: [
     "Tudo do Bronze",
