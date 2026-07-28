@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { processarWebhook } from "@/lib/mercadopago/processarWebhook";
 
 export async function POST(req: Request) {
+  
   try {
+    console.log("WEBHOOK EXECUTOU");
+console.log(req.url);
+
     const { searchParams } = new URL(req.url);
 
 const paymentId =
