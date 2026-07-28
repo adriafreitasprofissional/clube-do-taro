@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Preference } from "mercadopago";
 import { mpClient } from "@/lib/mercadopago";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
   try {
 
     
-    const { plano, valor } = await req.json();
+    const { plano, valor, nome, email } = await req.json();
 
     console.log("=== DADOS RECEBIDOS ===");
     console.log({
@@ -33,37 +34,48 @@ export async function POST(req: Request) {
 
     const preference = new Preference(mpClient);
 
-    const body = {
-      items: [
-        {
-          id: plano,
-          title: `Clube do Tarô - ${plano}`,
-          quantity: 1,
-          currency_id: "BRL",
-          unit_price: Number(valor),
-        },
-      ],
+const externalReference = `novo-${Date.now()}`;
 
-     metadata: {
-  produto: "clube",
-  plano,
-  tipo_usuario: "assinante",
-  origem: "landing",
-},
+await supabaseAdmin
+  .from("checkout_pendentes")
+  .insert({
+    external_reference: externalReference,
+    nome,
+    email,
+    plano,
+    valor,
+  });
+const body = {
+  items: [
+    {
+      id: plano,
+      title: `Clube do Tarô - ${plano}`,
+      quantity: 1,
+      currency_id: "BRL",
+      unit_price: Number(valor),
+    },
+  ],
 
-      back_urls: {
-        success: "https://www.magiaoriente.com.br/pagamento/sucesso",
-        failure: "https://www.magiaoriente.com.br/pagamento/falha",
-        pending: "https://www.magiaoriente.com.br/pagamento/pendente",
-      },
+  metadata: {
+    produto: "clube",
+    plano,
+    tipo_usuario: "assinante",
+    origem: "landing",
+  },
 
-      auto_return: "approved",
+  back_urls: {
+    success: "https://www.magiaoriente.com.br/pagamento/sucesso",
+    failure: "https://www.magiaoriente.com.br/pagamento/falha",
+    pending: "https://www.magiaoriente.com.br/pagamento/pendente",
+  },
 
-      notification_url:
-        "https://www.magiaoriente.com.br/api/pagamentos/mercadopago/webhook",
+  auto_return: "approved",
 
-      external_reference: `novo-${Date.now()}`,
-    };
+  notification_url:
+    "https://www.magiaoriente.com.br/api/pagamentos/mercadopago/webhook",
+
+  external_reference: externalReference,
+};
 
     console.log("=== BODY ENVIADO ===");
     console.dir(body, { depth: null });

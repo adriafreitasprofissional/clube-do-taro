@@ -1,6 +1,8 @@
 "use client";
 
 import Container from "../ui/Container";
+import { useState } from "react";
+
 const planos = [
   {
     nome: "Teste",
@@ -73,8 +75,16 @@ const planos = [
 ];
 
 export default function PlanosMensais() {
+const [email, setEmail] = useState("");
+const [nome, setNome] = useState("");
+const [planoSelecionado, setPlanoSelecionado] = useState<(typeof planos)[number] | null>(null);
+  
 
-  async function comprar(plano: (typeof planos)[number]) {
+async function comprar(plano: (typeof planos)[number]) {
+  if (!nome.trim() || !email.trim()) {
+  alert("Informe seu nome e e-mail.");
+  return;
+}
   try {
     const resposta = await fetch(
       "/api/pagamentos/mercadopago/criar-preferencia",
@@ -84,9 +94,11 @@ export default function PlanosMensais() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          plano: plano.nome,
-          valor: plano.valor,
-        }),
+  plano: plano.nome,
+  valor: plano.valor,
+  nome,
+  email,
+}),
       }
     );
 
@@ -104,12 +116,55 @@ export default function PlanosMensais() {
     alert("Erro ao iniciar pagamento.");
   }
 }
- 
+
+
   return (
     <section
       id="planos-mensais"
       className="bg-[#0B0616] py-28 text-white"
     >
+{planoSelecionado && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="w-full max-w-md rounded-2xl bg-[#1B1029] p-8">
+      <h3 className="mb-6 text-2xl font-bold text-white">
+        Finalizar assinatura
+      </h3>
+
+      <input
+        type="text"
+        placeholder="Seu nome"
+        value={nome}
+        onChange={(e) => setNome(e.target.value)}
+        className="mb-4 w-full rounded-lg border border-white/20 bg-[#2A183F] p-3 text-white"
+      />
+
+      <input
+        type="email"
+        placeholder="Seu e-mail"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="mb-6 w-full rounded-lg border border-white/20 bg-[#2A183F] p-3 text-white"
+      />
+
+      <div className="flex gap-3">
+        <button
+          onClick={() => setPlanoSelecionado(null)}
+          className="flex-1 rounded-lg border border-white/20 py-3 text-white"
+        >
+          Cancelar
+        </button>
+
+        <button
+          onClick={() => comprar(planoSelecionado)}
+          className="flex-1 rounded-lg bg-violet-600 py-3 font-semibold text-white"
+        >
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       <Container>
 
         <div className="mx-auto max-w-3xl text-center">
@@ -208,7 +263,7 @@ export default function PlanosMensais() {
 </ul>
 
 <button
-  onClick={() => comprar(plano)}
+  onClick={() => setPlanoSelecionado(plano)}
   className="mt-2 flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-700 via-fuchsia-600 to-purple-600 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:scale-[1.03] hover:shadow-violet-500/40"
 >
   Quero fazer parte
