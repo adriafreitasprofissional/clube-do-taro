@@ -33,6 +33,11 @@ if (!checkout) {
 
 const email = checkout.email;
 const nome = checkout.nome;
+console.log("CHECKOUT ENCONTRADO:");
+console.log(checkout);
+console.log("EMAIL:", email);
+console.log("NOME:", nome);
+
 
 const { data: cliente } = await supabaseAdmin
   .from("club_clients")
