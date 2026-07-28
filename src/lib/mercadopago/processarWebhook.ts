@@ -16,7 +16,7 @@ export async function processarWebhook(paymentId: string) {
   const { data: cliente } = await supabaseAdmin
     .from("club_clients")
     .select("*")
-    .eq("email", pagamento.payer.email)
+    .eq("email", pagamento.payer?.email ?? "")
     .maybeSingle();
 
   console.log("CLIENTE:", cliente);
