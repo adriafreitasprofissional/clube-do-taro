@@ -31,6 +31,12 @@ if (!checkout) {
   return pagamento;
 }
 
+if (checkout.status === "processado") {
+  console.log("Pagamento já processado.");
+  return pagamento;
+}
+
+
 const email = checkout.email;
 const nome = checkout.nome;
 console.log("CHECKOUT ENCONTRADO:");
@@ -105,6 +111,16 @@ const { error: erroInsert } = await supabaseAdmin
   });
 
 console.log("ERRO INSERT:", erroInsert);
+
+if (!erroInsert) {
+  await supabaseAdmin
+    .from("checkout_pendentes")
+    .update({
+      status: "processado",
+      payment_id: Number(pagamento.id),
+    })
+    .eq("external_reference", referencia);
+}
 
   console.log("CLIENTE:", cliente);
 
