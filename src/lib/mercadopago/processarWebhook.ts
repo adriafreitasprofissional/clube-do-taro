@@ -19,12 +19,16 @@ export async function processarWebhook(paymentId: string) {
     .eq("email", pagamento.payer?.email ?? "")
     .maybeSingle();
 
-    if (!cliente) {
+   if (!cliente) {
   console.log("NOVO ASSINANTE");
+
+  const email = pagamento.payer?.email ?? "";
+
+  console.log("EMAIL RECEBIDO:", JSON.stringify(email));
 
   const { data: novoUsuario, error } =
     await supabaseAdmin.auth.admin.createUser({
-      email: pagamento.payer?.email ?? "",
+      email,
       email_confirm: true,
       password: Math.random().toString(36).slice(-10),
     });
