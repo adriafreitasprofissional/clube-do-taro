@@ -3,16 +3,16 @@ import { processarWebhook } from "@/lib/mercadopago/processarWebhook";
 
 export async function POST(req: Request) {
   try {
-   const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(req.url);
 
-const id = searchParams.get("id");
-const topic = searchParams.get("topic");
+    const paymentId = searchParams.get("data.id");
+    const type = searchParams.get("type");
 
-console.log({ id, topic });
+    console.log({ paymentId, type });
 
-if (topic === "payment" && id) {
-  await processarWebhook(id);
-}
+    if (type === "payment" && paymentId) {
+      await processarWebhook(paymentId);
+    }
 
     return NextResponse.json({ ok: true });
 
