@@ -11,6 +11,10 @@ export async function processarWebhook(paymentId: string) {
     id: paymentId,
   });
 
+console.log("PAGAMENTO COMPLETO:");
+console.log(JSON.stringify(pagamento, null, 2));
+
+
   if (pagamento.status !== "approved") {
     return pagamento;
   }
