@@ -148,7 +148,6 @@ const referenciaMes = `${new Date().getFullYear()}-${String(
   .eq("referencia_mes", referenciaMes)
   .eq("ativo", true);
 
-console.log("PERGUNTAS DO MÊS:", perguntas);
 
 const usadas = perguntas?.length || 0;
 
@@ -168,13 +167,6 @@ const exclusivo =
 
 setDirecionamentoExclusivo(exclusivo);
 
-console.log("EXCLUSIVO:", exclusivo);
-
-if (
-  exclusivo &&
-  exclusivo.status === "Aguardando resposta da assinante"
-) {    
-
   const { data: recado } = await supabase
     .from("exclusive_messages")
     .select("*")
@@ -184,12 +176,7 @@ if (
     .limit(1)
     .maybeSingle();
 
-  setReformulacao(recado);
-  console.log("RECADO:", recado);
-}
-        console.log("Nome do cliente:", data.nome);
-        console.log("Referência do mês:", referenciaMes);
-        console.log("Direcionamento encontrado:", exclusivo);
+    setReformulacao(recado);
       }
     } catch (err: any) {
       setError(err.message || "Erro ao carregar dados do cliente.");
@@ -200,8 +187,9 @@ if (
 
   if (slug) carregarCliente();
 }, [slug]);
-
-  useEffect(() => {
+  
+     useEffect(() => {
+ 
     async function carregarConteudosDaPlanilha() {
       try {
         const resposta = await fetch(PLANILHA_CONTEUDOS_CSV, {
@@ -244,7 +232,7 @@ if (
         });
 
         setConteudosPlanilha(conteudos);
-        console.log(conteudos);
+       
       } catch (err) {
         console.error("Erro ao carregar planilha:", err);
       } finally {
@@ -949,7 +937,7 @@ if (
       categoria,
       pergunta,
       urgente,
-      status: "Aguardando resposta",
+      status: "Aceita",
     })
     .eq("id", direcionamentoExclusivo.id);
 

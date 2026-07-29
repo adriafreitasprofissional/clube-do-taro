@@ -21,9 +21,11 @@ export default function AtendimentoPage() {
   const [mostrarReformulacao, setMostrarReformulacao] = useState(false);
 const [mensagem, setMensagem] = useState("");
 const [historico, setHistorico] = useState<any[]>([]);
-  const [aba, setAba] = useState<
-    "novas" | "aguardando" | "prontas" | "liberadas"
-  >("novas");
+
+const [aba, setAba] = useState<
+  "novas" | "aceitas" | "reformular" | "respondidas"
+>("novas");
+
 
   useEffect(() => {
     carregarPerguntas();
@@ -36,35 +38,29 @@ const [historico, setHistorico] = useState<any[]>([]);
     setPerguntas(Array.isArray(data) ? data : []);
   }
 
-  const novas = useMemo(
-    () =>
-      perguntas.filter(
-        (p) =>
-          !p.status ||
-          p.status === "Nova pergunta"
-      ),
-    [perguntas]
-  );
+  const aceitas = useMemo(
+  () =>
+    perguntas.filter(
+      (p) => p.status === "Aceita"
+    ),
+  [perguntas]
+);
 
-  const aguardando = useMemo(
-    () =>
-      perguntas.filter(
-        (p) =>
-          p.status ===
-          "Aguardando resposta da assinante"
-      ),
-    [perguntas]
-  );
+const reformular = useMemo(
+  () =>
+    perguntas.filter(
+      (p) => p.status === "Reformular"
+    ),
+  [perguntas]
+);
 
-  const prontas = useMemo(
-    () =>
-      perguntas.filter(
-        (p) =>
-          p.status ===
-          "Pronta para atendimento"
-      ),
-    [perguntas]
-  );
+const respondidas = useMemo(
+  () =>
+    perguntas.filter(
+      (p) => p.status === "Respondida em áudio"
+    ),
+  [perguntas]
+);
 
   const liberadas = useMemo(
     () =>
@@ -76,13 +72,13 @@ const [historico, setHistorico] = useState<any[]>([]);
   );
 
   const lista =
-    aba === "novas"
-      ? novas
-      : aba === "aguardando"
-      ? aguardando
-      : aba === "prontas"
-      ? prontas
-      : liberadas;
+  aba === "novas"
+    ? novas
+    : aba === "aceitas"
+    ? aceitas
+    : aba === "reformular"
+    ? reformular
+    : respondidas;
 
 async function excluirPergunta() {
   if (!selecionada) return;
@@ -206,33 +202,33 @@ async function carregarHistorico(questionId: string) {
           </button>
 
           <button
-            onClick={() => setAba("aguardando")}
+           onClick={() => setAba("aceitas")}
             style={botaoAba(
               aba === "aguardando",
               "#ff9800"
             )}
           >
-            🟠 Aguardando Cliente ({aguardando.length})
+            🟢 Perguntas Aceitas ({aceitas.length})
           </button>
 
           <button
-            onClick={() => setAba("prontas")}
+           onClick={() => setAba("reformular")}
             style={botaoAba(
               aba === "prontas",
               "#7b1fa2"
             )}
           >
-            🟣 Prontas ({prontas.length})
+            🟡 Reformular ({reformular.length})
           </button>
 
           <button
-            onClick={() => setAba("liberadas")}
+            oonClick={() => setAba("respondidas")}
             style={botaoAba(
               aba === "liberadas",
               "#2e7d32"
             )}
           >
-            🟢 Liberadas ({liberadas.length})
+           🎧 Respondidas ({respondidas.length})
           </button>
         </div>
 
