@@ -624,16 +624,8 @@ marginBottom: mobile ? 20 : 0,
   Que os oráculos iluminem seu caminho...
 </p>
 
-{direcionamentoExclusivo && (
-  <div
-    style={{
-      marginBottom: 30,
-      padding: 24,
-      borderRadius: 22,
-      background: "#1b0227",
-      border: "1px solid rgba(244,212,106,.25)",
-    }}
-  >
+{direcionamentos.length > 0 && (
+  <>
     <h2
       style={{
         color: "#f4d46a",
@@ -643,6 +635,18 @@ marginBottom: mobile ? 20 : 0,
     >
       🔮 Mensagem da Estella
     </h2>
+
+    {direcionamentos.map((direcionamentoExclusivo) => (
+      <div
+        key={direcionamentoExclusivo.id}
+        style={{
+          marginBottom: 30,
+          padding: 24,
+          borderRadius: 22,
+          background: "#1b0227",
+          border: "1px solid rgba(244,212,106,.25)",
+        }}
+      >
 
     {/* REFORMULAR */}
     {direcionamentoExclusivo.status ===
@@ -771,7 +775,7 @@ marginBottom: mobile ? 20 : 0,
         </>
       )}
 
-    <div
+        <div
       style={{
         marginTop: 20,
         color: "#999",
@@ -783,7 +787,9 @@ marginBottom: mobile ? 20 : 0,
         direcionamentoExclusivo.created_at
       ).toLocaleDateString("pt-BR")}
     </div>
-  </div>
+      </div>
+    ))}
+  </>
 )}
 
 
