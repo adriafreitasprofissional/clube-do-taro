@@ -613,6 +613,77 @@ marginBottom: mobile ? 20 : 0,
   Que os oráculos iluminem seu caminho...
 </p>
 
+{direcionamentoExclusivo && !reformulacao && (
+  <div
+    style={{
+      marginBottom: 30,
+      padding: 24,
+      borderRadius: 22,
+      background: "#1b0227",
+      border: "1px solid rgba(244,212,106,.25)",
+    }}
+  >
+    <h2
+      style={{
+        color: "#f4d46a",
+        marginBottom: 18,
+        fontSize: 24,
+      }}
+    >
+      📬 Mensagens da Cigana Estella
+    </h2>
+
+    <div
+      style={{
+        color: "#fff",
+        lineHeight: 1.8,
+        fontSize: 16,
+      }}
+    >
+      <p>
+        💜 Sua pergunta foi recebida.
+      </p>
+
+      <p>
+        Sua pergunta será respondida no próximo
+        <strong> Direcionamento Exclusivo.</strong>
+      </p>
+
+      <div
+        style={{
+          marginTop: 18,
+          padding: 18,
+          borderRadius: 14,
+          background: "rgba(255,255,255,.05)",
+        }}
+      >
+        <strong>Pergunta enviada</strong>
+
+        <div
+          style={{
+            marginTop: 10,
+            color: "#ddd",
+            fontStyle: "italic",
+          }}
+        >
+          "{direcionamentoExclusivo.pergunta}"
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 18,
+          color: "#bbb",
+          fontSize: 14,
+        }}
+      >
+        📅 {new Date(direcionamentoExclusivo.created_at).toLocaleDateString("pt-BR")}
+      </div>
+    </div>
+  </div>
+)}
+
+
 {meses.map((mes) => {
   const conteudos = conteudosDoMes(mes);
 
