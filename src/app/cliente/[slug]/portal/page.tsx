@@ -158,7 +158,13 @@ setPerguntasRestantes(
 
 
 const exclusivo =
-  perguntas?.find((p) => p.ativo) ?? null;
+  perguntas
+    ?.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
+    )
+    .find((p) => p.ativo) ?? null;
 
 setDirecionamentoExclusivo(exclusivo);
 
@@ -929,22 +935,46 @@ marginBottom: mobile ? 20 : 0,
       return;
     }
 
-    const { error } = await supabase
-  .from("exclusive_questions")
-  .insert({
-    cliente_id: clienteId,
-    nome_cliente: slug,
-    email_cliente: email,
-    plano,
-    categoria,
-    pergunta,
-    urgente,
-    referencia_mes: new Date().toISOString().slice(0, 7),
-    status: "Nova pergunta",
-    ativo: true,
-  });
-  
-   if (error) {
+    let error = null;
+
+if (
+  direcionamentoExclusivo &&
+  direcionamentoExclusivo.status ===
+    "Aguardando resposta da assinante"
+) {
+  // Reformulação
+  const resultado = await supabase
+    .from("exclusive_questions")
+    .update({
+      categoria,
+      pergunta,
+      urgente,
+      status: "Aguardando resposta",
+    })
+    .eq("id", direcionamentoExclusivo.id);
+
+  error = resultado.error;
+} else {
+  // Nova pergunta
+  const resultado = await supabase
+    .from("exclusive_questions")
+    .insert({
+      cliente_id: clienteId,
+      nome_cliente: slug,
+      email_cliente: email,
+      plano,
+      categoria,
+      pergunta,
+      urgente,
+      referencia_mes: new Date().toISOString().slice(0, 7),
+      status: "Nova pergunta",
+      ativo: true,
+    });
+
+  error = resultado.error;
+}
+
+if (error) {
   console.error(error);
 
   alert(
