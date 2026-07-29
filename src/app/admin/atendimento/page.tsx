@@ -233,9 +233,6 @@ async function carregarHistorico(questionId: string) {
 </button>
 
 
-
-
-
         </div>
 
         <div
@@ -405,9 +402,33 @@ async function carregarHistorico(questionId: string) {
     ✍️ Reformular Pergunta
   </button>
 
-  <button style={botaoAcao("#E7C96F", "#1A0921")}>
-    🎙 Liberar Direcionamento
-  </button>
+  <button
+  onClick={async () => {
+    if (!selecionada) return;
+
+    const response = await fetch("/api/admin/perguntas/status", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: selecionada.id,
+        status: "Respondida em áudio",
+      }),
+    });
+
+    if (!response.ok) {
+      alert("Erro ao liberar o direcionamento.");
+      return;
+    }
+
+    await carregarPerguntas();
+    setSelecionada(null);
+  }}
+  style={botaoAcao("#E7C96F", "#1A0921")}
+>
+  🎧 Liberar Direcionamento
+</button>
 
  <button
   onClick={excluirPergunta}
