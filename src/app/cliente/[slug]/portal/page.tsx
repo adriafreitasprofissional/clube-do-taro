@@ -105,84 +105,77 @@ useEffect(() => {
 
     try {
       const { data, error } = await supabase
-  .from("club_clients")
-  .select("id, plano, nome, slug")
-  .eq("slug", slug)
-  .maybeSingle();
+        .from("club_clients")
+        .select("id, plano, nome, slug")
+        .eq("slug", slug)
+        .maybeSingle();
 
       if (error) throw new Error(error.message);
 
       if (data) {
         setClienteId(data.id);
+
         setNome(
           data.slug.charAt(0).toUpperCase() + data.slug.slice(1)
         );
 
-        
-
         const planoCliente = (data.plano || "").toLowerCase();
 
-setPlano(planoCliente);
+        setPlano(planoCliente);
 
-const limitePerguntas =
-  planoCliente === "bronze"
-    ? 1
-    : planoCliente === "prata"
-    ? 2
-    : planoCliente === "ouro"
-    ? 2
-    : planoCliente === "diamante"
-    ? 3
-    : 0;
+        const limitePerguntas =
+          planoCliente === "bronze"
+            ? 1
+            : planoCliente === "prata"
+            ? 2
+            : planoCliente === "ouro"
+            ? 2
+            : planoCliente === "diamante"
+            ? 3
+            : 0;
 
-const referenciaMes = `${new Date().getFullYear()}-${String(
-  
+        const referenciaMes = `${new Date().getFullYear()}-${String(
           new Date().getMonth() + 1
         ).padStart(2, "0")}`;
 
-        
-  const { data: perguntas } = await supabase
-  .from("exclusive_questions")
-  .select("*")
-  .eq("cliente_id", data.id)
-  .eq("referencia_mes", referenciaMes)
-  .eq("ativo", true);
+        const { data: perguntas } = await supabase
+          .from("exclusive_questions")
+          .select("*")
+          .eq("cliente_id", data.id)
+          .eq("referencia_mes", referenciaMes)
+          .eq("ativo", true);
 
+        const usadas = perguntas?.length || 0;
 
-const usadas = perguntas?.length || 0;
+        setPerguntasRestantes(
+          Math.max(0, limitePerguntas - usadas)
+        );
 
-setPerguntasRestantes(
-  Math.max(0, limitePerguntas - usadas)
-);
+        const exclusivo =
+          perguntas
+            ?.sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            )
+            .find((p) => p.ativo) ?? null;
 
-const exclusivo =
-  perguntas
-    ?.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
-    )
-    .find((p) => p.ativo) ?? null;
+        setDirecionamentoExclusivo(exclusivo);
 
-setDirecionamentoExclusivo(exclusivo);
+        if (exclusivo) {
+          const { data: recado } = await supabase
+            .from("exclusive_messages")
+            .select("*")
+            .eq("question_id", exclusivo.id)
+            .eq("autor", "admin")
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-if (exclusivo) {
-  const { data: recado } = await supabase
-    .from("exclusive_messages")
-    .select("*")
-    .eq("question_id", exclusivo.id)
-    .eq("autor", "admin")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  setReformulacao(recado);
-} else {
-  setReformulacao(null);
-}
-
-
-    setReformulacao(recado);
+          setReformulacao(recado);
+        } else {
+          setReformulacao(null);
+        }
       }
     } catch (err: any) {
       setError(err.message || "Erro ao carregar dados do cliente.");
@@ -191,7 +184,9 @@ if (exclusivo) {
     }
   }
 
-  if (slug) carregarCliente();
+  if (slug) {
+    carregarCliente();
+  }
 }, [slug]);
   
      useEffect(() => {
