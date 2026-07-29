@@ -66,7 +66,13 @@ export default function PortalPremium() {
 const router = useRouter();
   const [audioAberto, setAudioAberto] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
-  const [direcionamentoExclusivo, setDirecionamentoExclusivo] = useState<any>(null);
+  
+  const [direcionamentos, setDirecionamentos] =
+  useState<any[]>([]);
+
+const [direcionamentoExclusivo, setDirecionamentoExclusivo] =
+  useState<any>(null);
+
   const [reformulacao, setReformulacao] = useState<any>(null);
 const [mesAberto, setMesAberto] = useState<string | null>(null);
   const [direcionamentoAberto, setDirecionamentoAberto] = useState(false);
@@ -151,16 +157,21 @@ useEffect(() => {
           Math.max(0, limitePerguntas - usadas)
         );
 
-        const exclusivo =
-          perguntas
-            ?.sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime()
-            )
-            .find((p) => p.ativo) ?? null;
+        const listaPerguntas =
+  (perguntas || []).sort(
+    (a, b) =>
+      new Date(a.created_at).getTime() -
+      new Date(b.created_at).getTime()
+  );
 
-        setDirecionamentoExclusivo(exclusivo);
+setDirecionamentos(listaPerguntas);
+
+const exclusivo =
+  listaPerguntas.length > 0
+    ? listaPerguntas[listaPerguntas.length - 1]
+    : null;
+
+setDirecionamentoExclusivo(exclusivo);
 
         if (exclusivo) {
           const { data: recado } = await supabase
