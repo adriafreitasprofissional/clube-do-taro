@@ -144,13 +144,17 @@ useEffect(() => {
           new Date().getMonth() + 1
         ).padStart(2, "0")}`;
 
-        const { data: perguntas } = await supabase
-          .from("exclusive_questions")
-          .select("*")
-          .eq("cliente_id", data.id)
-          .eq("referencia_mes", referenciaMes)
-          .eq("ativo", true);
+       const { data: perguntas, error: perguntasError } = await supabase
+  .from("exclusive_questions")
+  .select("*")
+  .eq("cliente_id", data.id)
+  .eq("referencia_mes", referenciaMes)
+  .order("created_at", { ascending: true });
 
+console.log("CLIENTE:", data.id);
+console.log("REFERÊNCIA:", referenciaMes);
+console.log("PERGUNTAS:", perguntas);
+console.log("ERRO:", perguntasError);
         const usadas = perguntas?.length || 0;
 
         setPerguntasRestantes(
