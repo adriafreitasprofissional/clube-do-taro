@@ -402,10 +402,24 @@ async function carregarHistorico(questionId: string) {
     ✍️ Reformular Pergunta
   </button>
 
-  <button
+ <button
   onClick={async () => {
     if (!selecionada) return;
 
+    // Salva no histórico
+    await fetch("/api/admin/exclusive-messages/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        question_id: selecionada.id,
+        autor: "admin",
+        mensagem: "🎧 Direcionamento liberado pela Cigana Estella.",
+      }),
+    });
+
+    // Atualiza o status da pergunta
     const response = await fetch("/api/admin/perguntas/status", {
       method: "POST",
       headers: {
@@ -422,6 +436,7 @@ async function carregarHistorico(questionId: string) {
       return;
     }
 
+    await carregarHistorico(selecionada.id);
     await carregarPerguntas();
     setSelecionada(null);
   }}
