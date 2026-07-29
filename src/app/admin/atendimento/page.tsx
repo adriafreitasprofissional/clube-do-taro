@@ -38,6 +38,16 @@ const [aba, setAba] = useState<
     setPerguntas(Array.isArray(data) ? data : []);
   }
 
+const novas = useMemo(
+  () =>
+    perguntas.filter(
+      (p) =>
+        !p.status ||
+        p.status === "Nova pergunta"
+    ),
+  [perguntas]
+);
+
   const aceitas = useMemo(
   () =>
     perguntas.filter(
@@ -61,15 +71,6 @@ const respondidas = useMemo(
     ),
   [perguntas]
 );
-
-  const liberadas = useMemo(
-    () =>
-      perguntas.filter(
-        (p) =>
-          p.status === "Liberado"
-      ),
-    [perguntas]
-  );
 
   const lista =
   aba === "novas"
@@ -192,44 +193,49 @@ async function carregarHistorico(questionId: string) {
           }}
         >
           <button
-            onClick={() => setAba("novas")}
-            style={botaoAba(
-              aba === "novas",
-              "#d32f2f"
-            )}
+           style={botaoAba(
+  aba === "aceitas",
+  "#2e7d32"
+)}
           >
             🔴 Novas ({novas.length})
+
           </button>
 
-          <button
-           onClick={() => setAba("aceitas")}
-            style={botaoAba(
-              aba === "aguardando",
-              "#ff9800"
-            )}
-          >
-            🟢 Perguntas Aceitas ({aceitas.length})
-          </button>
+         <button
+  onClick={() => setAba("aceitas")}
+  style={botaoAba(
+    aba === "aceitas",
+    "#2e7d32"
+  )}
+>
+  🟢 Perguntas Aceitas ({aceitas.length})
+</button>
 
           <button
-           onClick={() => setAba("reformular")}
-            style={botaoAba(
-              aba === "prontas",
-              "#7b1fa2"
-            )}
-          >
-            🟡 Reformular ({reformular.length})
-          </button>
+  onClick={() => setAba("reformular")}
+  style={botaoAba(
+    aba === "reformular",
+    "#f4b400"
+  )}
+>
+  🟡 Reformular ({reformular.length})
+</button>
 
           <button
-            oonClick={() => setAba("respondidas")}
-            style={botaoAba(
-              aba === "liberadas",
-              "#2e7d32"
-            )}
-          >
-           🎧 Respondidas ({respondidas.length})
-          </button>
+  onClick={() => setAba("respondidas")}
+  style={botaoAba(
+    aba === "respondidas",
+    "#2e7d32"
+  )}
+>
+  🎧 Respondidas ({respondidas.length})
+</button>
+
+
+
+
+
         </div>
 
         <div
