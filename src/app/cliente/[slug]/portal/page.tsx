@@ -155,7 +155,6 @@ setPerguntasRestantes(
   Math.max(0, limitePerguntas - usadas)
 );
 
-
 const exclusivo =
   perguntas
     ?.sort(
@@ -167,6 +166,7 @@ const exclusivo =
 
 setDirecionamentoExclusivo(exclusivo);
 
+if (exclusivo) {
   const { data: recado } = await supabase
     .from("exclusive_messages")
     .select("*")
@@ -175,6 +175,12 @@ setDirecionamentoExclusivo(exclusivo);
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  setReformulacao(recado);
+} else {
+  setReformulacao(null);
+}
+
 
     setReformulacao(recado);
       }
