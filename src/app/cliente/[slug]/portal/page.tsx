@@ -653,10 +653,10 @@ marginBottom: mobile ? 20 : 0,
       >
 
    {/* REFORMULAR */}
+   
    {reformulacao && (
-      "Aguardando resposta da assinante" &&
-      reformulacao && (
-        <>
+
+             <>
           <p
             style={{
               color: "#fff",
