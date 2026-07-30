@@ -178,14 +178,17 @@ const exclusivo =
 setDirecionamentoExclusivo(exclusivo);
 
         if (exclusivo) {
-          const { data: recado } = await supabase
+         const { data: recado, error } = await supabase
             .from("exclusive_messages")
             .select("*")
             .eq("question_id", exclusivo.id)
             .eq("autor", "admin")
             .order("created_at", { ascending: false })
             .limit(1)
-            .maybeSingle();
+            .single();
+
+            console.log("ERRO RECADO:", error);
+            console.log("RECADO:", recado);
 
           setReformulacao(recado);
           console.log("RECADO:", recado);
