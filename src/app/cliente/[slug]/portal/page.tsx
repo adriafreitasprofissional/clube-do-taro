@@ -185,7 +185,10 @@ setDirecionamentoExclusivo(exclusivo);
             .eq("autor", "admin")
             .order("created_at", { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
+
+const recadoMsg = recado && recado.length > 0 ? recado[0] : null;
+setReformulacao(recadoMsg);
 
             console.log("ERRO RECADO:", error);
             console.log("RECADO:", recado);
@@ -738,8 +741,7 @@ direcionamentoExclusivo.id === reformulacao.question_id && (
     {/* PERGUNTA RECEBIDA */}
     {direcionamentoExclusivo.status !==
       "Respondida em áudio" &&
-      direcionamentoExclusivo.status !==
-        "Aguardando resposta da assinante" && (
+      
         <>
           <p
             style={{
