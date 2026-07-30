@@ -783,8 +783,7 @@ direcionamentoExclusivo.id === reformulacao.question_id && (
             </div>
           </div>
         </>
-      )}
-
+    )
         <div
       style={{
         marginTop: 20,
