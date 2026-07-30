@@ -690,7 +690,7 @@ direcionamentoExclusivo.id === reformulacao.question_id && (
         </>
       )}
 
-    {/* HISTÓRICO */}
+       {/* HISTÓRICO */}
     {direcionamentoExclusivo.status ===
       "Respondida em áudio" && (
       <>
@@ -741,7 +741,8 @@ direcionamentoExclusivo.id === reformulacao.question_id && (
     {/* PERGUNTA RECEBIDA */}
     {direcionamentoExclusivo.status !==
       "Respondida em áudio" &&
-      
+      direcionamentoExclusivo.status !==
+        "Aguardando resposta da assinante" && (
         <>
           <p
             style={{
@@ -783,22 +784,23 @@ direcionamentoExclusivo.id === reformulacao.question_id && (
             </div>
           </div>
         </>
-    )
-        <div
-      style={{
-        marginTop: 20,
-        color: "#999",
-        fontSize: 13,
-      }}
-    >
-      📅{" "}
-      {new Date(
-        direcionamentoExclusivo.created_at
-      ).toLocaleDateString("pt-BR")}
-    </div>
+      )}
+
+      <div
+        style={{
+          marginTop: 20,
+          color: "#999",
+          fontSize: 13,
+        }}
+      >
+        📅{" "}
+        {new Date(
+          direcionamentoExclusivo.created_at
+        ).toLocaleDateString("pt-BR")}
       </div>
-    ))}
-  </>
+    </div>
+  ))}
+</>
 )}
 
 
