@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 
@@ -63,53 +63,149 @@ export default function PortalPremium() {
   const params = useParams();
   const slug = params.slug as string;
 
+const router = useRouter();
   const [audioAberto, setAudioAberto] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
+  
+  const [direcionamentos, setDirecionamentos] =
+  useState<any[]>([]);
+
+const [direcionamentoExclusivo, setDirecionamentoExclusivo] =
+  useState<any>(null);
+
+  const [reformulacao, setReformulacao] = useState<any>(null);
 const [mesAberto, setMesAberto] = useState<string | null>(null);
   const [direcionamentoAberto, setDirecionamentoAberto] = useState(false);
   const [categoria, setCategoria] = useState("");
+  const [urgente, setUrgente] = useState(false);
   const [pergunta, setPergunta] = useState("");
   const [nome, setNome] = useState("");
   const [plano, setPlano] = useState("");
-
+const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+const [clienteId, setClienteId] = useState("");
+const [perguntasRestantes, setPerguntasRestantes] = useState(0);  
 const [conteudosPlanilha, setConteudosPlanilha] = useState<ConteudoPlanilha[]>([]);
 const [carregandoConteudos, setCarregandoConteudos] = useState(true);
-  
+ 
+const [mobile, setMobile] = useState(false);
+
 useEffect(() => {
-    async function carregarCliente() {
-      setLoading(true);
-      setError(null);
+  const verificar = () => {
+    setMobile(window.innerWidth <= 900);
+  };
 
-      try {
-        const { data, error } = await supabase
-          .from("club_clients")
-          .select("plano, nome, slug")
-          .eq("slug", slug)
-          .maybeSingle();
-        if (error) throw new Error(error.message);
+  verificar();
 
-       if (data) {
+  window.addEventListener("resize", verificar);
 
-  setNome(
-    data.slug.charAt(0).toUpperCase() + data.slug.slice(1)
+  return () =>
+    window.removeEventListener("resize", verificar);
+}, []);
+
+useEffect(() => {
+  async function carregarCliente() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase
+        .from("club_clients")
+        .select("id, plano, nome, slug")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (error) throw new Error(error.message);
+
+      if (data) {
+        setClienteId(data.id);
+
+        setNome(
+          data.slug.charAt(0).toUpperCase() + data.slug.slice(1)
+        );
+
+        const planoCliente = (data.plano || "").toLowerCase();
+
+        setPlano(planoCliente);
+
+        const limitePerguntas =
+          planoCliente === "bronze"
+            ? 1
+            : planoCliente === "prata"
+            ? 2
+            : planoCliente === "ouro"
+            ? 2
+            : planoCliente === "diamante"
+            ? 3
+            : 0;
+
+        const referenciaMes = `${new Date().getFullYear()}-${String(
+          new Date().getMonth() + 1
+        ).padStart(2, "0")}`;
+
+       const { data: perguntas, error: perguntasError } = await supabase
+  .from("exclusive_questions")
+  .select("*")
+  .eq("cliente_id", data.id)
+  .eq("referencia_mes", referenciaMes)
+  .order("created_at", { ascending: true });
+
+console.log("CLIENTE:", data.id);
+console.log("REFERÊNCIA:", referenciaMes);
+console.log("PERGUNTAS:", perguntas);
+console.log("ERRO:", perguntasError);
+        const usadas = perguntas?.length || 0;
+
+        setPerguntasRestantes(
+          Math.max(0, limitePerguntas - usadas)
+        );
+
+        const listaPerguntas =
+  (perguntas || []).sort(
+    (a, b) =>
+      new Date(a.created_at).getTime() -
+      new Date(b.created_at).getTime()
   );
 
-  setPlano(data.plano || "");
+setDirecionamentos(listaPerguntas);
 
-}
-      } catch (err: any) {
-        setError(err.message || "Erro ao carregar dados do cliente.");
-      } finally {
-        setLoading(false);
+const exclusivo =
+  listaPerguntas.length > 0
+    ? listaPerguntas[listaPerguntas.length - 1]
+    : null;
+
+setDirecionamentoExclusivo(exclusivo);
+
+        if (exclusivo) {
+          const { data: recado } = await supabase
+            .from("exclusive_messages")
+            .select("*")
+            .eq("question_id", exclusivo.id)
+            .eq("autor", "admin")
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          setReformulacao(recado);
+        } else {
+          setReformulacao(null);
+        }
       }
+    } catch (err: any) {
+      setError(err.message || "Erro ao carregar dados do cliente.");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    if (slug) carregarCliente();
-  }, [slug]);
-
-  useEffect(() => {
+  if (slug) {
+    carregarCliente();
+  }
+}, [slug]);
+  
+     useEffect(() => {
+ 
     async function carregarConteudosDaPlanilha() {
       try {
         const resposta = await fetch(PLANILHA_CONTEUDOS_CSV, {
@@ -138,6 +234,7 @@ useEffect(() => {
             item[coluna] = valores[indice] || "";
           });
 
+
           return {
             slug: (item.slug || "").toLowerCase().trim(),
             ano: (item.ano || "").trim(),
@@ -151,6 +248,7 @@ useEffect(() => {
         });
 
         setConteudosPlanilha(conteudos);
+       
       } catch (err) {
         console.error("Erro ao carregar planilha:", err);
       } finally {
@@ -253,7 +351,9 @@ function abrirAudio(mes: string, semana: string) {
     return;
   }
 
+  window.open(conteudo.drive_file, "_blank");
 }
+
 if (loading) {
   return <div>Carregando...</div>;
 }
@@ -262,12 +362,445 @@ if (error) {
 }
 
 return (
-  <main style={{ padding: 40 }}>
-   
-    {meses.map((mes) => {
-      const conteudos = conteudosDoMes(mes);
+  <main
+    style={{
+       display: "grid",
+gridTemplateColumns: mobile ? "1fr" : "280px 1fr",
+gap: mobile ? 20 : 30,
+alignItems: "start",
+padding: mobile ? 15 : 40,
+    }}
+  >
+    {/* MENU ESQUERDO */}
 
-      return (
+   <aside
+  style={{
+    background: "#1b0227",
+    borderRadius: 22,
+    padding: 30,
+    border: "1px solid rgba(244,212,106,.20)",
+    position: mobile ? "relative" : "sticky",
+top: mobile ? 0 : 30,
+minHeight: mobile ? "auto" : "calc(100vh - 80px)",
+marginBottom: mobile ? 20 : 0,
+    display: "flex",
+    flexDirection: "column",
+  }}
+>
+      <h2
+        style={{
+          color: "#ffd000",
+          marginBottom: 30,
+        }}
+      >
+        ✨ Direcionamentos
+      </h2>
+
+     <h3
+  style={{
+    color: "#fff",
+    fontSize: 30,
+    fontWeight: 700,
+    lineHeight: 1.2,
+    letterSpacing: "0.3px",
+    marginTop: 24,
+    marginBottom: 12,
+  }}
+>
+  {nome}
+</h3>
+
+      <div
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 16px",
+    borderRadius: 999,
+    border: "1px solid rgba(212,164,0,.65)",
+    background: "rgba(212,164,0,.08)",
+    color: "#ffd54a",
+    fontWeight: 700,
+    fontSize: 15,
+    width: "fit-content",
+    marginTop: 10,
+  }}
+>
+  💎 Plano {plano}
+</div>
+<div
+  style={{
+    marginTop: 35,
+    padding: 18,
+    borderRadius: 18,
+    border: "1px solid rgba(244,212,106,.20)",
+    background: "rgba(255,255,255,.03)",
+  }}
+>
+  <div
+    style={{
+      color: "#f4d46a",
+      fontWeight: 700,
+      fontSize: 17,
+      marginBottom: 12,
+    }}
+  >
+    🔮 Direcionamento Exclusivo
+  </div>
+
+  <p
+    style={{
+      color: "#ddd",
+      fontSize: 14,
+      lineHeight: 1.6,
+      marginBottom: 16,
+    }}
+  >
+    Receba uma orientação exclusiva da Cigana Estella.
+  </p>
+
+  <div
+    style={{
+      color: "#f4d46a",
+      fontWeight: 600,
+      fontSize: 14,
+      marginBottom: 6,
+    }}
+  >
+    Você possui
+  </div>
+
+  <div
+    style={{
+      color: "#fff",
+      fontSize: 26,
+      fontWeight: 700,
+      marginBottom: 6,
+    }}
+  >
+   {perguntasRestantes} pergunta{perguntasRestantes > 1 ? "s" : ""}
+
+  </div>
+
+  <div
+    style={{
+      color: "#bbb",
+      fontSize: 14,
+      marginBottom: 18,
+    }}
+  >
+    disponível{perguntasRestantes > 1 ? "is" : ""} neste mês.
+  </div>
+
+  {!reformulacao ? (
+  <button
+  disabled={perguntasRestantes === 0}
+  onClick={() => {
+    if (perguntasRestantes === 0) return;
+    setDirecionamentoAberto(true);
+  }}
+  style={{
+    width: "100%",
+    padding: 14,
+    borderRadius: 999,
+    border: "none",
+    cursor: perguntasRestantes === 0 ? "not-allowed" : "pointer",
+    background:
+      perguntasRestantes === 0
+        ? "#666"
+        : "linear-gradient(90deg,#6d28d9,#8b5cf6)",
+    color: "#fff",
+    fontWeight: 700,
+    fontSize: 15,
+    opacity: perguntasRestantes === 0 ? 0.6 : 1,
+  }}
+>
+  {perguntasRestantes === 0
+    ? "Limite mensal atingido"
+    : "✨ Fazer minha pergunta"}
+</button>
+) : (
+  <button
+    onClick={() => {
+      setPergunta(direcionamentoExclusivo?.pergunta || "");
+      setCategoria(direcionamentoExclusivo?.categoria || "");
+      setDirecionamentoAberto(true);
+    }}
+    style={{
+      width: "100%",
+      padding: 14,
+      borderRadius: 999,
+      border: "none",
+      cursor: "pointer",
+      background: "#f4b400",
+      color: "#2b0a3d",
+      fontWeight: 700,
+      fontSize: 15,
+    }}
+  >
+    ✍️ Reformular minha pergunta
+  </button>
+)}
+{reformulacao && (
+  <div
+    style={{
+      marginTop: 18,
+      padding: 18,
+      borderRadius: 16,
+      background: "rgba(244,180,0,.10)",
+      border: "1px solid rgba(244,180,0,.35)",
+    }}
+  >
+    <h3
+      style={{
+        color: "#f4d46a",
+        marginBottom: 10,
+      }}
+    >
+      🟡 Reformule sua pergunta
+    </h3>
+
+    <p
+      style={{
+        color: "#ddd",
+        fontSize: 14,
+        lineHeight: 1.6,
+        marginBottom: 15,
+      }}
+    >
+      Para que seu <strong>Direcionamento Exclusivo</strong> seja o mais preciso possível,
+      a Cigana solicitou uma reformulação da sua pergunta.
+    </p>
+
+    <div
+      style={{
+        background: "rgba(255,255,255,.05)",
+        borderRadius: 12,
+        padding: 15,
+        color: "#fff",
+        lineHeight: 1.7,
+        whiteSpace: "pre-wrap",
+      }}
+    >
+      {reformulacao.mensagem}
+    </div>
+  </div>
+)}
+
+</div>
+
+      <button
+       onClick={() => router.push(`/cliente/${slug}`)}
+        style={{
+  width: "100%",
+  padding: 14,
+  borderRadius: 999,
+  background: "#6d28d9",
+  color: "#fff",
+  border: "none",
+  cursor: "pointer",
+  marginTop: "auto",
+}}
+      >
+        ← Voltar ao Portal
+      </button>
+    </aside>
+
+    {/* CONTEÚDO */}
+
+    <section>
+      <h1
+        style={{
+          color: "#f4d46a",
+          fontSize: 34,
+          marginBottom: 8,
+        }}
+      >
+        Portal de Direcionamentos
+      </h1>
+
+      <p
+  style={{
+    color: "#ddd",
+    marginBottom: 35,
+  }}
+>
+  Que os oráculos iluminem seu caminho...
+</p>
+
+{direcionamentos.length > 0 && (
+  <>
+    <h2
+      style={{
+        color: "#f4d46a",
+        marginBottom: 18,
+        fontSize: 24,
+      }}
+    >
+      🔮 Mensagem da Estella
+    </h2>
+
+    {direcionamentos.map((direcionamentoExclusivo) => (
+      <div
+        key={direcionamentoExclusivo.id}
+        style={{
+          marginBottom: 30,
+          padding: 24,
+          borderRadius: 22,
+          background: "#1b0227",
+          border: "1px solid rgba(244,212,106,.25)",
+        }}
+      >
+
+    {/* REFORMULAR */}
+    {direcionamentoExclusivo.status ===
+      "Aguardando resposta da assinante" &&
+      reformulacao && (
+        <>
+          <p
+            style={{
+              color: "#fff",
+              lineHeight: 1.8,
+            }}
+          >
+            A Cigana Estella pediu que você reformule sua
+            pergunta para que o direcionamento seja mais
+            preciso.
+          </p>
+
+          <div
+            style={{
+              marginTop: 18,
+              padding: 18,
+              borderRadius: 14,
+              background: "rgba(255,255,255,.05)",
+              color: "#fff",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {reformulacao.mensagem}
+          </div>
+        </>
+      )}
+
+    {/* HISTÓRICO */}
+    {direcionamentoExclusivo.status ===
+      "Respondida em áudio" && (
+      <>
+        <p
+          style={{
+            color: "#7CFC90",
+            fontWeight: 700,
+            fontSize: 18,
+          }}
+        >
+          ✅ Sua pergunta foi respondida.
+        </p>
+
+        <p
+          style={{
+            color: "#ddd",
+            marginTop: 15,
+            lineHeight: 1.7,
+          }}
+        >
+          Esta pergunta foi respondida no Direcionamento
+          Exclusivo deste mês.
+        </p>
+
+        <div
+          style={{
+            marginTop: 18,
+            padding: 18,
+            borderRadius: 14,
+            background: "rgba(255,255,255,.05)",
+          }}
+        >
+          <strong>Pergunta</strong>
+
+          <div
+            style={{
+              marginTop: 10,
+              color: "#ddd",
+              fontStyle: "italic",
+            }}
+          >
+            "{direcionamentoExclusivo.pergunta}"
+          </div>
+        </div>
+      </>
+    )}
+
+    {/* PERGUNTA RECEBIDA */}
+    {direcionamentoExclusivo.status !==
+      "Respondida em áudio" &&
+      direcionamentoExclusivo.status !==
+        "Aguardando resposta da assinante" && (
+        <>
+          <p
+            style={{
+              color: "#fff",
+              lineHeight: 1.8,
+            }}
+          >
+            💜 Sua pergunta foi recebida.
+          </p>
+
+          <p
+            style={{
+              color: "#ddd",
+              marginTop: 10,
+            }}
+          >
+            Sua pergunta será respondida no próximo
+            Direcionamento Exclusivo.
+          </p>
+
+          <div
+            style={{
+              marginTop: 18,
+              padding: 18,
+              borderRadius: 14,
+              background: "rgba(255,255,255,.05)",
+            }}
+          >
+            <strong>Pergunta enviada</strong>
+
+            <div
+              style={{
+                marginTop: 10,
+                color: "#ddd",
+                fontStyle: "italic",
+              }}
+            >
+              "{direcionamentoExclusivo.pergunta}"
+            </div>
+          </div>
+        </>
+      )}
+
+        <div
+      style={{
+        marginTop: 20,
+        color: "#999",
+        fontSize: 13,
+      }}
+    >
+      📅{" "}
+      {new Date(
+        direcionamentoExclusivo.created_at
+      ).toLocaleDateString("pt-BR")}
+    </div>
+      </div>
+    ))}
+  </>
+)}
+
+
+{meses.map((mes) => {
+  const conteudos = conteudosDoMes(mes);
+
+  return (
         <div key={mes} style={{ marginBottom: 20 }}>
           <div
             onClick={() =>
@@ -296,11 +829,10 @@ return (
                 gap: 10,
               }}
             >
-              
+
 {Array.from(
   new Set(conteudos.map((c) => c.semana))
 ).map((semana) => (
-
   <div
     key={semana}
     style={{
@@ -311,7 +843,6 @@ return (
       marginBottom: 20,
     }}
   >
-
     <h3
       style={{
         color: "#f4d46a",
@@ -328,25 +859,24 @@ return (
         flexWrap: "wrap",
       }}
     >
-
       <button
-  onClick={() => abrirAudio(mes, semana)}
-  style={{
-    background: "#6d28d9",
-    color: "#fff",
-    border: "none",
-    borderRadius: 999,
-    padding: "12px 20px",
-    cursor: "pointer",
-  }}
->
-  🎧 Ouvir Direcionamento
-</button>
+        onClick={() => abrirAudio(mes, semana)}
+        style={{
+          background: "#6d28d9",
+          color: "#fff",
+          border: "none",
+          borderRadius: 999,
+          padding: "12px 20px",
+          cursor: "pointer",
+        }}
+      >
+        🎧 Ouvir Direcionamento
+      </button>
 
       <button
         onClick={() => abrirPdf(mes, semana)}
         style={{
-          background: "#f4d46a",
+          background: "#6aa1f4",
           color: "#2a0738",
           border: "none",
           borderRadius: 999,
@@ -356,36 +886,18 @@ return (
         }}
       >
         📄 Baixar PDF
+      
       </button>
-
-      {semana === "3" && (
-        <button
-          onClick={() => setDirecionamentoAberto(true)}
-          style={{
-    background: "#6d28d9",
-    color: "#fff",
-    border: "none",
-    borderRadius: 999,
-    padding: "12px 20px",
-    cursor: "pointer",
-  }}
-        >
-          🔮 Direcionamento Exclusivo
-        </button>
-      )}
-
     </div>
-
   </div>
-
 ))}
-
-
             </div>
           )}
         </div>
       );
-        })}
+    })}
+
+    </section>
 
     {audioAberto && (
       <div
@@ -513,6 +1025,59 @@ return (
         <option>🧠 Emocional</option>
       </select>
 
+<div
+  style={{
+    marginBottom: 20,
+  }}
+>
+  <p
+    style={{
+      color: "#fff",
+      marginBottom: 10,
+      fontWeight: 600,
+    }}
+  >
+    Sua situação precisa de uma resposta antes da próxima leitura semanal?
+  </p>
+
+  <label
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      color: "#fff",
+      marginBottom: 8,
+      cursor: "pointer",
+    }}
+  >
+    <input
+      type="radio"
+      name="urgente"
+      checked={urgente === true}
+      onChange={() => setUrgente(true)}
+    />
+    Sim, preciso de uma orientação com urgência.
+  </label>
+
+  <label
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      color: "#fff",
+      cursor: "pointer",
+    }}
+  >
+    <input
+      type="radio"
+      name="urgente"
+      checked={urgente === false}
+      onChange={() => setUrgente(false)}
+    />
+    Não, posso aguardar normalmente.
+  </label>
+</div>
+
       <textarea
         value={pergunta}
         onChange={(e) => setPergunta(e.target.value)}
@@ -543,21 +1108,54 @@ return (
       return;
     }
 
-    const { error } = await supabase
-      .from("exclusive_questions")
-      .insert({
-        slug,
-        nome,
-        categoria,
-        pergunta,
-        status: "pendente",
-      });
+    let error = null;
 
-    if (error) {
-      alert("Erro ao enviar sua pergunta.");
-      console.error(error);
-      return;
-    }
+if (
+  direcionamentoExclusivo &&
+  direcionamentoExclusivo.status ===
+    "Aguardando resposta da assinante"
+) {
+  // Reformulação
+  const resultado = await supabase
+    .from("exclusive_questions")
+    .update({
+      categoria,
+      pergunta,
+      urgente,
+      status: "Aceita",
+    })
+    .eq("id", direcionamentoExclusivo.id);
+
+  error = resultado.error;
+} else {
+  // Nova pergunta
+  const resultado = await supabase
+    .from("exclusive_questions")
+    .insert({
+      cliente_id: clienteId,
+      nome_cliente: slug,
+      email_cliente: email,
+      plano,
+      categoria,
+      pergunta,
+      urgente,
+      referencia_mes: new Date().toISOString().slice(0, 7),
+      status: "Nova pergunta",
+      ativo: true,
+    });
+
+  error = resultado.error;
+}
+
+if (error) {
+  console.error(error);
+
+  alert(
+    `Erro: ${error.message}\nCódigo: ${error.code ?? ""}`
+  );
+
+  return;
+}
 
     alert("Pergunta enviada com sucesso! 💜");
 
