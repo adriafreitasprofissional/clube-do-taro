@@ -188,6 +188,7 @@ setDirecionamentoExclusivo(exclusivo);
             .maybeSingle();
 
           setReformulacao(recado);
+          console.log("RECADO:", recado);
         } else {
           setReformulacao(null);
         }
@@ -652,10 +653,10 @@ marginBottom: mobile ? 20 : 0,
         }}
       >
 
-   {/* REFORMULAR */}
-   
-   {reformulacao && (
+  {/* REFORMULAR */}
 
+{reformulacao &&
+direcionamentoExclusivo.id === reformulacao.question_id && (
              <>
           <p
             style={{
