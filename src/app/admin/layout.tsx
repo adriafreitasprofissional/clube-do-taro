@@ -11,6 +11,7 @@ const menu = [
   { href: "/admin/financeiro", icon: "💳", label: "Financeiro" },
   { href: "/admin/atendimento", icon: "🌹", label: "Atendimento" },
   { href: "/admin/recados", icon: "📢", label: "Recados" },
+  { href: "/admin/maps/novo", icon: "✨", label: "Mapas" },
   { href: "/admin/beneficios", icon: "🎁", label: "Benefícios" },
   { href: "/admin/indicacoes", icon: "🤝", label: "Indicações" },
   { href: "/admin/sorteios", icon: "🍀", label: "Sorteios" },
