@@ -1,13 +1,19 @@
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 
-export async function generatePdf(_resultado?: any) {
-  const element = document.getElementById("premium-pdf");
+export async function generatePdf(
+  _resultado?: any,
+  nome?: string
+) {
+  const element =
+    document.getElementById("premium-pdf");
 
   if (!element) {
     alert("Conteúdo do PDF não encontrado.");
     return;
   }
+
+  console.log("PDF: iniciando");
 
   const pdf = new jsPDF({
     orientation: "portrait",
@@ -16,324 +22,364 @@ export async function generatePdf(_resultado?: any) {
     compress: true,
   });
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+  const pageWidth =
+    pdf.internal.pageSize.getWidth();
+
+  const pageHeight =
+    pdf.internal.pageSize.getHeight();
 
   const margin = 12;
-  const contentWidth = pageWidth - margin * 2;
-  const contentHeight = pageHeight - margin * 2;
+  const headerHeight = 10;
 
+  const contentWidth =
+    pageWidth - margin * 2;
+
+  const contentHeight =
+    pageHeight -
+    margin * 2 -
+    headerHeight;
+
+  /*
+   * Capturamos cada bloco separadamente.
+   *
+   * Isso evita ultrapassar o limite máximo
+   * de 32767px do canvas.
+   */
   const blocks = Array.from(
     element.children
   ) as HTMLElement[];
 
   if (blocks.length === 0) {
-    alert("Nenhum conteúdo encontrado para o PDF.");
+    alert(
+      "Nenhum conteúdo encontrado para o PDF."
+    );
     return;
   }
 
-  let pageStarted = false;
+  let pageNumber = 0;
 
-  for (const block of blocks) {
-    if (
-      block.offsetWidth === 0 ||
-      block.offsetHeight === 0
-    ) {
+  for (
+    let blockIndex = 0;
+    blockIndex < blocks.length;
+    blockIndex++
+  ) {
+    const block = blocks[blockIndex];
+
+    if (!block) {
       continue;
     }
 
-    const clone = block.cloneNode(
-      true
-    ) as HTMLElement;
+    console.log(
+      `PDF: preparando bloco ${
+        blockIndex + 1
+      } de ${blocks.length}`
+    );
 
-    clone.style.position = "fixed";
-    clone.style.left = "0";
-    clone.style.top = "0";
-    clone.style.width = "794px";
-    clone.style.height = "auto";
-    clone.style.maxWidth = "794px";
-    clone.style.maxHeight = "none";
-    clone.style.overflow = "visible";
-    clone.style.margin = "0";
-    clone.style.padding = "32px";
-    clone.style.background = "#F5F0F8";
-    clone.style.backgroundColor = "#F5F0F8";
-    clone.style.boxShadow = "none";
-    clone.style.zIndex = "999999";
-    clone.style.pointerEvents = "none";
-    clone.style.color = "#30263A";
+    const clone =
+      block.cloneNode(true) as HTMLElement;
 
+    /*
+     * Área temporária de captura.
+     */
+    const captureArea =
+      document.createElement("div");
+
+    captureArea.style.position =
+      "fixed";
+
+    captureArea.style.left =
+      "-9000px";
+
+    captureArea.style.top =
+      "0";
+
+    captureArea.style.width =
+      "794px";
+
+    captureArea.style.margin =
+      "0";
+
+    captureArea.style.padding =
+      "0";
+
+    captureArea.style.backgroundColor =
+      "#24183A";
+
+    captureArea.style.pointerEvents =
+      "none";
+
+    captureArea.style.zIndex =
+      "-9999";
+
+    /*
+     * Configuração principal do bloco.
+     *
+     * O PDF inteiro usa uma única cor:
+     * roxo profundo #24183A.
+     */
+    clone.style.position =
+      "relative";
+
+    clone.style.left =
+      "0";
+
+    clone.style.top =
+      "0";
+
+    clone.style.width =
+      "794px";
+
+    clone.style.maxWidth =
+      "794px";
+
+    clone.style.height =
+      "auto";
+
+    clone.style.maxHeight =
+      "none";
+
+    clone.style.overflow =
+      "visible";
+
+    clone.style.margin =
+      "0";
+
+    clone.style.backgroundColor =
+      "#24183A";
+
+    clone.style.background =
+      "#24183A";
+
+    clone.style.backgroundImage =
+      "none";
+
+    clone.style.boxShadow =
+      "none";
+
+    clone.style.filter =
+      "none";
+
+    clone.style.color =
+      "#F8F3EA";
+
+    /*
+     * Remove botões.
+     */
     clone
       .querySelectorAll("button")
       .forEach((button) => {
         button.remove();
       });
 
-    const originalNodes =
-      block.querySelectorAll("*");
-
-    const clonedNodes =
-      clone.querySelectorAll("*");
-
-    const length = Math.min(
-      originalNodes.length,
-      clonedNodes.length
-    );
-
-    for (let i = 0; i < length; i++) {
-      const original = originalNodes[i];
-      const cloned =
-        clonedNodes[i] as HTMLElement;
-
-      const computed =
-        window.getComputedStyle(original);
-
-      cloned.style.color =
-        computed.color;
-
-      cloned.style.fontFamily =
-        computed.fontFamily;
-
-      cloned.style.fontSize =
-        computed.fontSize;
-
-      cloned.style.fontWeight =
-        computed.fontWeight;
-
-      cloned.style.fontStyle =
-        computed.fontStyle;
-
-      cloned.style.lineHeight =
-        computed.lineHeight;
-
-      cloned.style.letterSpacing =
-        computed.letterSpacing;
-
-      cloned.style.textAlign =
-        computed.textAlign;
-
-      cloned.style.textTransform =
-        computed.textTransform;
-
-      cloned.style.display =
-        computed.display;
-
-      cloned.style.flexDirection =
-        computed.flexDirection;
-
-      cloned.style.alignItems =
-        computed.alignItems;
-
-      cloned.style.justifyContent =
-        computed.justifyContent;
-
-      cloned.style.gap =
-        computed.gap;
-
-      cloned.style.padding =
-        computed.padding;
-
-      cloned.style.margin =
-        computed.margin;
-
-      cloned.style.width =
-        computed.width;
-
-      cloned.style.height =
-        computed.height;
-
-      cloned.style.borderRadius =
-        computed.borderRadius;
-
-      cloned.style.border =
-        computed.border;
-
-      cloned.style.boxShadow =
-        "none";
-
-      /*
-       * Fundo premium.
-       */
-      const background =
-        computed.backgroundColor;
-
-      if (
-        background === "rgb(11, 7, 18)" ||
-        background === "rgb(18, 11, 28)" ||
-        background === "rgb(26, 19, 44)" ||
-        background === "rgb(36, 24, 58)"
-      ) {
-        cloned.style.backgroundColor =
-          "#FBF8FC";
-      } else {
-        cloned.style.backgroundColor =
-          background;
-      }
-
-      /*
-       * Textos muito claros ficam sofisticados
-       * em roxo profundo no PDF.
-       */
-      const color =
-        computed.color;
-
-      if (
-        color === "rgb(255, 248, 234)" ||
-        color === "rgb(242, 236, 248)" ||
-        color === "rgb(245, 242, 255)" ||
-        color === "rgb(215, 201, 231)"
-      ) {
-        cloned.style.color =
-          "#30263A";
-      }
-
-      /*
-       * Roxos muito escuros permanecem elegantes.
-       */
-      if (
-        color === "rgb(11, 7, 18)" ||
-        color === "rgb(26, 19, 44)"
-      ) {
-        cloned.style.color =
-          "#30263A";
-      }
-
-      cloned.style.boxShadow = "none";
-    }
-
     /*
-     * Fundo geral da página.
-     */
-    clone.style.backgroundColor =
-      "#F5F0F8";
-
-    /*
-     * Blocos internos.
+     * IMPORTANTE:
+     *
+     * Todos os elementos internos ficam
+     * transparentes.
+     *
+     * Assim não aparece mais:
+     *
+     * roxo por fora
+     * + preto por dentro.
+     *
+     * O fundo passa a ser uma única cor.
      */
     clone
-      .querySelectorAll(
-        "article, section, header, footer"
-      )
+      .querySelectorAll("*")
       .forEach((node) => {
         const item =
           node as HTMLElement;
 
-        const current =
-          window.getComputedStyle(item);
+        item.style.backgroundColor =
+          "transparent";
 
-        if (
-          current.backgroundColor ===
-            "rgb(11, 7, 18)" ||
-          current.backgroundColor ===
-            "rgb(18, 11, 28)" ||
-          current.backgroundColor ===
-            "rgb(26, 19, 44)" ||
-          current.backgroundColor ===
-            "rgb(36, 24, 58)"
-        ) {
-          item.style.backgroundColor =
-            "#FBF8FC";
-        }
+        item.style.backgroundImage =
+          "none";
 
         item.style.boxShadow =
           "none";
+
+        item.style.filter =
+          "none";
       });
 
-    document.body.appendChild(clone);
+    /*
+     * O próprio bloco continua sendo
+     * o fundo roxo principal.
+     */
+    clone.style.backgroundColor =
+      "#24183A";
 
-    await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => {
+    clone.style.background =
+      "#24183A";
+
+    captureArea.appendChild(
+      clone
+    );
+
+    document.body.appendChild(
+      captureArea
+    );
+
+    /*
+     * Aguarda o navegador calcular
+     * completamente o layout.
+     */
+    await new Promise<void>(
+      (resolve) => {
         requestAnimationFrame(() => {
-          resolve();
+          requestAnimationFrame(() => {
+            resolve();
+          });
         });
-      });
-    });
+      }
+    );
 
-    const width = clone.scrollWidth;
-    const height = clone.scrollHeight;
+    const width =
+      captureArea.scrollWidth;
+
+    const height =
+      captureArea.scrollHeight;
+
+    console.log(
+      `PDF: bloco ${
+        blockIndex + 1
+      } — ${width} x ${height}px`
+    );
 
     if (
       width <= 0 ||
       height <= 0
     ) {
-      clone.remove();
+      captureArea.remove();
       continue;
     }
 
+    /*
+     * O canvas nunca pode ultrapassar
+     * 32767px.
+     */
     const maxDimension =
-      Math.max(width, height);
+      30000;
 
-    const scale = Math.min(
-      1.2,
-      30000 / maxDimension
-    );
+    const scale =
+      Math.min(
+        1.5,
+        maxDimension /
+          Math.max(
+            width,
+            height
+          )
+      );
 
-    let canvas: HTMLCanvasElement;
+    let canvas:
+      HTMLCanvasElement;
 
     try {
-      canvas = await html2canvas(
-        clone,
-        {
-          scale,
-          useCORS: true,
-          backgroundColor: "#F5F0F8",
-          logging: false,
-
-          width,
-          height,
-
-          windowWidth: width,
-          windowHeight: height,
-
-          scrollX: 0,
-          scrollY: 0,
-        }
+      console.log(
+        `PDF: renderizando bloco ${
+          blockIndex + 1
+        }`
       );
+
+      canvas =
+        await html2canvas(
+          captureArea,
+          {
+            scale,
+
+            useCORS:
+              true,
+
+            backgroundColor:
+              "#24183A",
+
+            logging:
+              false,
+
+            width,
+
+            height,
+
+            windowWidth:
+              width,
+
+            windowHeight:
+              Math.min(
+                height,
+                maxDimension
+              ),
+
+            scrollX:
+              0,
+
+            scrollY:
+              0,
+          }
+        );
     } catch (error) {
       console.error(
-        "Erro ao gerar PDF:",
+        `PDF: erro no bloco ${
+          blockIndex + 1
+        }`,
         error
       );
 
-      clone.remove();
+      captureArea.remove();
 
       alert(
-        "Não foi possível preparar o PDF."
+        `Erro ao preparar a página ${
+          blockIndex + 1
+        } do PDF.`
       );
 
       return;
     }
 
-    clone.remove();
+    /*
+     * Remove imediatamente
+     * a cópia temporária.
+     */
+    captureArea.remove();
 
     if (
-      canvas.width === 0 ||
-      canvas.height === 0
+      canvas.width <= 0 ||
+      canvas.height <= 0
     ) {
       continue;
     }
 
+    /*
+     * Calcula o tamanho da imagem
+     * dentro do A4.
+     */
     const imageWidth =
       contentWidth;
 
     const imageHeight =
-      (canvas.height * imageWidth) /
+      (canvas.height *
+        imageWidth) /
       canvas.width;
 
+    /*
+     * Caso o bloco caiba inteiro
+     * em uma página.
+     */
     if (
-      imageHeight <= contentHeight
+      imageHeight <=
+      contentHeight
     ) {
-      if (pageStarted) {
+      if (pageNumber > 0) {
         pdf.addPage();
       }
 
       /*
-       * Fundo marfim/lilás.
+       * Fundo único da página.
        */
       pdf.setFillColor(
-        245,
-        240,
-        248
+        36,
+        24,
+        58
       );
 
       pdf.rect(
@@ -344,47 +390,98 @@ export async function generatePdf(_resultado?: any) {
         "F"
       );
 
+      /*
+       * Cabeçalho discreto.
+       */
+      pdf.setFont(
+        "helvetica",
+        "normal"
+      );
+
+      pdf.setFontSize(7);
+
+      pdf.setTextColor(
+        212,
+        175,
+        55
+      );
+
+      pdf.text(
+        "MAPA NUMEROLÓGICO PREMIUM",
+        margin,
+        7
+      );
+
+      if (nome) {
+        pdf.setTextColor(
+          220,
+          211,
+          229
+        );
+
+        pdf.text(
+          nome,
+          pageWidth - margin,
+          7,
+          {
+            align: "right",
+          }
+        );
+      }
+
+      /*
+       * Conteúdo.
+       */
       pdf.addImage(
-        canvas.toDataURL("image/png"),
+        canvas.toDataURL(
+          "image/png"
+        ),
         "PNG",
         margin,
-        margin,
+        margin +
+          headerHeight,
         imageWidth,
         imageHeight,
         undefined,
         "FAST"
       );
 
-      pageStarted = true;
+      pageNumber++;
 
       continue;
     }
 
-    const pixelsPerPage = Math.max(
-      1,
-      Math.floor(
-        (contentHeight /
-          imageHeight) *
-          canvas.height
-      )
-    );
+    /*
+     * Se o bloco for maior que uma
+     * página, divide em páginas A4.
+     */
+    const pixelsPerPage =
+      Math.max(
+        1,
+        Math.floor(
+          (contentHeight /
+            imageHeight) *
+            canvas.height
+        )
+      );
 
     let sourceY = 0;
 
     while (
-      sourceY < canvas.height
+      sourceY <
+      canvas.height
     ) {
-      if (pageStarted) {
+      if (pageNumber > 0) {
         pdf.addPage();
       }
 
       /*
-       * Fundo premium.
+       * Fundo único.
        */
       pdf.setFillColor(
-        245,
-        240,
-        248
+        36,
+        24,
+        58
       );
 
       pdf.rect(
@@ -395,10 +492,53 @@ export async function generatePdf(_resultado?: any) {
         "F"
       );
 
+      /*
+       * Cabeçalho discreto.
+       */
+      pdf.setFont(
+        "helvetica",
+        "normal"
+      );
+
+      pdf.setFontSize(7);
+
+      pdf.setTextColor(
+        212,
+        175,
+        55
+      );
+
+      pdf.text(
+        "MAPA NUMEROLÓGICO PREMIUM",
+        margin,
+        7
+      );
+
+      if (nome) {
+        pdf.setTextColor(
+          220,
+          211,
+          229
+        );
+
+        pdf.text(
+          nome,
+          pageWidth - margin,
+          7,
+          {
+            align: "right",
+          }
+        );
+      }
+
+      /*
+       * Altura desta parte da página.
+       */
       const sliceHeight =
         Math.min(
           pixelsPerPage,
-          canvas.height - sourceY
+          canvas.height -
+            sourceY
         );
 
       const sliceCanvas =
@@ -413,16 +553,22 @@ export async function generatePdf(_resultado?: any) {
         sliceHeight;
 
       const context =
-        sliceCanvas.getContext("2d");
+        sliceCanvas.getContext(
+          "2d"
+        );
 
       if (!context) {
         throw new Error(
-          "Não foi possível preparar o PDF."
+          "Não foi possível preparar a página."
         );
       }
 
+      /*
+       * Fundo único também no
+       * pedaço da imagem.
+       */
       context.fillStyle =
-        "#F5F0F8";
+        "#24183A";
 
       context.fillRect(
         0,
@@ -433,17 +579,21 @@ export async function generatePdf(_resultado?: any) {
 
       context.drawImage(
         canvas,
+
         0,
         sourceY,
+
         canvas.width,
         sliceHeight,
+
         0,
         0,
+
         canvas.width,
         sliceHeight
       );
 
-      const sliceData =
+      const imageData =
         sliceCanvas.toDataURL(
           "image/png"
         );
@@ -454,32 +604,36 @@ export async function generatePdf(_resultado?: any) {
         canvas.width;
 
       pdf.addImage(
-        sliceData,
+        imageData,
         "PNG",
         margin,
-        margin,
+        margin +
+          headerHeight,
         imageWidth,
         sliceHeightMm,
         undefined,
         "FAST"
       );
 
-      sourceY += sliceHeight;
+      sourceY +=
+        sliceHeight;
 
-      pageStarted = true;
+      pageNumber++;
     }
   }
 
-  if (!pageStarted) {
+  if (
+    pageNumber === 0
+  ) {
     alert(
-      "Não foi possível gerar o PDF."
+      "Não foi possível criar nenhuma página."
     );
 
     return;
   }
 
   /*
-   * Rodapé premium.
+   * RODAPÉ DE TODAS AS PÁGINAS.
    */
   const totalPages =
     pdf.getNumberOfPages();
@@ -492,15 +646,17 @@ export async function generatePdf(_resultado?: any) {
     pdf.setPage(page);
 
     /*
-     * Linha dourada.
+     * Linha dourada discreta.
      */
     pdf.setDrawColor(
-      184,
-      148,
-      50
+      212,
+      175,
+      55
     );
 
-    pdf.setLineWidth(0.25);
+    pdf.setLineWidth(
+      0.25
+    );
 
     pdf.line(
       margin,
@@ -509,6 +665,9 @@ export async function generatePdf(_resultado?: any) {
       pageHeight - 8
     );
 
+    /*
+     * Rodapé.
+     */
     pdf.setFont(
       "helvetica",
       "normal"
@@ -517,9 +676,9 @@ export async function generatePdf(_resultado?: any) {
     pdf.setFontSize(7);
 
     pdf.setTextColor(
-      117,
-      102,
-      128
+      216,
+      201,
+      232
     );
 
     pdf.text(
@@ -538,17 +697,36 @@ export async function generatePdf(_resultado?: any) {
     );
   }
 
+  console.log(
+    `PDF: ${totalPages} páginas criadas`
+  );
+
   /*
-   * Abre para visualização.
+   * Abre o PDF em outra aba.
    */
   const blob =
     pdf.output("blob");
 
   const url =
-    URL.createObjectURL(blob);
+    URL.createObjectURL(
+      blob
+    );
 
-  window.open(
-    url,
-    "_blank"
+  const newWindow =
+    window.open(
+      url,
+      "_blank"
+    );
+
+  if (!newWindow) {
+    alert(
+      "O navegador bloqueou a abertura do PDF. Permita pop-ups."
+    );
+
+    return;
+  }
+
+  console.log(
+    "PDF: aberto com sucesso"
   );
 }
