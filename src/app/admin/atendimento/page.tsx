@@ -59,7 +59,7 @@ const novas = useMemo(
 const reformular = useMemo(
   () =>
     perguntas.filter(
-      (p) => p.status === "Reformular"
+      (p) => p.status === "Aguardando resposta da assinante"
     ),
   [perguntas]
 );
@@ -193,14 +193,14 @@ async function carregarHistorico(questionId: string) {
           }}
         >
           <button
-           style={botaoAba(
-  aba === "aceitas",
-  "#2e7d32"
-)}
-          >
-            🔴 Novas ({novas.length})
-
-          </button>
+  onClick={() => setAba("novas")}
+  style={botaoAba(
+    aba === "novas",
+    "#c62828"
+  )}
+>
+  🔴 Novas ({novas.length})
+</button>
 
          <button
   onClick={() => setAba("aceitas")}

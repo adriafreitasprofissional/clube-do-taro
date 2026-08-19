@@ -738,53 +738,119 @@ direcionamentoExclusivo.id === reformulacao.question_id && (
       </>
     )}
 
-    {/* PERGUNTA RECEBIDA */}
-    {direcionamentoExclusivo.status !==
-      "Respondida em áudio" &&
-      direcionamentoExclusivo.status !==
-        "Aguardando resposta da assinante" && (
-        <>
-          <p
-            style={{
-              color: "#fff",
-              lineHeight: 1.8,
-            }}
-          >
-            💜 Sua pergunta foi recebida.
-          </p>
+    {/* STATUS DA PERGUNTA */}
 
-          <p
-            style={{
-              color: "#ddd",
-              marginTop: 10,
-            }}
-          >
-            Sua pergunta será respondida no próximo
-            Direcionamento Exclusivo.
-          </p>
+{direcionamentoExclusivo.status === "Aceita" && (
+  <>
+    <p
+      style={{
+        color: "#7CFC90",
+        fontWeight: 700,
+        fontSize: 18,
+      }}
+    >
+      💜 Sua pergunta foi aceita e será respondida no próximo direcionamento.
+    </p>
 
-          <div
-            style={{
-              marginTop: 18,
-              padding: 18,
-              borderRadius: 14,
-              background: "rgba(255,255,255,.05)",
-            }}
-          >
-            <strong>Pergunta enviada</strong>
+    <p
+      style={{
+        color: "#ddd",
+        marginTop: 10,
+        lineHeight: 1.7,
+      }}
+    >
+      Sua pergunta está aguardando o próximo Direcionamento Exclusivo.
+    </p>
 
-            <div
-              style={{
-                marginTop: 10,
-                color: "#ddd",
-                fontStyle: "italic",
-              }}
-            >
-              "{direcionamentoExclusivo.pergunta}"
-            </div>
-          </div>
-        </>
-      )}
+    <div
+      style={{
+        marginTop: 18,
+        padding: 18,
+        borderRadius: 14,
+        background: "rgba(255,255,255,.05)",
+      }}
+    >
+      <strong>Pergunta aceita</strong>
+
+      <div
+        style={{
+          marginTop: 10,
+          color: "#ddd",
+          fontStyle: "italic",
+        }}
+      >
+        "{direcionamentoExclusivo.pergunta}"
+      </div>
+    </div>
+  </>
+)}
+
+{direcionamentoExclusivo.status === "Nova pergunta" && (
+  <>
+    <p
+      style={{
+        color: "#fff",
+        lineHeight: 1.8,
+      }}
+    >
+      💜 Sua pergunta foi recebida.
+    </p>
+
+    <p
+      style={{
+        color: "#ddd",
+        marginTop: 10,
+      }}
+    >
+      Sua pergunta está aguardando análise para o próximo Direcionamento Exclusivo.
+    </p>
+
+    <div
+      style={{
+        marginTop: 18,
+        padding: 18,
+        borderRadius: 14,
+        background: "rgba(255,255,255,.05)",
+      }}
+    >
+      <strong>Pergunta enviada</strong>
+
+      <div
+        style={{
+          marginTop: 10,
+          color: "#ddd",
+          fontStyle: "italic",
+        }}
+      >
+        "{direcionamentoExclusivo.pergunta}"
+      </div>
+    </div>
+  </>
+)}
+
+{direcionamentoExclusivo.status === "Aguardando resposta da assinante" && (
+  <>
+    <p
+      style={{
+        color: "#f4d46a",
+        fontWeight: 700,
+        fontSize: 18,
+      }}
+    >
+      🟡 Sua pergunta precisa ser reformulada.
+    </p>
+
+    <p
+      style={{
+        color: "#ddd",
+        marginTop: 10,
+        lineHeight: 1.7,
+      }}
+    >
+      A Cigana Estella solicitou uma reformulação antes de aceitar sua pergunta para o próximo direcionamento.
+    </p>
+  </>
+)}
 
       <div
         style={{
