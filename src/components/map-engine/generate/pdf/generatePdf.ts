@@ -1,26 +1,420 @@
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 
+const PDF_BACKGROUND = "#24183A";
+const PDF_TEXT = "#F8F3EA";
+const PDF_GOLD = "#D4AF37";
+const PDF_BORDER = "#6F568D";
+
+const MAX_CANVAS_DIMENSION = 30000;
+
+function waitForLayout() {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        resolve();
+      });
+    });
+  });
+}
+
+/**
+ * Procura uma linha horizontal vazia próxima do limite da página.
+ *
+ * Isso permite terminar uma página entre linhas/parágrafos,
+ * em vez de cortar uma frase no meio.
+ */
+function findBestCutRow(
+  canvas: HTMLCanvasElement,
+  desiredRow: number,
+  minRow: number,
+  maxRow: number
+) {
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return desiredRow;
+  }
+
+  const start = Math.max(
+    minRow,
+    desiredRow - 180
+  );
+
+  const end = Math.min(
+    maxRow,
+    desiredRow + 40
+  );
+
+  if (end <= start) {
+    return desiredRow;
+  }
+
+  const imageData = context.getImageData(
+    0,
+    start,
+    canvas.width,
+    end - start
+  );
+
+  const data = imageData.data;
+
+  let bestRow = desiredRow;
+  let bestDistance = Infinity;
+
+  /*
+   * Consideramos uma linha vazia quando
+   * praticamente não existe conteúdo visível.
+   */
+  for (
+    let row = 0;
+    row < end - start;
+    row++
+  ) {
+    let visiblePixels = 0;
+
+    for (
+      let x = 0;
+      x < canvas.width;
+      x += 4
+    ) {
+      const index =
+        (row * canvas.width + x) * 4;
+
+      const r = data[index];
+      const g = data[index + 1];
+      const b = data[index + 2];
+      const a = data[index + 3];
+
+      if (a > 20) {
+        const brightness =
+          r + g + b;
+
+        /*
+         * O fundo é escuro.
+         * Textos e elementos claros
+         * apresentam brilho maior.
+         */
+        if (brightness > 150) {
+          visiblePixels++;
+        }
+      }
+    }
+
+    if (visiblePixels <= 2) {
+      const absoluteRow = start + row;
+      const distance = Math.abs(
+        absoluteRow - desiredRow
+      );
+
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestRow = absoluteRow;
+      }
+    }
+  }
+
+  return bestRow;
+}
+
+function addBackground(
+  pdf: jsPDF,
+  pageWidth: number,
+  pageHeight: number
+) {
+  pdf.setFillColor(36, 24, 58);
+
+  pdf.rect(
+    0,
+    0,
+    pageWidth,
+    pageHeight,
+    "F"
+  );
+}
+
+function addFooter(
+  pdf: jsPDF,
+  pageWidth: number,
+  pageHeight: number,
+  margin: number,
+  page: number,
+  totalPages: number,
+  nome?: string
+) {
+  pdf.setDrawColor(212, 175, 55);
+  pdf.setLineWidth(0.25);
+
+  pdf.line(
+    margin,
+    pageHeight - 8,
+    pageWidth - margin,
+    pageHeight - 8
+  );
+
+  pdf.setFont(
+    "helvetica",
+    "normal"
+  );
+
+  pdf.setFontSize(7);
+
+  pdf.setTextColor(
+    216,
+    201,
+    232
+  );
+
+  pdf.text(
+    "MAPA NUMEROLÓGICO PREMIUM",
+    margin,
+    pageHeight - 4
+  );
+
+  if (nome) {
+    pdf.text(
+      nome,
+      pageWidth / 2,
+      pageHeight - 4,
+      {
+        align: "center",
+      }
+    );
+  }
+
+  pdf.text(
+    `${page} / ${totalPages}`,
+    pageWidth - margin,
+    pageHeight - 4,
+    {
+      align: "right",
+    }
+  );
+}
+
+async function captureBlock(
+  block: HTMLElement
+) {
+  const clone =
+    block.cloneNode(true) as HTMLElement;
+
+  const captureArea =
+    document.createElement("div");
+
+  captureArea.style.position =
+    "fixed";
+
+  captureArea.style.left =
+    "-20000px";
+
+  captureArea.style.top = "0";
+
+  captureArea.style.width =
+    "794px";
+
+  captureArea.style.margin = "0";
+
+  captureArea.style.padding = "0";
+
+  captureArea.style.background =
+    PDF_BACKGROUND;
+
+  captureArea.style.backgroundColor =
+    PDF_BACKGROUND;
+
+  captureArea.style.pointerEvents =
+    "none";
+
+  captureArea.style.zIndex =
+    "-9999";
+
+  clone.style.position =
+    "relative";
+
+  clone.style.left = "0";
+
+  clone.style.top = "0";
+
+  clone.style.width =
+    "794px";
+
+  clone.style.maxWidth =
+    "794px";
+
+  clone.style.height = "auto";
+
+  clone.style.minHeight = "0";
+
+  clone.style.maxHeight =
+    "none";
+
+  clone.style.overflow =
+    "visible";
+
+  clone.style.margin = "0";
+
+  clone.style.background =
+    PDF_BACKGROUND;
+
+  clone.style.backgroundColor =
+    PDF_BACKGROUND;
+
+  clone.style.boxShadow =
+    "none";
+
+  clone.style.filter =
+    "none";
+
+  clone.style.color =
+    PDF_TEXT;
+
+  /*
+   * Impede que estilos de página
+   * existentes criem alturas artificiais.
+   */
+  clone.style.breakBefore =
+    "auto";
+
+  clone.style.breakAfter =
+    "auto";
+
+  clone.style.breakInside =
+    "auto";
+
+  clone
+    .querySelectorAll("button")
+    .forEach((button) => {
+      button.remove();
+    });
+
+  clone
+    .querySelectorAll("*")
+    .forEach((node) => {
+      const item =
+        node as HTMLElement;
+
+      item.style.boxShadow =
+        "none";
+
+      item.style.filter =
+        "none";
+
+      /*
+       * Não deixamos elementos internos
+       * criarem uma segunda cor de fundo.
+       */
+      item.style.backgroundColor =
+        "transparent";
+
+      item.style.backgroundImage =
+        "none";
+    });
+
+  captureArea.appendChild(
+    clone
+  );
+
+  document.body.appendChild(
+    captureArea
+  );
+
+  await waitForLayout();
+
+  const width =
+    Math.min(
+      captureArea.scrollWidth,
+      794
+    );
+
+  const height =
+    captureArea.scrollHeight;
+
+  if (
+    width <= 0 ||
+    height <= 0
+  ) {
+    captureArea.remove();
+
+    return null;
+  }
+
+  const scale =
+    Math.min(
+      1.5,
+      MAX_CANVAS_DIMENSION /
+        Math.max(width, height)
+    );
+
+  let canvas:
+    | HTMLCanvasElement
+    | null = null;
+
+  try {
+    canvas =
+      await html2canvas(
+        captureArea,
+        {
+          scale,
+
+          useCORS: true,
+
+          backgroundColor:
+            PDF_BACKGROUND,
+
+          logging: false,
+
+          width,
+
+          height,
+
+          windowWidth: width,
+
+          windowHeight:
+            Math.min(
+              height,
+              MAX_CANVAS_DIMENSION
+            ),
+
+          scrollX: 0,
+
+          scrollY: 0,
+        }
+      );
+  } finally {
+    captureArea.remove();
+  }
+
+  return canvas;
+}
+
 export async function generatePdf(
   _resultado?: any,
   nome?: string
 ) {
   const element =
-    document.getElementById("premium-pdf");
+    document.getElementById(
+      "premium-pdf"
+    );
 
   if (!element) {
-    alert("Conteúdo do PDF não encontrado.");
+    alert(
+      "Conteúdo do PDF não encontrado."
+    );
+
     return;
   }
 
-  console.log("PDF: iniciando");
+  console.log(
+    "PDF: iniciando"
+  );
 
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-    compress: true,
-  });
+  const pdf =
+    new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true,
+    });
 
   const pageWidth =
     pdf.internal.pageSize.getWidth();
@@ -29,30 +423,23 @@ export async function generatePdf(
     pdf.internal.pageSize.getHeight();
 
   const margin = 12;
-  const headerHeight = 10;
 
   const contentWidth =
     pageWidth - margin * 2;
 
   const contentHeight =
-    pageHeight -
-    margin * 2 -
-    headerHeight;
+    pageHeight - margin * 2;
 
-  /*
-   * Capturamos cada bloco separadamente.
-   *
-   * Isso evita ultrapassar o limite máximo
-   * de 32767px do canvas.
-   */
-  const blocks = Array.from(
-    element.children
-  ) as HTMLElement[];
+  const blocks =
+    Array.from(
+      element.children
+    ) as HTMLElement[];
 
   if (blocks.length === 0) {
     alert(
       "Nenhum conteúdo encontrado para o PDF."
     );
+
     return;
   }
 
@@ -63,7 +450,8 @@ export async function generatePdf(
     blockIndex < blocks.length;
     blockIndex++
   ) {
-    const block = blocks[blockIndex];
+    const block =
+      blocks[blockIndex];
 
     if (!block) {
       continue;
@@ -75,272 +463,12 @@ export async function generatePdf(
       } de ${blocks.length}`
     );
 
-    const clone =
-      block.cloneNode(true) as HTMLElement;
+    const canvas =
+      await captureBlock(block);
 
-    /*
-     * Área temporária de captura.
-     */
-    const captureArea =
-      document.createElement("div");
-
-    captureArea.style.position =
-      "fixed";
-
-    captureArea.style.left =
-      "-9000px";
-
-    captureArea.style.top =
-      "0";
-
-    captureArea.style.width =
-      "794px";
-
-    captureArea.style.margin =
-      "0";
-
-    captureArea.style.padding =
-      "0";
-
-    captureArea.style.backgroundColor =
-      "#24183A";
-
-    captureArea.style.pointerEvents =
-      "none";
-
-    captureArea.style.zIndex =
-      "-9999";
-
-    /*
-     * Configuração principal do bloco.
-     *
-     * O PDF inteiro usa uma única cor:
-     * roxo profundo #24183A.
-     */
-    clone.style.position =
-      "relative";
-
-    clone.style.left =
-      "0";
-
-    clone.style.top =
-      "0";
-
-    clone.style.width =
-      "794px";
-
-    clone.style.maxWidth =
-      "794px";
-
-    clone.style.height =
-      "auto";
-
-    clone.style.maxHeight =
-      "none";
-
-    clone.style.overflow =
-      "visible";
-
-    clone.style.margin =
-      "0";
-
-    clone.style.backgroundColor =
-      "#24183A";
-
-    clone.style.background =
-      "#24183A";
-
-    clone.style.backgroundImage =
-      "none";
-
-    clone.style.boxShadow =
-      "none";
-
-    clone.style.filter =
-      "none";
-
-    clone.style.color =
-      "#F8F3EA";
-
-    /*
-     * Remove botões.
-     */
-    clone
-      .querySelectorAll("button")
-      .forEach((button) => {
-        button.remove();
-      });
-
-    /*
-     * IMPORTANTE:
-     *
-     * Todos os elementos internos ficam
-     * transparentes.
-     *
-     * Assim não aparece mais:
-     *
-     * roxo por fora
-     * + preto por dentro.
-     *
-     * O fundo passa a ser uma única cor.
-     */
-    clone
-      .querySelectorAll("*")
-      .forEach((node) => {
-        const item =
-          node as HTMLElement;
-
-        item.style.backgroundColor =
-          "transparent";
-
-        item.style.backgroundImage =
-          "none";
-
-        item.style.boxShadow =
-          "none";
-
-        item.style.filter =
-          "none";
-      });
-
-    /*
-     * O próprio bloco continua sendo
-     * o fundo roxo principal.
-     */
-    clone.style.backgroundColor =
-      "#24183A";
-
-    clone.style.background =
-      "#24183A";
-
-    captureArea.appendChild(
-      clone
-    );
-
-    document.body.appendChild(
-      captureArea
-    );
-
-    /*
-     * Aguarda o navegador calcular
-     * completamente o layout.
-     */
-    await new Promise<void>(
-      (resolve) => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            resolve();
-          });
-        });
-      }
-    );
-
-    const width =
-      captureArea.scrollWidth;
-
-    const height =
-      captureArea.scrollHeight;
-
-    console.log(
-      `PDF: bloco ${
-        blockIndex + 1
-      } — ${width} x ${height}px`
-    );
-
-    if (
-      width <= 0 ||
-      height <= 0
-    ) {
-      captureArea.remove();
+    if (!canvas) {
       continue;
     }
-
-    /*
-     * O canvas nunca pode ultrapassar
-     * 32767px.
-     */
-    const maxDimension =
-      30000;
-
-    const scale =
-      Math.min(
-        1.5,
-        maxDimension /
-          Math.max(
-            width,
-            height
-          )
-      );
-
-    let canvas:
-      HTMLCanvasElement;
-
-    try {
-      console.log(
-        `PDF: renderizando bloco ${
-          blockIndex + 1
-        }`
-      );
-
-      canvas =
-        await html2canvas(
-          captureArea,
-          {
-            scale,
-
-            useCORS:
-              true,
-
-            backgroundColor:
-              "#24183A",
-
-            logging:
-              false,
-
-            width,
-
-            height,
-
-            windowWidth:
-              width,
-
-            windowHeight:
-              Math.min(
-                height,
-                maxDimension
-              ),
-
-            scrollX:
-              0,
-
-            scrollY:
-              0,
-          }
-        );
-    } catch (error) {
-      console.error(
-        `PDF: erro no bloco ${
-          blockIndex + 1
-        }`,
-        error
-      );
-
-      captureArea.remove();
-
-      alert(
-        `Erro ao preparar a página ${
-          blockIndex + 1
-        } do PDF.`
-      );
-
-      return;
-    }
-
-    /*
-     * Remove imediatamente
-     * a cópia temporária.
-     */
-    captureArea.remove();
 
     if (
       canvas.width <= 0 ||
@@ -349,10 +477,6 @@ export async function generatePdf(
       continue;
     }
 
-    /*
-     * Calcula o tamanho da imagem
-     * dentro do A4.
-     */
     const imageWidth =
       contentWidth;
 
@@ -362,84 +486,28 @@ export async function generatePdf(
       canvas.width;
 
     /*
-     * Caso o bloco caiba inteiro
-     * em uma página.
+     * BLOCO INTEIRO EM UMA PÁGINA
      */
     if (
-      imageHeight <=
-      contentHeight
+      imageHeight <= contentHeight
     ) {
       if (pageNumber > 0) {
         pdf.addPage();
       }
 
-      /*
-       * Fundo único da página.
-       */
-      pdf.setFillColor(
-        36,
-        24,
-        58
-      );
-
-      pdf.rect(
-        0,
-        0,
+      addBackground(
+        pdf,
         pageWidth,
-        pageHeight,
-        "F"
+        pageHeight
       );
 
-      /*
-       * Cabeçalho discreto.
-       */
-      pdf.setFont(
-        "helvetica",
-        "normal"
-      );
-
-      pdf.setFontSize(7);
-
-      pdf.setTextColor(
-        212,
-        175,
-        55
-      );
-
-      pdf.text(
-        "MAPA NUMEROLÓGICO PREMIUM",
-        margin,
-        7
-      );
-
-      if (nome) {
-        pdf.setTextColor(
-          220,
-          211,
-          229
-        );
-
-        pdf.text(
-          nome,
-          pageWidth - margin,
-          7,
-          {
-            align: "right",
-          }
-        );
-      }
-
-      /*
-       * Conteúdo.
-       */
       pdf.addImage(
         canvas.toDataURL(
           "image/png"
         ),
         "PNG",
         margin,
-        margin +
-          headerHeight,
+        margin,
         imageWidth,
         imageHeight,
         undefined,
@@ -452,94 +520,171 @@ export async function generatePdf(
     }
 
     /*
-     * Se o bloco for maior que uma
-     * página, divide em páginas A4.
+     * CAPÍTULO MAIOR QUE UMA PÁGINA.
+     *
+     * Aqui está a principal correção:
+     * procuramos uma linha vazia antes
+     * de cada corte.
      */
     const pixelsPerPage =
-      Math.max(
-        1,
-        Math.floor(
-          (contentHeight /
-            imageHeight) *
-            canvas.height
-        )
+      Math.floor(
+        (contentHeight *
+          canvas.width) /
+          imageWidth
       );
 
     let sourceY = 0;
 
     while (
-      sourceY <
-      canvas.height
+      sourceY < canvas.height
     ) {
+      const remaining =
+        canvas.height -
+        sourceY;
+
+      if (
+        remaining <=
+        pixelsPerPage
+      ) {
+        if (pageNumber > 0) {
+          pdf.addPage();
+        }
+
+        addBackground(
+          pdf,
+          pageWidth,
+          pageHeight
+        );
+
+        const finalCanvas =
+          document.createElement(
+            "canvas"
+          );
+
+        finalCanvas.width =
+          canvas.width;
+
+        finalCanvas.height =
+          remaining;
+
+        const finalContext =
+          finalCanvas.getContext(
+            "2d"
+          );
+
+        if (!finalContext) {
+          throw new Error(
+            "Não foi possível preparar a última página."
+          );
+        }
+
+        finalContext.fillStyle =
+          PDF_BACKGROUND;
+
+        finalContext.fillRect(
+          0,
+          0,
+          finalCanvas.width,
+          finalCanvas.height
+        );
+
+        finalContext.drawImage(
+          canvas,
+          0,
+          sourceY,
+          canvas.width,
+          remaining,
+          0,
+          0,
+          canvas.width,
+          remaining
+        );
+
+        const finalHeightMm =
+          (remaining *
+            imageWidth) /
+          canvas.width;
+
+        pdf.addImage(
+          finalCanvas.toDataURL(
+            "image/png"
+          ),
+          "PNG",
+          margin,
+          margin,
+          imageWidth,
+          finalHeightMm,
+          undefined,
+          "FAST"
+        );
+
+        pageNumber++;
+
+        break;
+      }
+
+      /*
+       * Limite ideal para esta página.
+       */
+      const desiredRow =
+        sourceY +
+        pixelsPerPage;
+
+      /*
+       * Procuramos um espaço vazio
+       * próximo do limite.
+       */
+      const cutRow =
+        findBestCutRow(
+          canvas,
+          desiredRow,
+          sourceY + 250,
+          desiredRow
+        );
+
+      /*
+       * Proteção para evitar
+       * cortes pequenos demais.
+       */
+      const minimumSlice =
+        Math.max(
+          400,
+          Math.floor(
+            pixelsPerPage * 0.55
+          )
+        );
+
+      let actualCut =
+        cutRow;
+
+      if (
+        actualCut -
+          sourceY <
+        minimumSlice
+      ) {
+        actualCut =
+          desiredRow;
+      }
+
+      const sliceHeight =
+        actualCut -
+        sourceY;
+
+      if (
+        sliceHeight <= 0
+      ) {
+        break;
+      }
+
       if (pageNumber > 0) {
         pdf.addPage();
       }
 
-      /*
-       * Fundo único.
-       */
-      pdf.setFillColor(
-        36,
-        24,
-        58
-      );
-
-      pdf.rect(
-        0,
-        0,
+      addBackground(
+        pdf,
         pageWidth,
-        pageHeight,
-        "F"
+        pageHeight
       );
-
-      /*
-       * Cabeçalho discreto.
-       */
-      pdf.setFont(
-        "helvetica",
-        "normal"
-      );
-
-      pdf.setFontSize(7);
-
-      pdf.setTextColor(
-        212,
-        175,
-        55
-      );
-
-      pdf.text(
-        "MAPA NUMEROLÓGICO PREMIUM",
-        margin,
-        7
-      );
-
-      if (nome) {
-        pdf.setTextColor(
-          220,
-          211,
-          229
-        );
-
-        pdf.text(
-          nome,
-          pageWidth - margin,
-          7,
-          {
-            align: "right",
-          }
-        );
-      }
-
-      /*
-       * Altura desta parte da página.
-       */
-      const sliceHeight =
-        Math.min(
-          pixelsPerPage,
-          canvas.height -
-            sourceY
-        );
 
       const sliceCanvas =
         document.createElement(
@@ -563,12 +708,8 @@ export async function generatePdf(
         );
       }
 
-      /*
-       * Fundo único também no
-       * pedaço da imagem.
-       */
       context.fillStyle =
-        "#24183A";
+        PDF_BACKGROUND;
 
       context.fillRect(
         0,
@@ -579,24 +720,15 @@ export async function generatePdf(
 
       context.drawImage(
         canvas,
-
         0,
         sourceY,
-
         canvas.width,
         sliceHeight,
-
         0,
         0,
-
         canvas.width,
         sliceHeight
       );
-
-      const imageData =
-        sliceCanvas.toDataURL(
-          "image/png"
-        );
 
       const sliceHeightMm =
         (sliceHeight *
@@ -604,27 +736,26 @@ export async function generatePdf(
         canvas.width;
 
       pdf.addImage(
-        imageData,
+        sliceCanvas.toDataURL(
+          "image/png"
+        ),
         "PNG",
         margin,
-        margin +
-          headerHeight,
+        margin,
         imageWidth,
         sliceHeightMm,
         undefined,
         "FAST"
       );
 
-      sourceY +=
-        sliceHeight;
-
       pageNumber++;
+
+      sourceY =
+        actualCut;
     }
   }
 
-  if (
-    pageNumber === 0
-  ) {
+  if (pageNumber === 0) {
     alert(
       "Não foi possível criar nenhuma página."
     );
@@ -633,7 +764,7 @@ export async function generatePdf(
   }
 
   /*
-   * RODAPÉ DE TODAS AS PÁGINAS.
+   * RODAPÉ
    */
   const totalPages =
     pdf.getNumberOfPages();
@@ -645,55 +776,14 @@ export async function generatePdf(
   ) {
     pdf.setPage(page);
 
-    /*
-     * Linha dourada discreta.
-     */
-    pdf.setDrawColor(
-      212,
-      175,
-      55
-    );
-
-    pdf.setLineWidth(
-      0.25
-    );
-
-    pdf.line(
+    addFooter(
+      pdf,
+      pageWidth,
+      pageHeight,
       margin,
-      pageHeight - 8,
-      pageWidth - margin,
-      pageHeight - 8
-    );
-
-    /*
-     * Rodapé.
-     */
-    pdf.setFont(
-      "helvetica",
-      "normal"
-    );
-
-    pdf.setFontSize(7);
-
-    pdf.setTextColor(
-      216,
-      201,
-      232
-    );
-
-    pdf.text(
-      "MAPA NUMEROLÓGICO PREMIUM",
-      margin,
-      pageHeight - 4
-    );
-
-    pdf.text(
-      `${page} / ${totalPages}`,
-      pageWidth - margin,
-      pageHeight - 4,
-      {
-        align: "right",
-      }
+      page,
+      totalPages,
+      nome
     );
   }
 
@@ -702,15 +792,13 @@ export async function generatePdf(
   );
 
   /*
-   * Abre o PDF em outra aba.
+   * ABRE FORA DO SISTEMA
    */
   const blob =
     pdf.output("blob");
 
   const url =
-    URL.createObjectURL(
-      blob
-    );
+    URL.createObjectURL(blob);
 
   const newWindow =
     window.open(

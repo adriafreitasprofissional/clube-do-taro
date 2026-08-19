@@ -15,6 +15,7 @@ import { calculatePersonalDay } from "@/modules/numerology/personalDay"
 import { calculatePinnacles, PinnaclesResult } from "@/modules/numerology/pinnacles"
 import { calculateCycles } from "@/modules/numerology/cycles"
 import { calculateKarmicDebts } from "@/modules/numerology/karmicDebts"
+import { calculateHiddenTendency, HiddenTendencyResult } from "@/modules/numerology/hiddenTendency"
 
 
 export interface NumerologyResult {
@@ -47,9 +48,8 @@ export interface NumerologyResult {
   }
 
   karmicDebts: number[]
+  hiddenTendency: HiddenTendencyResult
 }
-
-
 
 export class NumerologyEngine {
 
@@ -83,6 +83,7 @@ export class NumerologyEngine {
         third: 0,
         },
       karmicDebts: [],
+      hiddenTendency: calculateHiddenTendency(client.fullName),
       }
   
     }
@@ -103,15 +104,11 @@ export class NumerologyEngine {
     const personalDay = calculatePersonalDay(personalMonth)
     const mission = calculateMission(lifeLesson, destiny)
     const maturity = calculateMaturity(destiny, expression)
-    
-   const pinnacles = calculatePinnacles(
-  birthDateObj,
-  lifeLesson
-)
-
-const cycles = calculateCycles(birthDateObj)
+    const hiddenTendency = calculateHiddenTendency(fullName)
+    const pinnacles = calculatePinnacles( birthDateObj,lifeLesson)
+    const cycles = calculateCycles(birthDateObj)
     const karmicDebts = calculateKarmicDebts(lifeLesson, destiny, expression)
-
+    
     return {
       success: true,
 
@@ -130,6 +127,7 @@ const cycles = calculateCycles(birthDateObj)
       pinnacles,
       cycles,
       karmicDebts,
+      hiddenTendency,
     }
 
   }

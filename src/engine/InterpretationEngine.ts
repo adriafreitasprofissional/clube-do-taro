@@ -22,6 +22,9 @@ import { PERSONAL_DAY } from "@/modules/interpreter/personalDay"
 import { PINNACLES } from "@/modules/interpreter/pinnacles"
 import { CYCLES } from "@/modules/interpreter/cycles"
 import { KARMIC_DEBTS } from "@/modules/interpreter/karmicDebts"
+import { HIDDEN_TENDENCY } from "@/modules/interpreter/hiddenTendency"
+import { ENERGIZING_COLORS } from "@/modules/interpreter/energizingColors"
+import { PROFESSIONS } from "@/modules/interpreter/professions"
 
 export interface InterpretationChapter {
   id: string
@@ -244,6 +247,106 @@ for (const debt of numerology.karmicDebts) {
     id: `debt-${debt}`,
     title: interpretation.title,
     content: buildChapter(interpretation)
+  })
+}
+
+const hiddenNumbers =
+  numerology.hiddenTendency.numbers
+
+for (const number of hiddenNumbers) {
+  const interpretation =
+    HIDDEN_TENDENCY[number]
+
+  if (!interpretation) continue
+
+  chapters.push({
+    id: `hidden-tendency-${number}`,
+    title: interpretation.title,
+    content: buildChapter(interpretation)
+  })
+}
+const colorNumbers =
+  numerology.hiddenTendency.numbers
+
+const selectedColors =
+  colorNumbers
+    .map(
+      (number) =>
+        ENERGIZING_COLORS[number]
+    )
+    .filter(Boolean)
+
+if (selectedColors.length > 0) {
+  const primaryColors =
+    selectedColors.map(
+      (color) => color.primary
+    )
+
+  const complementaryColors =
+    selectedColors.flatMap(
+      (color) =>
+        color.complementary
+    )
+
+  const energies =
+    selectedColors.map(
+      (color) => color.energy
+    )
+
+  const guidances =
+    selectedColors.map(
+      (color) => color.guidance
+    )
+
+  chapters.push({
+    id: "energizing-colors",
+    title: "Cores que Energizam Você",
+    content: `
+Cores principais
+
+${primaryColors.join(" • ")}
+
+Cores complementares
+
+${[
+  ...new Set(
+    complementaryColors
+  )
+].join(" • ")}
+
+Energia
+
+${energies.join(" ")}
+
+Direcionamento
+
+${guidances.join(" ")}
+    `.trim()
+  })
+}
+const professionNumber =
+  numerology.destiny
+
+const profession =
+  PROFESSIONS[professionNumber]
+
+if (profession) {
+  chapters.push({
+    id: "professional-paths",
+    title: "Caminhos Profissionais",
+    content: `
+Áreas que podem favorecer sua expressão
+
+${profession.areas}
+
+Profissões mais alinhadas
+
+${profession.professions}
+
+Seu direcionamento profissional
+
+${profession.guidance}
+    `.trim()
   })
 }
     return {

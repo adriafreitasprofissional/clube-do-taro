@@ -6,10 +6,12 @@ import { generatePdf } from "./pdf/generatePdf";
 
 interface Props {
   resultado: any;
+  nome?: string;
 }
 
 export function GenerateStepPDF({
   resultado,
+  nome,
 }: Props) {
   const [gerando, setGerando] = useState(false);
 
@@ -21,9 +23,14 @@ export function GenerateStepPDF({
 
       console.log("CLIQUE PDF");
 
-      await generatePdf(resultado);
+      await generatePdf(
+        resultado,
+        nome
+      );
 
-      console.log("GERADOR TERMINOU");
+      console.log(
+        "GERADOR TERMINOU"
+      );
     } catch (error) {
       console.error(
         "ERRO PDF:",

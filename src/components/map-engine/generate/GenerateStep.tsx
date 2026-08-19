@@ -187,6 +187,7 @@ export function GenerateStep({
 
             <GenerateStepPDF
               resultado={resultado}
+              nome={client?.nome}
             />
 
           </div>
@@ -195,137 +196,143 @@ export function GenerateStep({
       )}
 
       {resultado && chapters.length > 0 && (
-  <div
-    id="premium-pdf"
-    aria-hidden="true"
-    style={{
-      position: "fixed",
-      left: "-20000px",
-      top: "0",
-      width: "794px",
-      margin: 0,
-      padding: "32px",
-      pointerEvents: "none",
-      zIndex: -9999,
-      background: "#24183A",
-    }}
-  >
-    {/* CAPA */}
+        <div
+          id="premium-pdf"
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            left: "-20000px",
+            top: "0",
+            width: "794px",
+            margin: 0,
+            padding: "32px",
+            pointerEvents: "none",
+            zIndex: -9999,
+            background: "#24183A",
+          }}
+        >
 
-    <div
-      className="mb-12 rounded-[38px] border border-[#6F568D] bg-[#24183A] px-10 py-20 text-center"
-    >
-      <p className="text-xs uppercase tracking-[0.5em] text-[#D4AF37]">
-        MAPA NUMEROLÓGICO PREMIUM
-      </p>
+          {/* CAPA */}
 
-      <h1 className="mt-8 text-5xl font-light text-[#F8F3EA]">
-        {client?.nome}
-      </h1>
+          <div className="mb-12 rounded-[38px] border border-[#6F568D] bg-[#24183A] px-10 py-20 text-center">
 
-      <p className="mt-6 text-lg text-[#D8C9E8]">
-        Uma leitura completa da sua jornada
-      </p>
+            <p className="text-xs uppercase tracking-[0.5em] text-[#D4AF37]">
+              MAPA NUMEROLÓGICO PREMIUM
+            </p>
 
-      <div className="mx-auto mt-10 h-px w-32 bg-[#D4AF37]" />
+            <h1 className="mt-8 text-5xl font-light text-[#F8F3EA]">
+              {client?.nome}
+            </h1>
 
-      <div className="mt-10 text-sm leading-7 text-[#D8C9E8]">
-        <p>
-          Nascimento:{" "}
-          {formatarData(client?.data_nascimento)}
-        </p>
+            <p className="mt-6 text-lg text-[#D8C9E8]">
+              Uma leitura completa da sua jornada
+            </p>
 
-        <p>
-          Hora:{" "}
-          {client?.hora_nascimento || "-"}
-        </p>
+            <div className="mx-auto mt-10 h-px w-32 bg-[#D4AF37]" />
 
-        <p>
-          Local:{" "}
-          {client?.cidade_nascimento || "-"}
-          {client?.estado_nascimento
-            ? ` • ${client.estado_nascimento}`
-            : ""}
-        </p>
-      </div>
-    </div>
-
-    {/* SUMÁRIO */}
-
-    <div className="mb-12 rounded-[30px] border border-[#6F568D] bg-[#24183A] px-10 py-12">
-      <p className="text-xs uppercase tracking-[0.4em] text-[#D4AF37]">
-        SUMÁRIO DO MAPA
-      </p>
-
-      <h2 className="mt-5 text-3xl font-light text-[#F8F3EA]">
-        Seus capítulos
-      </h2>
-
-      <div className="mt-8 space-y-4">
-        {chapters.map(
-          (chapter: any, index: number) => (
-            <div
-              key={
-                chapter.id ||
-                `chapter-${index}`
-              }
-              className="flex items-center gap-4 border-b border-[#6F568D]/50 pb-4"
-            >
-              <span className="text-sm text-[#D4AF37]">
-                {String(index + 1).padStart(
-                  2,
-                  "0"
+            <div className="mt-10 text-sm leading-7 text-[#D8C9E8]">
+              <p>
+                Nascimento:{" "}
+                {formatarData(
+                  client?.data_nascimento
                 )}
-              </span>
+              </p>
 
-              <span className="text-base text-[#F8F3EA]">
-                {chapter.title ||
-                  `Capítulo ${index + 1}`}
-              </span>
+              <p>
+                Hora:{" "}
+                {client?.hora_nascimento || "-"}
+              </p>
+
+              <p>
+                Local:{" "}
+                {client?.cidade_nascimento || "-"}
+                {client?.estado_nascimento
+                  ? ` • ${client.estado_nascimento}`
+                  : ""}
+              </p>
             </div>
-          )
-        )}
-      </div>
-    </div>
 
-    {/* CAPÍTULOS */}
-
-    {chapters.map(
-      (chapter: any, index: number) => {
-        if (!chapter?.content) {
-          return null;
-        }
-
-        return (
-          <div
-            key={
-              chapter.id ||
-              `pdf-chapter-${index}`
-            }
-            className="mb-12"
-          >
-            <PremiumChapter
-              title={
-                chapter.title ||
-                `Capítulo ${index + 1}`
-              }
-              number={
-                chapter.number ??
-                String(index + 1)
-              }
-              subtitle={
-                chapter.subtitle
-              }
-              content={
-                chapter.content
-              }
-            />
           </div>
-        );
-      }
-    )}
-  </div>
-)}
+
+          {/* SUMÁRIO */}
+
+          <div className="mb-12 rounded-[30px] border border-[#6F568D] bg-[#24183A] px-10 py-12">
+
+            <p className="text-xs uppercase tracking-[0.4em] text-[#D4AF37]">
+              SUMÁRIO DO MAPA
+            </p>
+
+            <h2 className="mt-5 text-3xl font-light text-[#F8F3EA]">
+              Seus capítulos
+            </h2>
+
+            <div className="mt-8 grid grid-cols-2 gap-x-10">
+  {chapters.map(
+    (chapter: any, index: number) => (
+      <div
+        key={
+          chapter.id ||
+          `chapter-${index}`
+        }
+        className="flex min-h-[42px] items-center gap-4 border-b border-[#6F568D]/50 py-3"
+      >
+        <span className="shrink-0 text-sm text-[#D4AF37]">
+          {String(index + 1).padStart(
+            2,
+            "0"
+          )}
+        </span>
+
+        <span className="text-sm text-[#F8F3EA]">
+          {chapter.title ||
+            `Capítulo ${index + 1}`}
+        </span>
+      </div>
+    )
+  )}
+</div>
+
+          </div>
+
+          {/* CAPÍTULOS */}
+
+          {chapters.map(
+            (chapter: any, index: number) => {
+              if (!chapter?.content) {
+                return null;
+              }
+
+              return (
+                <div
+                  key={
+                    chapter.id ||
+                    `pdf-chapter-${index}`
+                  }
+                  className="mb-12"
+                >
+                  <PremiumChapter
+                    title={
+                      chapter.title ||
+                      `Capítulo ${index + 1}`
+                    }
+                    number={
+                      chapter.number ??
+                      String(index + 1)
+                    }
+                    subtitle={
+                      chapter.subtitle
+                    }
+                    content={
+                      chapter.content
+                    }
+                  />
+                </div>
+              );
+            }
+          )}
+
+        </div>
+      )}
 
     </div>
   );
