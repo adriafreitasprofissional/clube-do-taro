@@ -122,7 +122,7 @@ export const PERSONAL_DAY: Record<number, InterpretationData> = {
       "Observe números, prioridades e oportunidades com atenção. Decida com firmeza, mas mantenha seus princípios como referência."
   },
 
-  9: {
+    9: {
     title: "Dia Pessoal 9",
     intro: "Hoje é um dia de conclusão, compreensão e libertação.",
     meaning:
@@ -135,6 +135,52 @@ export const PERSONAL_DAY: Record<number, InterpretationData> = {
       "Finalizar algo importante, liberar o que já não faz sentido e criar espaço para uma nova possibilidade.",
     advice:
       "Pergunte o que você pode concluir hoje. Às vezes, uma pequena liberação traz uma grande sensação de espaço."
+  },
+
+  11: {
+    title: "Dia Pessoal 11",
+    intro: "Hoje é um dia de intuição, percepção e inspiração.",
+    meaning:
+      "O Dia Pessoal 11 amplia a sensibilidade e a percepção. É um dia que pode favorecer insights, compreensão de situações e percepção de caminhos que ainda não estavam claros.",
+    gifts:
+      "Intuição, inspiração, sensibilidade, criatividade e percepção.",
+    challenges:
+      "Seu desenvolvimento está em diferenciar percepção de ansiedade. Nem tudo precisa de uma resposta imediata.",
+    mission:
+      "Perceber com mais profundidade aquilo que o dia está mostrando e transformar essa percepção em consciência.",
+    advice:
+      "Observe os sinais e as ideias que surgirem, mas permita que sua percepção encontre clareza antes de tomar decisões importantes."
+  },
+
+  22: {
+    title: "Dia Pessoal 22",
+    intro: "Hoje é um dia de construção, organização e realização.",
+    meaning:
+      "O Dia Pessoal 22 favorece planejamento, organização e concretização. É um dia especialmente adequado para transformar uma ideia importante em uma ação prática e estruturada.",
+    gifts:
+      "Visão, organização, planejamento, liderança e capacidade de realização.",
+    challenges:
+      "Seu desenvolvimento está em não tentar resolver tudo de uma vez. Grandes resultados começam com uma ação bem escolhida.",
+    mission:
+      "Transformar uma intenção importante em uma realização concreta.",
+    advice:
+      "Escolha uma prioridade e dê um passo concreto. Não precisa construir tudo hoje; precisa começar a construir."
+  },
+
+  33: {
+    title: "Dia Pessoal 33",
+    intro: "Hoje é um dia de acolhimento, amor e contribuição.",
+    meaning:
+      "O Dia Pessoal 33 favorece cuidado, ensino, orientação e vínculos significativos. É um dia que pode mostrar como sua experiência pode contribuir para o crescimento de outras pessoas.",
+    gifts:
+      "Compaixão, acolhimento, sabedoria, capacidade de ensinar e orientação.",
+    challenges:
+      "Seu desenvolvimento está em ajudar sem assumir para si aquilo que pertence às escolhas dos outros.",
+    mission:
+      "Transformar conhecimento, experiência e amor em uma contribuição significativa.",
+    advice:
+      "Ofereça aquilo que pode ajudar, mas respeite o caminho de cada pessoa. Cuidar também significa respeitar limites."
   }
+
 
 }

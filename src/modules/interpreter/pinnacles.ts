@@ -135,6 +135,51 @@ export const PINNACLES: Record<number, InterpretationData> = {
       "Concluir ciclos com consciência e transformar experiências em sabedoria para a próxima etapa da vida.",
     advice:
       "Honre o que foi vivido, mas não permaneça apenas porque já investiu muito. Algumas conclusões representam crescimento."
+  },
+
+   11: {
+    title: "Pináculo 11",
+    intro: "Este Pináculo amplia intuição, percepção e consciência.",
+    meaning:
+      "O Pináculo 11 favorece desenvolvimento intuitivo, sensibilidade, inspiração e percepção profunda. Esta fase pode ampliar sua capacidade de compreender pessoas, situações e acontecimentos por perspectivas que vão além do que é imediatamente visível.",
+    gifts:
+      "Intuição, inspiração, sensibilidade, criatividade, percepção e capacidade de compreender experiências com maior profundidade.",
+    challenges:
+      "Seu desenvolvimento está em equilibrar sensibilidade e discernimento. Perceber muito não significa precisar agir sobre tudo imediatamente.",
+    mission:
+      "Aprofundar consciência, desenvolver a própria percepção e transformar inspiração em escolhas que tenham significado.",
+    advice:
+      "Confie na sua percepção, mas permita que ela amadureça antes de tomar decisões importantes. Sensibilidade também precisa de clareza."
+  },
+
+  22: {
+    title: "Pináculo 22",
+    intro: "Este Pináculo favorece grandes construções e realização.",
+    meaning:
+      "O Pináculo 22 favorece visão de longo prazo, planejamento, organização e capacidade de transformar projetos importantes em realizações concretas. É uma fase que pode colocar você diante de responsabilidades maiores e oportunidades de construir algo duradouro.",
+    gifts:
+      "Visão ampla, liderança, planejamento, organização, capacidade de realização e força para transformar ideias em estruturas concretas.",
+    challenges:
+      "Seu desenvolvimento está em não se deixar dominar pelo tamanho dos objetivos. Grandes construções precisam de método, paciência e etapas bem definidas.",
+    mission:
+      "Transformar uma visão significativa em uma realização concreta que tenha valor duradouro.",
+    advice:
+      "Pense grande, mas construa por etapas. Uma grande realização começa quando uma visão encontra organização e ação."
+  },
+
+  33: {
+    title: "Pináculo 33",
+    intro: "Este Pináculo favorece amor, ensino e contribuição.",
+    meaning:
+      "O Pináculo 33 amplia experiências relacionadas a acolhimento, conhecimento, orientação e contribuição. Esta fase pode revelar uma capacidade maior de transformar aquilo que você aprendeu ao longo da vida em algo que também beneficie outras pessoas.",
+    gifts:
+      "Compaixão, sabedoria, capacidade de ensinar, acolhimento, orientação e habilidade para transformar experiências em conhecimento.",
+    challenges:
+      "Seu desenvolvimento está em contribuir sem assumir a responsabilidade pelas escolhas de todos. Ensinar e cuidar também significa respeitar a autonomia do outro.",
+    mission:
+      "Transformar experiência e conhecimento em contribuição, orientação e crescimento para outras pessoas.",
+    advice:
+      "Compartilhe aquilo que sua trajetória ensinou, mas permita que cada pessoa faça seu próprio caminho."
   }
 
 }
