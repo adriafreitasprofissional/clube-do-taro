@@ -135,7 +135,7 @@ export const PERSONAL_MONTH: Record<number, InterpretationData> = {
       "Concluir o que precisa ser concluído e criar espaço emocional, mental e prático para o próximo movimento.",
     advice:
       "Finalize o que puder, organize o que ficou pendente e libere aquilo que já não possui lugar na sua vida."
-  }
+  },
 
   11: {
     title: "Mês Pessoal 11",
