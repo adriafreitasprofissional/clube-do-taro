@@ -135,7 +135,8 @@ export const PERSONAL_YEAR: Record<number, InterpretationData> = {
       "Concluir o que precisa ser concluído, transformar experiências em sabedoria e preparar espaço para o próximo ciclo.",
     advice:
       "Não tenha medo de fechar portas que já cumpriram seu papel. Um novo ciclo precisa de espaço para nascer."
-  }
+  },
+  
   11: {
     title: "Ano Pessoal 11",
     intro: "Este é um ano de intuição, inspiração e expansão da consciência.",
