@@ -137,4 +137,49 @@ export const PERSONAL_MONTH: Record<number, InterpretationData> = {
       "Finalize o que puder, organize o que ficou pendente e libere aquilo que já não possui lugar na sua vida."
   }
 
+  11: {
+    title: "Mês Pessoal 11",
+    intro: "Este mês favorece intuição, inspiração e percepção.",
+    meaning:
+      "O Mês Pessoal 11 amplia a sensibilidade, a intuição e a percepção sobre pessoas, situações e escolhas. É um período que pode trazer ideias importantes, encontros significativos e uma compreensão mais profunda sobre aquilo que está acontecendo em sua vida.",
+    gifts:
+      "Intuição, inspiração, sensibilidade, criatividade, percepção e capacidade de compreender situações por diferentes perspectivas.",
+    challenges:
+      "Seu desenvolvimento está em equilibrar sensibilidade e discernimento. Nem toda percepção precisa gerar uma ação imediata; algumas precisam primeiro ser compreendidas.",
+    mission:
+      "Aprofundar sua percepção e transformar inspiração em escolhas mais conscientes e alinhadas ao que possui significado.",
+    advice:
+      "Observe suas percepções com atenção e dê tempo para que elas encontrem clareza. Intuição e discernimento podem caminhar juntos."
+  },
+
+  22: {
+    title: "Mês Pessoal 22",
+    intro: "Este mês favorece construção, organização e realização.",
+    meaning:
+      "O Mês Pessoal 22 favorece planejamento, estruturação e concretização de projetos importantes. É um período para transformar ideias em ações organizadas e utilizar sua capacidade de realização de maneira consciente.",
+    gifts:
+      "Visão de longo prazo, organização, planejamento, liderança, capacidade de realização e habilidade para transformar ideias em resultados concretos.",
+    challenges:
+      "Seu desenvolvimento está em não se deixar sobrecarregar pelo tamanho dos objetivos. Grandes projetos precisam de etapas, prioridades e constância.",
+    mission:
+      "Transformar uma visão importante em algo concreto, estruturado e significativo.",
+    advice:
+      "Escolha uma prioridade e transforme-a em etapas. O que parece grande pode se tornar possível quando você constrói uma parte de cada vez."
+  },
+
+  33: {
+    title: "Mês Pessoal 33",
+    intro: "Este mês favorece amor, ensino, acolhimento e contribuição.",
+    meaning:
+      "O Mês Pessoal 33 amplia a capacidade de acolher, ensinar, orientar e contribuir com outras pessoas. É um período que pode colocar em evidência relações importantes, conhecimentos adquiridos e formas de transformar experiência em contribuição.",
+    gifts:
+      "Compaixão, acolhimento, capacidade de ensinar, orientação, sensibilidade e habilidade para transformar experiências em conhecimento.",
+    challenges:
+      "Seu desenvolvimento está em contribuir sem assumir responsabilidades que pertencem aos outros. Cuidar, ensinar e orientar também exige limites.",
+    mission:
+      "Utilizar experiência, conhecimento e amor para contribuir com o crescimento de pessoas e projetos que tenham significado.",
+    advice:
+      "Compartilhe aquilo que sabe, mas respeite o caminho de cada pessoa. Sua experiência pode orientar sem precisar carregar o destino de ninguém."
+  }
+
 }

@@ -136,5 +136,49 @@ export const PERSONAL_YEAR: Record<number, InterpretationData> = {
     advice:
       "Não tenha medo de fechar portas que já cumpriram seu papel. Um novo ciclo precisa de espaço para nascer."
   }
+  11: {
+    title: "Ano Pessoal 11",
+    intro: "Este é um ano de intuição, inspiração e expansão da consciência.",
+    meaning:
+      "O Ano Pessoal 11 amplia a percepção, a sensibilidade e a capacidade de compreender situações por perspectivas mais profundas. É um período que pode trazer insights importantes, encontros significativos e uma necessidade maior de ouvir aquilo que sua própria percepção está indicando.",
+    gifts:
+      "Intuição, inspiração, sensibilidade, percepção, criatividade e capacidade de compreender situações de maneira mais ampla.",
+    challenges:
+      "Seu desenvolvimento está em equilibrar sensibilidade e clareza. Nem toda percepção precisa ser transformada imediatamente em decisão; algumas precisam primeiro ser compreendidas.",
+    mission:
+      "Aprofundar sua consciência, confiar na própria percepção e transformar inspiração em escolhas e experiências que tenham significado.",
+    advice:
+      "Observe os sinais, ideias e percepções que surgirem, mas dê tempo para que sua intuição encontre clareza antes de agir."
+  },
+
+  22: {
+    title: "Ano Pessoal 22",
+    intro: "Este é um ano de grandes construções e realização concreta.",
+    meaning:
+      "O Ano Pessoal 22 favorece planejamento, organização, realização e construção de projetos que podem produzir resultados duradouros. É um período para transformar uma visão ampla em algo concreto, estruturado e significativo.",
+    gifts:
+      "Visão de longo prazo, organização, liderança, planejamento, capacidade de realização e força para transformar ideias em estruturas concretas.",
+    challenges:
+      "Seu desenvolvimento está em não se deixar paralisar pelo tamanho dos objetivos. Grandes realizações precisam ser divididas em etapas possíveis e construídas com consistência.",
+    mission:
+      "Transformar uma visão importante em realização concreta, construindo algo que tenha significado e possa produzir impacto duradouro.",
+    advice:
+      "Pense grande, mas comece pelo que pode ser feito hoje. Uma grande construção nasce de muitos passos conscientes."
+  },
+
+  33: {
+    title: "Ano Pessoal 33",
+    intro: "Este é um ano de amor, acolhimento, ensino e contribuição.",
+    meaning:
+      "O Ano Pessoal 33 amplia a capacidade de cuidar, ensinar, orientar e contribuir com outras pessoas. É um período que pode trazer experiências importantes relacionadas a vínculos, conhecimento, responsabilidade e propósito.",
+    gifts:
+      "Compaixão, acolhimento, capacidade de ensinar, orientação, sensibilidade e habilidade para transformar experiências em conhecimento.",
+    challenges:
+      "Seu desenvolvimento está em contribuir sem assumir para si a responsabilidade pelo caminho de todos. Cuidar também exige limites e respeito pela autonomia de cada pessoa.",
+    mission:
+      "Transformar conhecimento, experiência e amor em orientação e contribuição para o crescimento de outras pessoas.",
+    advice:
+      "Compartilhe aquilo que sabe, mas não carregue o que pertence às escolhas dos outros. Sua contribuição se torna mais forte quando também preserva seu equilíbrio."
+  }
 
 }
