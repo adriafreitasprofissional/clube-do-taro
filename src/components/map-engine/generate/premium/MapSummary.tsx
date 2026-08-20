@@ -16,6 +16,8 @@ import {
   Crown,
   Infinity,
   ChevronRight,
+    Palette,
+  Lightbulb,
 } from "lucide-react";
 
 import { PremiumChapter } from "./PremiumChapter";
@@ -338,8 +340,8 @@ export function MapSummary({
                 }`}
               >
                 <span className="w-7 text-[11px] text-[#806D9E]">
-                  20
-                </span>
+  22
+</span>
 
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#5A467D] text-[#9E8BB9]">
                   <Infinity size={16} />
@@ -387,38 +389,309 @@ export function MapSummary({
               </div>
             )}
 
-            {selected && currentChapter && (
-              <div
-                key={selected}
-                className="animate-in fade-in slide-in-from-bottom-2 duration-500"
-              >
-              <button
-  type="button"
-  onClick={() => onSelect(null)}
-  className="mb-6 flex items-center gap-2 text-sm font-medium text-[#D4AF37] transition hover:text-[#F1D36A]"
->
-  ← Voltar ao Sumário
-</button>
+        {selected && currentChapter && (
+  <div
+    key={selected}
+    className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+  >
 
+    <button
+      type="button"
+      onClick={() => onSelect(null)}
+      className="mb-6 flex items-center gap-2 text-sm font-medium text-[#D4AF37] transition hover:text-[#F1D36A]"
+    >
+      ← Voltar ao Sumário
+    </button>
 
-              <PremiumChapter
-  title={
-    selectedDefinition?.title ||
-    currentChapter.title
-  }
-  number={
-    selectedDefinition
-      ? selectedDefinition.value(resultado)
-      : "—"
-  }
-  subtitle={
-    selectedDefinition?.subtitle ||
-    "Uma dimensão importante da sua jornada."
-  }
-  content={currentChapter.content}
-/>
+    {/* ====================================================== */}
+    {/* CORES FAVORÁVEIS */}
+    {/* ====================================================== */}
+
+    {selected === "energizing-colors" ? (
+
+      <div className="overflow-hidden rounded-[32px] border border-[#4A3A72] bg-[#211536]">
+
+        <div className="border-b border-[#4A3A72] px-8 py-10 text-center">
+
+          <div className="flex items-center justify-center gap-3">
+            <Palette
+              size={20}
+              className="text-[#D4AF37]"
+            />
+
+            <span className="text-xs uppercase tracking-[0.4em] text-[#D4AF37]">
+              Capítulo 20
+            </span>
+          </div>
+
+          <h2 className="mt-5 text-3xl font-light text-[#F5F2FF] md:text-4xl">
+            Cores Favoráveis
+          </h2>
+
+          <p className="mt-3 text-sm text-[#A994C7]">
+            As cores que harmonizam e fortalecem sua energia
+          </p>
+
+        </div>
+
+        <div className="space-y-8 p-8 md:p-10">
+
+          {/* CORES PRINCIPAIS */}
+
+          <div>
+
+            <h3 className="mb-5 text-sm font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">
+              Cores principais
+            </h3>
+
+            <div className="flex flex-wrap gap-8">
+
+              <div className="text-center">
+
+                <div
+                  className="mx-auto h-24 w-24 rounded-full border-4 border-[#D4AF37] shadow-[0_0_30px_rgba(139,92,246,.45)]"
+                  style={{
+                    background:
+                      currentChapter.content?.mainColorHex ||
+                      "#7C3AED",
+                  }}
+                />
+
+                <p className="mt-4 text-lg font-medium text-[#F5F2FF]">
+                  {currentChapter.content?.mainColor || "Violeta"}
+                </p>
+
               </div>
-            )}
+
+            </div>
+
+          </div>
+
+          {/* CORES COMPLEMENTARES */}
+
+          <div>
+
+            <h3 className="mb-5 text-sm font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">
+              Cores complementares
+            </h3>
+
+            <div className="flex flex-wrap gap-8">
+
+              {(currentChapter.content?.complementaryColors || "Branco • Dourado")
+                .split("•")
+                .map((cor: string, index: number) => {
+
+                  const nome = cor.trim();
+
+                  const hex =
+                    nome.toLowerCase().includes("branco")
+                      ? "#FFFFFF"
+                      : nome.toLowerCase().includes("dourado")
+                      ? "#E7C96F"
+                      : "#8B5CF6";
+
+                  return (
+                    <div
+                      key={index}
+                      className="text-center"
+                    >
+
+                      <div
+                        className="mx-auto h-20 w-20 rounded-full border-2 border-[#D4AF37] shadow-[0_0_22px_rgba(212,175,55,.25)]"
+                        style={{
+                          background: hex,
+                        }}
+                      />
+
+                      <p className="mt-3 text-sm font-medium text-[#F5F2FF]">
+                        {nome}
+                      </p>
+
+                    </div>
+                  );
+                })}
+
+            </div>
+
+          </div>
+
+          {/* ENERGIA */}
+
+          <div className="rounded-2xl border border-[#4A3A72] bg-[#1A132C] p-6">
+
+            <div className="flex items-center gap-3">
+
+              <Sparkles
+                size={20}
+                className="text-[#D4AF37]"
+              />
+
+              <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">
+                Energia das cores
+              </h3>
+
+            </div>
+
+            <p className="mt-4 leading-7 text-[#D8CEE9]">
+              {currentChapter.content?.energy ||
+                "Essas cores ajudam a harmonizar e fortalecer sua energia."}
+            </p>
+
+          </div>
+
+          {/* DIRECIONAMENTO */}
+
+          <div className="rounded-2xl border border-[#D4AF37]/30 bg-[#24183A] p-6">
+
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#D4AF37]">
+              Direcionamento
+            </h3>
+
+            <p className="mt-4 leading-7 text-[#D8CEE9]">
+              {currentChapter.content?.direction ||
+                "Utilize essas cores conscientemente em momentos em que deseja fortalecer sua energia."}
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    ) : selected === "hiddenTalents" ? (
+
+      /* ====================================================== */
+      /* TALENTOS OCULTOS */
+      /* ====================================================== */
+
+      <div className="overflow-hidden rounded-[32px] border border-[#4A3A72] bg-[#211536]">
+
+        <div className="border-b border-[#4A3A72] px-8 py-10 text-center">
+
+          <div className="flex items-center justify-center gap-3">
+            <Lightbulb
+              size={20}
+              className="text-[#D4AF37]"
+            />
+
+            <span className="text-xs uppercase tracking-[0.4em] text-[#D4AF37]">
+              Capítulo 21
+            </span>
+          </div>
+
+          <h2 className="mt-5 text-3xl font-light text-[#F5F2FF] md:text-4xl">
+            Talentos Ocultos
+          </h2>
+
+          <p className="mt-3 text-sm text-[#A994C7]">
+            Potenciais que podem ser desenvolvidos ao longo da sua jornada
+          </p>
+
+        </div>
+
+        <div className="space-y-5 p-8 md:p-10">
+
+          {resultado?.interpretation?.chapters
+            ?.filter(
+              (chapter: any) =>
+                chapter.id.startsWith("hidden-tendency-")
+            )
+            .map((chapter: any) => (
+
+              <div
+                key={chapter.id}
+                className="rounded-2xl border border-[#4A3A72] bg-[#1A132C] p-6"
+              >
+
+                <div className="flex items-start gap-4">
+
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#D4AF37]/40 bg-[#24183A]">
+
+                    <Lightbulb
+                      size={20}
+                      className="text-[#D4AF37]"
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <h3 className="text-xl font-medium text-[#F5F2FF]">
+                      {chapter.title}
+                    </h3>
+
+                    <div className="mt-3 leading-7 text-[#C7B9DC]">
+                      {typeof chapter.content === "string"
+                        ? chapter.content
+                        : Object.values(chapter.content || {})
+                            .filter(Boolean)
+                            .map(String)
+                            .join(" ")}
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          {!resultado?.interpretation?.chapters?.some(
+            (chapter: any) =>
+              chapter.id.startsWith("hidden-tendency-")
+          ) && (
+
+            <div className="rounded-2xl border border-[#4A3A72] bg-[#1A132C] p-8 text-center">
+
+              <Lightbulb
+                size={28}
+                className="mx-auto text-[#D4AF37]"
+              />
+
+              <h3 className="mt-4 text-xl font-medium text-[#F5F2FF]">
+                Nenhum talento oculto identificado
+              </h3>
+
+              <p className="mt-3 text-sm leading-7 text-[#A994C7]">
+                Não foram encontrados talentos ocultos nos números analisados.
+              </p>
+
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
+
+    ) : (
+
+      /* ====================================================== */
+      /* CAPÍTULOS NORMAIS */
+      /* ====================================================== */
+
+      <PremiumChapter
+        title={
+          selectedDefinition?.title ||
+          currentChapter.title
+        }
+        number={
+          selectedDefinition
+            ? selectedDefinition.value(resultado)
+            : "—"
+        }
+        subtitle={
+          selectedDefinition?.subtitle ||
+          "Uma dimensão importante da sua jornada."
+        }
+        content={currentChapter.content}
+      />
+
+    )}
+
+  </div>
+)}   
 
             {selected === "karmicDebts" && (
               <div className="space-y-6">
