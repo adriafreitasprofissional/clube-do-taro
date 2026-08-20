@@ -179,6 +179,23 @@ const chapters = [
     icon: Crown,
     value: (r: any) => r.numerology.pinnacles?.fourth ?? "-",
   },
+  {
+  id: "energizing-colors",
+  number: "20",
+  title: "Cores Favoráveis",
+  subtitle: "As cores que harmonizam e fortalecem sua energia",
+  icon: Sparkles,
+  value: () => "✦",
+},
+
+{
+  id: "hiddenTalents",
+  number: "21",
+  title: "Talentos Ocultos",
+  subtitle: "Potenciais que podem ser desenvolvidos ao longo da sua jornada",
+  icon: Gem,
+  value: () => "✦",
+},
 ];
 
 export function MapSummary({
