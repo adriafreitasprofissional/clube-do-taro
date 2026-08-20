@@ -30,14 +30,19 @@ console.log("MAPA GERADO");
 
 return NextResponse.json(result)
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error(error)
+    console.error("ERRO REAL AO GERAR MAPA:", error)
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Erro desconhecido ao gerar mapa."
 
     return NextResponse.json(
       {
         success: false,
-        message: "Erro ao gerar mapa.",
+        message,
       },
       {
         status: 500,
