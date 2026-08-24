@@ -92,28 +92,8 @@ if (!senha) {
 
     console.log("CLIENTE ID DA TABELA:", clienteId);
 
-    const meses = [
-      "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
-    ];
-
-    // 5. Criar estrutura no Storage usando o ID DA TABELA
-    for (const mes of meses) {
-      const { error } = await supabaseAdmin.storage
-        .from("clientes")
-        .upload(
-          `${clienteId}/clube-do-taro/2026/${mes}/.keep`,
-          Buffer.from("criado"),
-          { upsert: true }
-        );
-
-      if (error) {
-        console.error(`ERRO NO MÊS ${mes}:`, error);
-        return NextResponse.json(
-          { error: `Erro ao criar estrutura do mês ${mes}` },
-          { status: 500 }
-        );
-      }
-    }
+    // A estrutura mensal não precisa ser criada no cadastro.
+// Os conteúdos da cliente serão vinculados conforme forem disponibilizados.
 
     return NextResponse.json({
       success: true,
