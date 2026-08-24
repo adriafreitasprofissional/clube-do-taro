@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 
-const [nome, setNome] = useState("");
-const [nomeReferencia, setNomeReferencia] = useState("");
-const [email, setEmail] = useState("");
-const [whatsapp, setWhatsapp] = useState("");
-const [tipoAssinatura, setTipoAssinatura] = useState("assinatura");
-const [plano, setPlano] = useState("Bronze");
-const [senhaInicial, setSenhaInicial] = useState("");
-const [dataInicio, setDataInicio] = useState("");
-const [genero, setGenero] = useState("Mulher");
+export default function AssinantesPage() {
+  const [nome, setNome] = useState("");
+  const [nomeReferencia, setNomeReferencia] = useState("");
+  const [email, setEmail] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [tipoAssinatura, setTipoAssinatura] = useState("assinatura");
+  const [plano, setPlano] = useState("Bronze");
+  const [senhaInicial, setSenhaInicial] = useState("");
+  const [dataInicio, setDataInicio] = useState("");
+  const [genero, setGenero] = useState("Mulher");
 
   const [clientes, setClientes] = useState<any[]>([]);
 
