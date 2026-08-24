@@ -130,15 +130,17 @@ useEffect(() => {
         setPlano(planoCliente);
 
         const limitePerguntas =
-          planoCliente === "bronze"
-            ? 1
-            : planoCliente === "prata"
-            ? 2
-            : planoCliente === "ouro"
-            ? 2
-            : planoCliente === "diamante"
-            ? 3
-            : 0;
+  planoCliente === "cortesia"
+    ? 1
+    : planoCliente === "bronze"
+    ? 1
+    : planoCliente === "prata"
+    ? 2
+    : planoCliente === "ouro"
+    ? 2
+    : planoCliente === "diamante"
+    ? 3
+    : 0;
 
         const referenciaMes = `${new Date().getFullYear()}-${String(
           new Date().getMonth() + 1
