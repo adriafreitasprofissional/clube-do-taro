@@ -112,18 +112,16 @@ useEffect(() => {
     try {
       const { data, error } = await supabase
         .from("club_clients")
-        .select("id, plano, nome, slug")
+       .select("id, plano, nome, nome_referencia, slug")
         .eq("slug", slug)
         .maybeSingle();
 
       if (error) throw new Error(error.message);
 
       if (data) {
-        setClienteId(data.id);
+  setClienteId(data.id);
 
-        setNome(
-          data.slug.charAt(0).toUpperCase() + data.slug.slice(1)
-        );
+  setNome(data.nome_referencia || data.nome);
 
         const planoCliente = (data.plano || "").toLowerCase();
 
