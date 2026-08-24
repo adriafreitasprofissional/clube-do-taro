@@ -47,26 +47,37 @@ if (!senha) {
 
     // 3. Inserir na tabela vinculando ao ID do Auth (Melhor Prática)
     // Se você quer que o ID da tabela seja o ID principal, passamos ele aqui.
-    const { data: cliente, error: clientError } = await supabaseAdmin
-  .from("club_clients")
-  .insert({
-    id: authId,
-    nome,
-    email,
-    whatsapp,
-    plano,
-    genero,
-    senha_inicial: senha,
-    data_inicio: dataInicio,
-    slug,
-    status: "Ativo",
-  })
-  .select()
-  .single();
+        const { data: cliente, error: clientError } = await supabaseAdmin
+      .from("club_clients")
+      .insert({
+        id: authId,
+        nome,
+        email,
+        whatsapp,
+        plano,
+        genero,
+        senha_inicial: senha,
+        data_inicio: dataInicio,
+        slug,
+        status: "Ativo",
+      })
+      .select()
+      .single();
 
     if (clientError) {
-      // Se der erro na tabela, idealmente você deveria deletar o usuário do Auth criado acima
-      return NextResponse.json({ error: clientError.message }, { status: 400 });
+      // Se o cadastro no club_clients falhar,
+      // remove também o usuário criado no Authentication.
+      await supabaseAdmin.auth.admin.deleteUser(authId);
+
+      console.error("ERRO AO CRIAR CLIENTE:", clientError);
+
+      return NextResponse.json(
+        {
+          error: clientError.message,
+          auth_user_removed: true,
+        },
+        { status: 400 }
+      );
     }
 
     // 4. Agora pegamos o ID que veio da TABELA (que agora é igual ao Auth)

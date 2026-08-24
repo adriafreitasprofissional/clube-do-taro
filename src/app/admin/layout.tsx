@@ -28,16 +28,21 @@ const menuGroups = [
     ],
   },
   {
-    title: "CONTEÚDO",
-    items: [
-      { href: "/admin/cursos", icon: "📚", label: "Cursos" },
-      {
-        href: "/admin/biblioteca",
-        icon: "📖",
-        label: "Biblioteca Ádria Freitas",
-      },
-    ],
-  },
+  title: "CONTEÚDO",
+  items: [
+    { href: "/admin/cursos", icon: "📚", label: "Cursos" },
+    {
+      href: "/admin/liberacao-cursos",
+      icon: "🎁",
+      label: "Liberação de Cursos",
+    },
+    {
+      href: "/admin/biblioteca",
+      icon: "📖",
+      label: "Biblioteca Ádria Freitas",
+    },
+  ],
+},
   {
     title: "SISTEMA",
     items: [

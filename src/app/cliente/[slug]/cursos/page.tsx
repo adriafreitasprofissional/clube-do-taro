@@ -12,6 +12,7 @@ export default function MeusCursosPage() {
   const [loading, setLoading] = useState(true);
   const [liberado, setLiberado] = useState(false);
 
+
   useEffect(() => {
     async function verificar() {
       const { data } = await supabase
@@ -50,6 +51,7 @@ export default function MeusCursosPage() {
   }
 
   if (!liberado) return null;
+
 
   return (
     <main
