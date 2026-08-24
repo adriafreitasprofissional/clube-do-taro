@@ -134,6 +134,10 @@ export default function LiberacaoCursosPage() {
     if (liberacoesResponse.data) {
   const dados = liberacoesResponse.data.map((item) => ({
     ...item,
+    client_id: item.club_client_id,
+    tipo_acesso: "curso",
+    data_inicio: item.created_at,
+    data_fim: null,
     cliente: listaClientes.find(
       (cliente) => cliente.id === item.club_client_id
     ),
