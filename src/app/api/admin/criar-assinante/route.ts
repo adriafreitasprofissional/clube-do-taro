@@ -7,11 +7,13 @@ export async function POST(req: Request) {
 
    const {
   nome,
+  nomeReferencia,
   email,
   whatsapp,
+  tipoAssinatura = "assinatura",
   plano,
   genero = "",
-  senha: senhaInicial,
+  senhaInicial,
   dataInicio = new Date().toISOString().slice(0, 10),
 } = body;
 
@@ -50,17 +52,22 @@ if (!senha) {
         const { data: cliente, error: clientError } = await supabaseAdmin
       .from("club_clients")
       .insert({
-        id: authId,
-        nome,
-        email,
-        whatsapp,
-        plano,
-        genero,
-        senha_inicial: senha,
-        data_inicio: dataInicio,
-        slug,
-        status: "Ativo",
-      })
+  id: authId,
+  nome,
+  nome_referencia: nomeReferencia,
+  email,
+  whatsapp,
+  plano: plano.toLowerCase(),
+  genero,
+  tipo_assinatura: tipoAssinatura,
+  senha_inicial: senha,
+  data_inicio: dataInicio,
+  slug,
+  status: "Ativo",
+  produto: "Clube do Tarô",
+  acesso_app: true,
+  direcionamento_exclusivo: true,
+})
       .select()
       .single();
 

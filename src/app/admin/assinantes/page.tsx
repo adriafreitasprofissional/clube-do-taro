@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react";
 
-export default function AssinantesPage() {
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [plano, setPlano] = useState("Bronze");
-  const [senhaInicial, setSenhaInicial] = useState("");
-  const [dataInicio, setDataInicio] = useState("");
-  const [genero, setGenero] = useState("Mulher");
+const [nome, setNome] = useState("");
+const [nomeReferencia, setNomeReferencia] = useState("");
+const [email, setEmail] = useState("");
+const [whatsapp, setWhatsapp] = useState("");
+const [tipoAssinatura, setTipoAssinatura] = useState("assinatura");
+const [plano, setPlano] = useState("Bronze");
+const [senhaInicial, setSenhaInicial] = useState("");
+const [dataInicio, setDataInicio] = useState("");
+const [genero, setGenero] = useState("Mulher");
 
   const [clientes, setClientes] = useState<any[]>([]);
 
@@ -37,14 +38,16 @@ export default function AssinantesPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nome,
-          email,
-          whatsapp,
-          plano,
-          senhaInicial,
-          dataInicio,
-          genero,
-        }),
+  nome,
+  nomeReferencia,
+  email,
+  whatsapp,
+  tipoAssinatura,
+  plano,
+  senhaInicial,
+  dataInicio,
+  genero,
+}),
       }
     );
 
@@ -60,8 +63,10 @@ export default function AssinantesPage() {
     carregarClientes();
 
     setNome("");
+    setNomeReferencia("");
     setEmail("");
     setWhatsapp("");
+    setTipoAssinatura("assinatura");
     setPlano("Bronze");
     setSenhaInicial("");
     setDataInicio("");
@@ -144,45 +149,66 @@ const toggleGrupo = (grupo: keyof typeof abertos) => {
           </h2>
 
           <input
-            placeholder="Nome"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            style={campo}
-          />
+  placeholder="Nome completo"
+  value={nome}
+  onChange={(e) => setNome(e.target.value)}
+  style={campo}
+/>
 
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={campo}
-          />
+<input
+  placeholder="Nome de referência — Ex.: Gabi, Tati, Cris"
+  value={nomeReferencia}
+  onChange={(e) => setNomeReferencia(e.target.value)}
+  style={campo}
+/>
 
-          <input
-            placeholder="WhatsApp"
-            value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            style={campo}
-          />
+<input
+  placeholder="Email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  style={campo}
+/>
 
-          <select
-            value={plano}
-            onChange={(e) => setPlano(e.target.value)}
-            style={campo}
-          >
-            <option>Bronze</option>
-            <option>Prata</option>
-            <option>Ouro</option>
-            <option>Diamante</option>
-          </select>
+<input
+  placeholder="WhatsApp"
+  value={whatsapp}
+  onChange={(e) => setWhatsapp(e.target.value)}
+  style={campo}
+/>
 
-          <select
-            value={genero}
-            onChange={(e) => setGenero(e.target.value)}
-            style={campo}
-          >
-            <option value="Mulher">👩 Mulher</option>
-            <option value="Homem">👨 Homem</option>
-          </select>
+<select
+  value={tipoAssinatura}
+  onChange={(e) => setTipoAssinatura(e.target.value)}
+  style={campo}
+>
+  <option value="assinatura">Assinatura</option>
+  <option value="cortesia">Cortesia</option>
+</select>
+
+<select
+  value={plano}
+  onChange={(e) => setPlano(e.target.value)}
+  style={campo}
+>
+  <option value="Bronze">Bronze</option>
+  <option value="Prata">Prata</option>
+  <option value="Ouro">Ouro</option>
+  <option value="Diamante">Diamante</option>
+</select>
+
+<select
+  value={genero}
+  onChange={(e) => setGenero(e.target.value)}
+  style={campo}
+>
+  <option value="Mulher">Mulher</option>
+  <option value="Homem">Homem</option>
+  <option value="Não binário">Não binário</option>
+  <option value="Outro">Outro</option>
+  <option value="Prefiro não informar">
+    Prefiro não informar
+  </option>
+</select>
 
           <input
             placeholder="Senha Inicial"
