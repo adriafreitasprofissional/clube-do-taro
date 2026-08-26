@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
   const { data: registros, error: registrosError } =
     await supabaseAdmin
       .from("client_service_records")
-      .select(`
+            .select(`
         id,
         service_type,
         title,
@@ -93,7 +93,10 @@ export async function GET(request: NextRequest) {
         video_file_id,
         report_adria,
         report_estella,
-        pdf_file_id
+        pdf_file_id,
+        pdf_storage_path,
+        pdf_file_name,
+        pdf_generated_at
       `)
       .eq("client_id", cliente.id)
       .eq("service_type", "mentoria")
@@ -106,13 +109,40 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+  const registrosComPdf = await Promise.all(
+    (registros || []).map(async (registro) => {
+      let pdf_download_url: string | null = null;
+
+      if (registro.pdf_storage_path) {
+        const { data: urlData } =
+          await supabaseAdmin.storage
+            .from("mentoria-pdfs")
+            .createSignedUrl(
+              registro.pdf_storage_path,
+              60 * 60
+            );
+
+        pdf_download_url =
+          urlData?.signedUrl || null;
+      }
+
+      return {
+        ...registro,
+        pdf_download_url,
+      };
+    })
+  );
 
   return NextResponse.json({
     cliente: {
-      nome: cliente.nome_referencia || cliente.nome,
+      nome:
+        cliente.nome_referencia ||
+        cliente.nome,
+
       plano: cliente.plano,
     },
 
-    registros: registros || [],
+    registros: registrosComPdf,
   });
+  
 }
