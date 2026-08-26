@@ -14,28 +14,60 @@ type Pergunta = {
   created_at: string;
 };
 
+type Interacao = {
+  id: string;
+  client_id: string;
+  source_type: string;
+  source_id: string | null;
+  interaction_type: "feedback" | "sugestao" | "duvida";
+  message: string;
+  admin_reply: string | null;
+  replied_at: string | null;
+  status: string;
+  created_at: string;
+  nome_cliente: string;
+  plano: string;
+  titulo_origem: string;
+};
 export default function AtendimentoPage() {
-  const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
-  const [selecionada, setSelecionada] = useState<Pergunta | null>(null);
 
+const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
+const [selecionada, setSelecionada] = useState<Pergunta | null>(null);
+
+const [interacoes, setInteracoes] = useState<Interacao[]>([]);
+const [interacaoSelecionada, setInteracaoSelecionada] =
+  useState<Interacao | null>(null);
   const [mostrarReformulacao, setMostrarReformulacao] = useState(false);
 const [mensagem, setMensagem] = useState("");
 const [historico, setHistorico] = useState<any[]>([]);
 
 const [aba, setAba] = useState<
-  "novas" | "aceitas" | "reformular" | "respondidas"
+  | "novas"
+  | "aceitas"
+  | "reformular"
+  | "respondidas"
+  | "feedback"
+  | "sugestoes"
+  | "duvidas"
 >("novas");
 
-
-  useEffect(() => {
-    carregarPerguntas();
-  }, []);
-
+useEffect(() => {
+  carregarPerguntas();
+  carregarInteracoes();
+}, []);
+ 
   async function carregarPerguntas() {
     const response = await fetch("/api/admin/perguntas");
     const data = await response.json();
 
     setPerguntas(Array.isArray(data) ? data : []);
+  }
+
+  async function carregarInteracoes() {
+    const response = await fetch("/api/admin/interacoes");
+    const data = await response.json();
+
+    setInteracoes(Array.isArray(data) ? data : []);
   }
 
 const novas = useMemo(
@@ -71,15 +103,54 @@ const respondidas = useMemo(
     ),
   [perguntas]
 );
+const feedbacks = useMemo(
+  () =>
+    interacoes.filter(
+      (item) => item.interaction_type === "feedback"
+    ),
+  [interacoes]
+);
 
-  const lista =
+const sugestoes = useMemo(
+  () =>
+    interacoes.filter(
+      (item) => item.interaction_type === "sugestao"
+    ),
+  [interacoes]
+);
+
+const duvidas = useMemo(
+  () =>
+    interacoes.filter(
+      (item) => item.interaction_type === "duvida"
+    ),
+  [interacoes]
+);
+
+const abaInteracao =
+  aba === "feedback" ||
+  aba === "sugestoes" ||
+  aba === "duvidas";
+
+const listaInteracoes =
+  aba === "feedback"
+    ? feedbacks
+    : aba === "sugestoes"
+    ? sugestoes
+    : aba === "duvidas"
+    ? duvidas
+    : [];
+  
+    const lista =
   aba === "novas"
     ? novas
     : aba === "aceitas"
     ? aceitas
     : aba === "reformular"
     ? reformular
-    : respondidas;
+    : aba === "respondidas"
+    ? respondidas
+    : [];
 
 async function excluirPergunta() {
   if (!selecionada) return;
@@ -232,7 +303,70 @@ async function carregarHistorico(questionId: string) {
   🎧 Respondidas ({respondidas.length})
 </button>
 
+<div
+  style={{
+    marginTop: 10,
+    paddingTop: 14,
+    borderTop: "1px solid rgba(231,201,111,.15)",
+  }}
+>
+  <div
+    style={{
+      color: "#E7C96F",
+      fontSize: 13,
+      fontWeight: 700,
+      marginBottom: 10,
+    }}
+  >
+    💬 Interações
+  </div>
 
+  <button
+    onClick={() => {
+      setAba("feedback");
+      setSelecionada(null);
+      setInteracaoSelecionada(null);
+    }}
+    style={botaoAba(
+      aba === "feedback",
+      "#7c3aed"
+    )}
+  >
+    💜 Feedback ({feedbacks.length})
+  </button>
+
+  <div style={{ height: 8 }} />
+
+  <button
+    onClick={() => {
+      setAba("sugestoes");
+      setSelecionada(null);
+      setInteracaoSelecionada(null);
+    }}
+    style={botaoAba(
+      aba === "sugestoes",
+      "#8b5cf6"
+    )}
+  >
+    ✨ Sugestões ({sugestoes.length})
+  </button>
+
+  <div style={{ height: 8 }} />
+
+  <button
+    onClick={() => {
+      setAba("duvidas");
+      setSelecionada(null);
+      setInteracaoSelecionada(null);
+    }}
+    style={botaoAba(
+      aba === "duvidas",
+      "#5b21b6"
+    )}
+  >
+    ❓ Dúvidas ({duvidas.length})
+  </button>
+</div>
         </div>
 
         <div
@@ -241,9 +375,58 @@ async function carregarHistorico(questionId: string) {
             overflowY: "auto",
           }}
         >
-          {lista.map((pergunta) => (
-            <button
-              key={pergunta.id}
+          {abaInteracao
+  ? listaInteracoes.map((item) => (
+      <button
+        key={item.id}
+        onClick={() => {
+          setInteracaoSelecionada(item);
+          setSelecionada(null);
+        }}
+        style={{
+          width: "100%",
+          textAlign: "left",
+          marginBottom: 10,
+          padding: 14,
+          borderRadius: 12,
+          border:
+            interacaoSelecionada?.id === item.id
+              ? "1px solid #E7C96F"
+              : "1px solid rgba(255,255,255,.08)",
+          background:
+            interacaoSelecionada?.id === item.id
+              ? "rgba(231,201,111,.15)"
+              : "#1a0026",
+          color: "#fff",
+          cursor: "pointer",
+        }}
+      >
+        <strong>{item.nome_cliente}</strong>
+
+        <br />
+
+        <small
+          style={{
+            color: "#E7C96F",
+          }}
+        >
+          {item.plano || "Assinante"}
+        </small>
+
+        {item.titulo_origem && (
+          <>
+            <br />
+            <small style={{ color: "#aaa" }}>
+              {item.titulo_origem}
+            </small>
+          </>
+        )}
+      </button>
+    ))
+  : lista.map((pergunta) => (
+      <button
+        key={pergunta.id}
+
               onClick={() => {
   setSelecionada(pergunta);
   carregarHistorico(pergunta.id);
@@ -280,7 +463,8 @@ async function carregarHistorico(questionId: string) {
                 {pergunta.plano}
               </small>
             </button>
-          ))}
+         ))}
+
         </div>
       </aside>
             <section
@@ -291,7 +475,86 @@ async function carregarHistorico(questionId: string) {
           border: "1px solid rgba(231,201,111,.20)",
         }}
       >
-        {!selecionada ? (
+       {abaInteracao ? (
+  !interacaoSelecionada ? (
+    <div
+      style={{
+        color: "#bbb",
+        textAlign: "center",
+        marginTop: 120,
+      }}
+    >
+      <h2 style={{ color: "#E7C96F" }}>
+        💬 Interações das Assinantes
+      </h2>
+
+      <p>
+        Selecione uma interação para visualizar.
+      </p>
+    </div>
+  ) : (
+    <>
+      <h2 style={{ color: "#E7C96F" }}>
+        {interacaoSelecionada.nome_cliente}
+      </h2>
+
+      <p style={{ color: "#aaa" }}>
+        {interacaoSelecionada.plano || "Assinante"}
+        {" • "}
+        {interacaoSelecionada.source_type === "mentoria"
+          ? "Mentoria"
+          : interacaoSelecionada.source_type}
+      </p>
+
+      {interacaoSelecionada.titulo_origem && (
+        <p
+          style={{
+            color: "#E7C96F",
+            marginTop: 8,
+          }}
+        >
+          {interacaoSelecionada.titulo_origem}
+        </p>
+      )}
+
+      <div
+        style={{
+          marginTop: 25,
+          padding: 20,
+          borderRadius: 16,
+          background: "#1a0026",
+          color: "#fff",
+          lineHeight: 1.7,
+        }}
+      >
+        <div
+          style={{
+            color: "#E7C96F",
+            fontWeight: 700,
+            marginBottom: 10,
+            textTransform: "capitalize",
+          }}
+        >
+          {interacaoSelecionada.interaction_type}
+        </div>
+
+        {interacaoSelecionada.message}
+      </div>
+
+      <small
+        style={{
+          display: "block",
+          marginTop: 12,
+          color: "#888",
+        }}
+      >
+        {new Date(
+          interacaoSelecionada.created_at
+        ).toLocaleString("pt-BR")}
+      </small>
+    </>
+  )
+) : !selecionada ? (
           <div
             style={{
               color: "#bbb",
