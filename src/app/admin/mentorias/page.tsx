@@ -539,7 +539,7 @@ export default function MentoriasAdminPage() {
 
       const pdfResponse =
         await fetch(
-          "/api/admin/mentorias/gerar-pdf",
+           "/api/mentorias/gerar-pdf",
           {
             method: "POST",
 
