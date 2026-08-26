@@ -557,8 +557,29 @@ export default function MentoriasAdminPage() {
           }
         );
 
-      const pdfData =
-        await pdfResponse.json();
+            const pdfTexto =
+        await pdfResponse.text();
+
+      let pdfData: {
+        error?: string;
+        pdf_storage_path?: string;
+        pdf_file_name?: string;
+        pdf_url?: string;
+        pdf_generated_at?: string;
+      } = {};
+
+      try {
+        pdfData = JSON.parse(pdfTexto);
+      } catch {
+        console.error(
+          "Resposta recebida da rota gerar-pdf:",
+          pdfTexto
+        );
+
+        throw new Error(
+          `A rota de geração do PDF retornou uma resposta inválida. Código HTTP: ${pdfResponse.status}.`
+        );
+      }
 
       if (!pdfResponse.ok) {
         throw new Error(
