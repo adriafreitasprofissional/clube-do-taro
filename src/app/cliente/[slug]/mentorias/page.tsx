@@ -205,23 +205,36 @@ export default function MentoriasDaAssinantePage() {
                             })}
                           </p>
                         </div>
+<div className="flex shrink-0 flex-col gap-3">
+  {registro.video_file_id && (
+    <button
+      type="button"
+      onClick={() =>
+        setArquivoAberto({
+          tipo: "video",
+          titulo: registro.title,
+          fileId:
+            registro.video_file_id!,
+        })
+      }
+      className="rounded-xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-3 font-bold text-yellow-200 transition hover:bg-yellow-500/20"
+    >
+      ▶ Assistir à mentoria
+    </button>
+  )}
 
-                        {registro.video_file_id && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setArquivoAberto({
-                                tipo: "video",
-                                titulo: registro.title,
-                                fileId:
-                                  registro.video_file_id!,
-                              })
-                            }
-                            className="shrink-0 rounded-xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-3 font-bold text-yellow-200 transition hover:bg-yellow-500/20"
-                          >
-                            ▶ Assistir à mentoria
-                          </button>
-                        )}
+  {registro.pdf_download_url && (
+    <a
+      href={registro.pdf_download_url}
+      target="_blank"
+      rel="noreferrer"
+      className="rounded-xl border border-purple-400/30 bg-purple-700/20 px-5 py-3 text-center text-sm font-bold text-purple-100 transition hover:bg-purple-700/35"
+    >
+      📄 Baixar relatório em PDF
+    </a>
+  )}
+</div>
+                        
                       </div>
 
                       {(registro.report_adria ||
@@ -252,37 +265,7 @@ export default function MentoriasDaAssinantePage() {
                           )}
                         </div>
                       )}
-                      {registro.pdf_download_url ? (
-                        <a
-                          href={
-                            registro.pdf_download_url
-                          }
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-5 inline-flex rounded-xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-3 text-sm font-bold text-yellow-200 transition hover:bg-yellow-500/20"
-                        >
-                          📄 Baixar relatório em PDF
-                        </a>
-                      ) : registro.pdf_file_id ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setArquivoAberto({
-                              tipo: "pdf",
-
-                              titulo:
-                                `Relatório — ${registro.title}`,
-
-                              fileId:
-                                registro.pdf_file_id!,
-                            })
-                          }
-                          className="mt-5 rounded-xl border border-purple-400/30 bg-purple-700/20 px-5 py-3 text-sm font-bold text-purple-100 transition hover:bg-purple-700/35"
-                        >
-                          📄 Visualizar relatório completo
-                        </button>
-                      ) : null}
-                      
+                                            
                     </article>
                   ))}
                 </div>
