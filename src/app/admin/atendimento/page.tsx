@@ -513,19 +513,52 @@ async function carregarHistorico(questionId: string) {
           cursor: "pointer",
         }}
       >
-        <strong>
-          {item.nome_cliente}
-        </strong>
+       <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  }}
+>
+  <strong>
+    {item.nome_cliente}
+  </strong>
 
-        <br />
+  {item.status === "lido" && (
+    <span
+      style={{
+        fontSize: 11,
+        color: "#7ee787",
+        fontWeight: 700,
+      }}
+    >
+      ✓ Lida
+    </span>
+  )}
 
-        <small
-          style={{
-            color: "#E7C96F",
-          }}
-        >
-          {item.plano || "Assinante"}
-        </small>
+  {item.status === "respondido" && (
+    <span
+      style={{
+        fontSize: 11,
+        color: "#E7C96F",
+        fontWeight: 700,
+      }}
+    >
+      ✓ Respondida
+    </span>
+  )}
+</div>
+
+<br />
+
+<small
+  style={{
+    color: "#E7C96F",
+  }}
+>
+  {item.plano || "Assinante"}
+</small>
 
         {item.titulo_origem && (
           <>
@@ -681,12 +714,14 @@ async function carregarHistorico(questionId: string) {
           marginTop: 25,
         }}
       >
-        <button
-          onClick={marcarInteracaoComoLida}
-          style={botaoAcao("#2e7d32")}
-        >
-          ✓ Marcar como lida
-        </button>
+        {interacaoSelecionada.status === "novo" && (
+  <button
+    onClick={marcarInteracaoComoLida}
+    style={botaoAcao("#2e7d32")}
+  >
+    ✓ Marcar como lida
+  </button>
+)}
 
         <button
           onClick={() => {
