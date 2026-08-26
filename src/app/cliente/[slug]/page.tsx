@@ -337,7 +337,27 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
     </p>
   </a>
 )}
-        
+
+{ehDiamante && (
+  <Link
+    href={`/cliente/${slug}/mentorias`}
+    className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
+  >
+    <p className="text-3xl">🎥</p>
+
+    <h3 className="mt-4 text-xl font-extrabold text-yellow-400">
+      Minhas Mentorias Gravadas
+    </h3>
+
+    <p className="mt-3 text-sm leading-6 text-purple-100">
+      Reveja seus encontros e acesse seus relatórios exclusivos.
+    </p>
+
+    <p className="mt-5 text-sm font-bold text-yellow-300">
+      Abrir minhas mentorias →
+    </p>
+  </Link>
+)}
             </div>
             {recados.length > 0 && (
               <div className="mt-8 w-full max-w-4xl">

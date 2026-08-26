@@ -13,8 +13,13 @@ const menuGroups = [
       { href: "/admin/assinantes", icon: "👥", label: "Assinantes" },
       { href: "/admin/financeiro", icon: "💳", label: "Financeiro" },
       { href: "/admin/atendimento", icon: "🌹", label: "Atendimento" },
-      { href: "/admin/recados", icon: "📢", label: "Recados" },
-      { href: "/admin/agenda", icon: "📅", label: "Agenda" },
+{ href: "/admin/recados", icon: "📢", label: "Recados" },
+{ href: "/admin/agenda", icon: "📅", label: "Agenda" },
+{
+  href: "/admin/mentorias",
+  icon: "🎥",
+  label: "Mentorias Gravadas",
+},
     ],
   },
   {
