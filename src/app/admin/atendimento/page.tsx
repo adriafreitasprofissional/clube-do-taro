@@ -1,6 +1,6 @@
 "use client";
 
-import { div } from "framer-motion/client";
+import { button, div } from "framer-motion/client";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 
@@ -37,6 +37,14 @@ const [selecionada, setSelecionada] = useState<Pergunta | null>(null);
 const [interacoes, setInteracoes] = useState<Interacao[]>([]);
 const [interacaoSelecionada, setInteracaoSelecionada] =
   useState<Interacao | null>(null);
+
+const [mostrarRespostaInteracao, setMostrarRespostaInteracao] =
+  useState(false);
+
+const [respostaInteracao, setRespostaInteracao] =
+  useState("");
+
+
   const [mostrarReformulacao, setMostrarReformulacao] = useState(false);
 const [mensagem, setMensagem] = useState("");
 const [historico, setHistorico] = useState<any[]>([]);
@@ -217,6 +225,107 @@ async function enviarReformulacao() {
   carregarPerguntas();
 }
 
+async function marcarInteracaoComoLida() {
+  if (!interacaoSelecionada) return;
+
+  const response = await fetch("/api/admin/interacoes", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: interacaoSelecionada.id,
+      action: "read",
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.error || "Erro ao marcar como lida.");
+    return;
+  }
+
+  await carregarInteracoes();
+
+  setInteracaoSelecionada({
+    ...interacaoSelecionada,
+    status: "lido",
+  });
+}
+
+async function responderInteracao() {
+  if (
+    !interacaoSelecionada ||
+    !respostaInteracao.trim()
+  ) {
+    return;
+  }
+
+  const response = await fetch("/api/admin/interacoes", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: interacaoSelecionada.id,
+      action: "reply",
+      reply: respostaInteracao.trim(),
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.error || "Erro ao responder.");
+    return;
+  }
+
+  setRespostaInteracao("");
+  setMostrarRespostaInteracao(false);
+
+  await carregarInteracoes();
+
+  setInteracaoSelecionada({
+    ...interacaoSelecionada,
+    admin_reply: respostaInteracao.trim(),
+    status: "respondido",
+    replied_at: new Date().toISOString(),
+  });
+}
+
+async function excluirInteracao() {
+  if (!interacaoSelecionada) return;
+
+  if (
+    !confirm(
+      "Excluir definitivamente esta interação?"
+    )
+  ) {
+    return;
+  }
+
+  const response = await fetch(
+    `/api/admin/interacoes?id=${interacaoSelecionada.id}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    alert(data.error || "Erro ao excluir.");
+    return;
+  }
+
+  setInteracaoSelecionada(null);
+  setMostrarRespostaInteracao(false);
+  setRespostaInteracao("");
+
+    await carregarInteracoes();
+}
+
 async function carregarHistorico(questionId: string) {
   const response = await fetch(
     `/api/admin/exclusive-messages?questionId=${questionId}`
@@ -228,6 +337,7 @@ async function carregarHistorico(questionId: string) {
 }
 
   return (
+    
   <div
     style={{
       display: "grid",
@@ -382,6 +492,8 @@ async function carregarHistorico(questionId: string) {
         onClick={() => {
           setInteracaoSelecionada(item);
           setSelecionada(null);
+          setMostrarRespostaInteracao(false);
+          setRespostaInteracao("");
         }}
         style={{
           width: "100%",
@@ -401,7 +513,9 @@ async function carregarHistorico(questionId: string) {
           cursor: "pointer",
         }}
       >
-        <strong>{item.nome_cliente}</strong>
+        <strong>
+          {item.nome_cliente}
+        </strong>
 
         <br />
 
@@ -416,14 +530,20 @@ async function carregarHistorico(questionId: string) {
         {item.titulo_origem && (
           <>
             <br />
-            <small style={{ color: "#aaa" }}>
+
+            <small
+              style={{
+                color: "#aaa",
+              }}
+            >
               {item.titulo_origem}
             </small>
           </>
         )}
       </button>
     ))
-  : lista.map((pergunta) => (
+
+      : lista.map((pergunta) => (
       <button
         key={pergunta.id}
 
@@ -541,7 +661,7 @@ async function carregarHistorico(questionId: string) {
         {interacaoSelecionada.message}
       </div>
 
-      <small
+            <small
         style={{
           display: "block",
           marginTop: 12,
@@ -552,6 +672,145 @@ async function carregarHistorico(questionId: string) {
           interacaoSelecionada.created_at
         ).toLocaleString("pt-BR")}
       </small>
+
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+          marginTop: 25,
+        }}
+      >
+        <button
+          onClick={marcarInteracaoComoLida}
+          style={botaoAcao("#2e7d32")}
+        >
+          ✓ Marcar como lida
+        </button>
+
+        <button
+          onClick={() => {
+            setMostrarRespostaInteracao(true);
+            setRespostaInteracao(
+              interacaoSelecionada.admin_reply || ""
+            );
+          }}
+          style={botaoAcao("#7c3aed")}
+        >
+          ✍️ Responder
+        </button>
+
+        <button
+          onClick={excluirInteracao}
+          style={botaoAcao("#8b0000")}
+        >
+          🗑 Excluir
+        </button>
+      </div>
+
+      {interacaoSelecionada.admin_reply && (
+        <div
+          style={{
+            marginTop: 25,
+            padding: 20,
+            borderRadius: 16,
+            background: "#1a0026",
+            border:
+              "1px solid rgba(231,201,111,.15)",
+          }}
+        >
+          <div
+            style={{
+              color: "#E7C96F",
+              fontWeight: 700,
+              marginBottom: 10,
+            }}
+          >
+            Sua resposta
+          </div>
+
+          <div
+            style={{
+              color: "#fff",
+              whiteSpace: "pre-wrap",
+              lineHeight: 1.7,
+            }}
+          >
+            {interacaoSelecionada.admin_reply}
+          </div>
+        </div>
+      )}
+
+      {mostrarRespostaInteracao && (
+        <div
+          style={{
+            marginTop: 25,
+            padding: 20,
+            borderRadius: 16,
+            border:
+              "1px solid rgba(231,201,111,.20)",
+            background: "#1a0026",
+          }}
+        >
+          <h3
+            style={{
+              color: "#E7C96F",
+              marginTop: 0,
+            }}
+          >
+            ✍️ Responder para{" "}
+            {interacaoSelecionada.nome_cliente}
+          </h3>
+
+          <textarea
+            value={respostaInteracao}
+            onChange={(e) =>
+              setRespostaInteracao(
+                e.target.value
+              )
+            }
+            placeholder="Escreva sua resposta..."
+            style={{
+              width: "100%",
+              minHeight: 140,
+              marginTop: 15,
+              padding: 15,
+              borderRadius: 12,
+              background: "#120018",
+              border:
+                "1px solid rgba(231,201,111,.20)",
+              color: "#fff",
+            }}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              marginTop: 15,
+            }}
+          >
+            <button
+              onClick={responderInteracao}
+              style={botaoAcao("#7c3aed")}
+            >
+              Enviar resposta
+            </button>
+
+            <button
+              onClick={() => {
+                setMostrarRespostaInteracao(
+                  false
+                );
+                setRespostaInteracao("");
+              }}
+              style={botaoAcao("#444")}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 ) : !selecionada ? (

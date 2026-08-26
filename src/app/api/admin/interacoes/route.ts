@@ -123,3 +123,133 @@ export async function GET() {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+
+    const id = String(body.id || "").trim();
+    const action = String(body.action || "").trim();
+    const reply = String(body.reply || "").trim();
+
+    if (!id || !action) {
+      return NextResponse.json(
+        {
+          error:
+            "Interação e ação são obrigatórias.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (action === "read") {
+      const { error } = await supabaseAdmin
+        .from("client_interactions")
+        .update({
+          status: "lido",
+        })
+        .eq("id", id);
+
+      if (error) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+      });
+    }
+
+    if (action === "reply") {
+      if (!reply) {
+        return NextResponse.json(
+          {
+            error: "Escreva uma resposta.",
+          },
+          { status: 400 }
+        );
+      }
+
+      const agora = new Date().toISOString();
+
+      const { error } = await supabaseAdmin
+        .from("client_interactions")
+        .update({
+          admin_reply: reply,
+          replied_at: agora,
+          status: "respondido",
+        })
+        .eq("id", id);
+
+      if (error) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+      });
+    }
+
+    return NextResponse.json(
+      { error: "Ação inválida." },
+      { status: 400 }
+    );
+  } catch (error: unknown) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Erro ao atualizar interação.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        {
+          error: "Interação não informada.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const { error } = await supabaseAdmin
+      .from("client_interactions")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Erro ao excluir interação.",
+      },
+      { status: 500 }
+    );
+  }
+}
