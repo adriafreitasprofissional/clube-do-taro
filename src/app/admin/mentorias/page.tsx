@@ -916,55 +916,20 @@ export default function MentoriasAdminPage() {
             />
           </label>
 
-                    <div className="area-pdf">
-            <div>
-              <p className="titulo-pdf">
-                📄 Relatório em PDF
-              </p>
+                      <label>
+            Link ou código do vídeo no Drive
 
-              <p className="descricao-pdf">
-                Gere o arquivo depois de revisar
-                todos os campos do relatório.
-              </p>
-
-              {formulario.pdf_file_name && (
-                <p className="nome-pdf">
-                  {formulario.pdf_file_name}
-                </p>
-              )}
-            </div>
-
-            <div className="acoes-pdf">
-              <button
-                type="button"
-                onClick={gerarPdf}
-                disabled={
-                  gerandoPdf ||
-                  !formulario.id
-                }
-                className="botao-pdf"
-              >
-                {gerandoPdf
-                  ? "Gerando PDF..."
-                  : formulario.pdf_storage_path
-                  ? "🔄 Gerar novamente"
-                  : formulario.id
-                  ? "📄 Gerar PDF"
-                  : "Cadastre para gerar o PDF"}
-              </button>
-
-              {formulario.pdf_url && (
-                <a
-                  href={formulario.pdf_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="visualizar-pdf"
-                >
-                  👁️ Visualizar PDF
-                </a>
-              )}
-            </div>
-          </div>
+            <input
+              value={formulario.video_file_id}
+              onChange={(event) =>
+                atualizarCampo(
+                  "video_file_id",
+                  event.target.value
+                )
+              }
+              placeholder="Cole o link completo do vídeo"
+            />
+          </label>       
 
           <label>
             Relatório da Ádria
@@ -1155,20 +1120,55 @@ export default function MentoriasAdminPage() {
             )}
           </div>
 
-          <label>
-            Link ou código do PDF
+                   <div className="area-pdf">
+            <div>
+              <p className="titulo-pdf">
+                📄 Relatório em PDF
+              </p>
 
-            <input
-              value={formulario.pdf_file_id}
-              onChange={(event) =>
-                atualizarCampo(
-                  "pdf_file_id",
-                  event.target.value
-                )
-              }
-              placeholder="Opcional — cole o link do relatório em PDF"
-            />
-          </label>
+              <p className="descricao-pdf">
+                Gere o PDF depois de revisar
+                todo o conteúdo criado pelo agente.
+              </p>
+
+              {formulario.pdf_file_name && (
+                <p className="nome-pdf">
+                  {formulario.pdf_file_name}
+                </p>
+              )}
+            </div>
+
+            <div className="acoes-pdf">
+              <button
+                type="button"
+                onClick={gerarPdf}
+                disabled={
+                  gerandoPdf ||
+                  !formulario.id
+                }
+                className="botao-pdf"
+              >
+                {gerandoPdf
+                  ? "Gerando PDF..."
+                  : formulario.pdf_storage_path
+                  ? "🔄 Gerar novamente"
+                  : formulario.id
+                  ? "📄 Gerar PDF"
+                  : "Cadastre para gerar o PDF"}
+              </button>
+
+              {formulario.pdf_url && (
+                <a
+                  href={formulario.pdf_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="visualizar-pdf"
+                >
+                  👁️ Visualizar PDF
+                </a>
+              )}
+            </div>
+          </div> 
 
           <label className="publicar">
             <input
