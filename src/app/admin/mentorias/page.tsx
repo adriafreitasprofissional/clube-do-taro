@@ -42,8 +42,11 @@ type Registro = {
   generated_report:
     | Partial<RelatorioGerado>
     | null;
-  generated_report_at: string | null;
+   generated_report_at: string | null;
   pdf_file_id: string | null;
+  pdf_storage_path: string | null;
+  pdf_file_name: string | null;
+  pdf_url: string | null;
   pdf_generated_at: string | null;
   published: boolean;
 
@@ -65,6 +68,9 @@ type Formulario = {
   report_estella: string;
   generated_report: RelatorioGerado;
   pdf_file_id: string;
+  pdf_storage_path: string;
+  pdf_file_name: string;
+  pdf_url: string;
   published: boolean;
 };
 
@@ -79,8 +85,13 @@ const FORMULARIO_INICIAL: Formulario = {
   generated_report: {
     ...RELATORIO_VAZIO,
   },
+  
   pdf_file_id: "",
+  pdf_storage_path: "",
+  pdf_file_name: "",
+  pdf_url: "",
   published: false,
+
 };
 
 function paraDataDoFormulario(valor: string) {
@@ -156,12 +167,19 @@ export default function MentoriasAdminPage() {
     const [salvando, setSalvando] =
     useState(false);
 
-  const [
+   const [
     gerandoRelatorio,
     setGerandoRelatorio,
   ] = useState(false);
 
+  const [
+    gerandoPdf,
+    setGerandoPdf,
+  ] = useState(false);
+
   const [erro, setErro] = useState("");
+
+
 
   const clientesDisponiveis = useMemo(
     () =>
@@ -298,8 +316,17 @@ export default function MentoriasAdminPage() {
       report_estella:
         registro.report_estella || "",
 
-      pdf_file_id:
+            pdf_file_id:
         registro.pdf_file_id || "",
+
+      pdf_storage_path:
+        registro.pdf_storage_path || "",
+
+      pdf_file_name:
+        registro.pdf_file_name || "",
+
+      pdf_url:
+        registro.pdf_url || "",
 
             generated_report:
         normalizarRelatorio(
@@ -432,6 +459,140 @@ export default function MentoriasAdminPage() {
       );
     } finally {
       setGerandoRelatorio(false);
+    }
+  }
+
+    async function gerarPdf() {
+    if (!formulario.id) {
+      alert(
+        "Cadastre a mentoria primeiro. Depois clique em Editar para gerar o PDF."
+      );
+
+      return;
+    }
+
+    const possuiRelatorio =
+      Object.values(
+        formulario.generated_report
+      ).some((valor) =>
+        valor.trim()
+      );
+
+    if (!possuiRelatorio) {
+      alert(
+        "Gere o relatório com o agente antes de criar o PDF."
+      );
+
+      return;
+    }
+
+    setGerandoPdf(true);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error(
+          "Sessão administrativa expirada. Entre novamente."
+        );
+      }
+
+      const salvarResponse =
+        await fetch(
+          "/api/admin/mentorias",
+          {
+            method: "PATCH",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              Authorization:
+                `Bearer ${session.access_token}`,
+            },
+
+            body: JSON.stringify({
+              ...formulario,
+
+              service_type:
+                "mentoria",
+
+              occurred_at:
+                new Date(
+                  formulario.occurred_at
+                ).toISOString(),
+            }),
+          }
+        );
+
+      const salvarData =
+        await salvarResponse.json();
+
+      if (!salvarResponse.ok) {
+        throw new Error(
+          salvarData.error ||
+            "Não foi possível salvar o relatório."
+        );
+      }
+
+      const pdfResponse =
+        await fetch(
+          "/api/admin/mentorias/gerar-pdf",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              Authorization:
+                `Bearer ${session.access_token}`,
+            },
+
+            body: JSON.stringify({
+              id: formulario.id,
+            }),
+          }
+        );
+
+      const pdfData =
+        await pdfResponse.json();
+
+      if (!pdfResponse.ok) {
+        throw new Error(
+          pdfData.error ||
+            "Não foi possível gerar o PDF."
+        );
+      }
+
+      setFormulario((anterior) => ({
+        ...anterior,
+
+        pdf_storage_path:
+          pdfData.pdf_storage_path || "",
+
+        pdf_file_name:
+          pdfData.pdf_file_name || "",
+
+        pdf_url:
+          pdfData.pdf_url || "",
+      }));
+
+      await carregarDados();
+
+      alert(
+        "PDF criado com sucesso. Agora você pode visualizá-lo."
+      );
+    } catch (error: unknown) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Erro ao gerar o PDF."
+      );
+    } finally {
+      setGerandoPdf(false);
     }
   }
 
@@ -755,20 +916,55 @@ export default function MentoriasAdminPage() {
             />
           </label>
 
-          <label>
-            Link ou código do vídeo no Drive
+                    <div className="area-pdf">
+            <div>
+              <p className="titulo-pdf">
+                📄 Relatório em PDF
+              </p>
 
-            <input
-              value={formulario.video_file_id}
-              onChange={(event) =>
-                atualizarCampo(
-                  "video_file_id",
-                  event.target.value
-                )
-              }
-              placeholder="Cole o link completo do vídeo"
-            />
-          </label>
+              <p className="descricao-pdf">
+                Gere o arquivo depois de revisar
+                todos os campos do relatório.
+              </p>
+
+              {formulario.pdf_file_name && (
+                <p className="nome-pdf">
+                  {formulario.pdf_file_name}
+                </p>
+              )}
+            </div>
+
+            <div className="acoes-pdf">
+              <button
+                type="button"
+                onClick={gerarPdf}
+                disabled={
+                  gerandoPdf ||
+                  !formulario.id
+                }
+                className="botao-pdf"
+              >
+                {gerandoPdf
+                  ? "Gerando PDF..."
+                  : formulario.pdf_storage_path
+                  ? "🔄 Gerar novamente"
+                  : formulario.id
+                  ? "📄 Gerar PDF"
+                  : "Cadastre para gerar o PDF"}
+              </button>
+
+              {formulario.pdf_url && (
+                <a
+                  href={formulario.pdf_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="visualizar-pdf"
+                >
+                  👁️ Visualizar PDF
+                </a>
+              )}
+            </div>
+          </div>
 
           <label>
             Relatório da Ádria
@@ -1307,9 +1503,105 @@ export default function MentoriasAdminPage() {
           }
         }
 
-        .publicar {
-
+                .area-pdf {
           display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+          margin: 22px 0;
+          padding: 18px;
+          border: 1px solid
+            rgba(244, 212, 106, 0.22);
+          border-radius: 16px;
+          background: rgba(
+            255,
+            255,
+            255,
+            0.035
+          );
+        }
+
+        .titulo-pdf {
+          margin: 0;
+          color: #f4d46a;
+          font-weight: 800;
+        }
+
+        .descricao-pdf {
+          margin: 7px 0 0;
+          color: rgba(
+            255,
+            255,
+            255,
+            0.65
+          );
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        .nome-pdf {
+          margin: 8px 0 0;
+          color: #c4b5fd;
+          font-size: 12px;
+          word-break: break-word;
+        }
+
+        .acoes-pdf {
+          display: flex;
+          flex-shrink: 0;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        .botao-pdf {
+          background: #e7c96f;
+          color: #1a0921;
+        }
+
+        .botao-pdf:disabled {
+          cursor: not-allowed;
+          opacity: 0.55;
+        }
+
+        .visualizar-pdf {
+          display: inline-flex;
+          align-items: center;
+          border: 1px solid
+            rgba(167, 139, 250, 0.35);
+          border-radius: 11px;
+          background: rgba(
+            139,
+            92,
+            246,
+            0.16
+          );
+          padding: 11px 15px;
+          color: #ede9fe;
+          text-decoration: none;
+          font-weight: 800;
+        }
+
+        @media (max-width: 680px) {
+          .area-pdf {
+            align-items: stretch;
+            flex-direction: column;
+          }
+
+          .acoes-pdf {
+            flex-direction: column;
+          }
+
+          .botao-pdf,
+          .visualizar-pdf {
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: center;
+          }
+        }
+
+        .publicar {
+          display: flex;
+        
           align-items: center;
           gap: 10px;
           border: 1px solid

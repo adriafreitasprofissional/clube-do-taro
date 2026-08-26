@@ -1,25 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
-
-const CAMPOS = `
-  id,
-  client_id,
-  service_type,
-  title,
-  occurred_at,
-  video_provider,
-  video_file_id,
-  report_adria,
-   report_estella,
-  generated_report,
-  generated_report_at,
-  pdf_file_id,
-  pdf_generated_at,
-  published,
-  created_at,
-  updated_at
-`;
 
 function bearerToken(request: NextRequest) {
   const authorization =
@@ -30,262 +14,229 @@ function bearerToken(request: NextRequest) {
     : "";
 }
 
-async function autorizarAdmin(request: NextRequest) {
+export async function GET(
+  request: NextRequest
+) {
+  const slug =
+    request.nextUrl.searchParams
+      .get("slug")
+      ?.trim();
+
   const token = bearerToken(request);
 
-  if (!token) {
-    return false;
+  if (!slug || !token) {
+    return NextResponse.json(
+      {
+        error:
+          "Acesso não autorizado.",
+      },
+      { status: 401 }
+    );
   }
 
   const {
     data: { user },
+    error: usuarioError,
   } = await supabaseAdmin.auth.getUser(token);
 
-  if (!user?.email) {
-    return false;
+  if (
+    usuarioError ||
+    !user?.email
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Sessão expirada. Entre novamente no portal.",
+      },
+      { status: 401 }
+    );
   }
 
-  const { data: admin } = await supabaseAdmin
+  const {
+    data: cliente,
+    error: clienteError,
+  } = await supabaseAdmin
     .from("club_clients")
-    .select("id")
-    .ilike("email", user.email)
-    .eq("role", "admin")
+    .select(
+      "id, nome, nome_referencia, email, slug, plano, status"
+    )
+    .eq("slug", slug)
     .maybeSingle();
 
-  return Boolean(admin);
-}
-
-function limparIdDrive(valor: unknown) {
-  const texto = String(valor || "").trim();
-
-  if (!texto) {
-    return null;
-  }
-
-  const encontrado =
-    texto.match(/\/d\/([^/?]+)/)?.[1];
-
-  return encontrado || texto;
-}
-
-function montarRegistro(
-  body: Record<string, unknown>
-) {
-  return {
-    client_id: String(body.client_id || "").trim(),
-
-    service_type: String(
-      body.service_type || "mentoria"
-    ).trim(),
-
-    title: String(body.title || "").trim(),
-
-    occurred_at: String(
-      body.occurred_at || ""
-    ).trim(),
-
-    video_provider: "google_drive",
-
-    video_file_id: limparIdDrive(
-      body.video_file_id
-    ),
-
-    report_adria:
-      String(body.report_adria || "").trim() || null,
-
-    report_estella:
-      String(body.report_estella || "").trim() ||
-      null,
-
-    pdf_file_id: limparIdDrive(body.pdf_file_id),
-
-    published: Boolean(body.published),
-  };
-}
-
-export async function GET(request: NextRequest) {
-  if (!(await autorizarAdmin(request))) {
+  if (
+    clienteError ||
+    !cliente
+  ) {
     return NextResponse.json(
       {
         error:
-          "Acesso administrativo não autorizado.",
+          "Assinante não encontrada.",
       },
-      { status: 401 }
+      { status: 404 }
     );
   }
 
-  const { data, error } = await supabaseAdmin
-    .from("client_service_records")
-    .select(
-      `${CAMPOS}, club_clients(nome, nome_referencia, slug, plano)`
+  const mesmoEmail =
+    String(
+      cliente.email || ""
+    ).toLowerCase() ===
+    user.email.toLowerCase();
+
+  const {
+    data: usuarioAtual,
+  } = await supabaseAdmin
+    .from("club_clients")
+    .select("role")
+    .ilike("email", user.email)
+    .maybeSingle();
+
+  const ehAdmin =
+    String(
+      usuarioAtual?.role || ""
+    ).toLowerCase() === "admin";
+
+  if (
+    !mesmoEmail &&
+    !ehAdmin
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Este portal pertence a outra assinante.",
+      },
+      { status: 403 }
+    );
+  }
+
+  if (
+    String(
+      cliente.status || ""
+    ).toLowerCase() !== "ativo"
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Este acesso não está ativo.",
+      },
+      { status: 403 }
+    );
+  }
+
+  if (
+    String(
+      cliente.plano || ""
+    ).toLowerCase() !== "diamante"
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "As mentorias gravadas são exclusivas do Plano Diamante.",
+      },
+      { status: 403 }
+    );
+  }
+
+  const {
+    data: registros,
+    error: registrosError,
+  } = await supabaseAdmin
+    .from(
+      "client_service_records"
     )
-    .order("occurred_at", { ascending: false });
+    .select(`
+      id,
+      service_type,
+      title,
+      occurred_at,
+      video_provider,
+      video_file_id,
+      report_adria,
+      report_estella,
+      pdf_file_id,
+      pdf_storage_path,
+      pdf_file_name
+    `)
+    .eq(
+      "client_id",
+      cliente.id
+    )
+    .eq(
+      "service_type",
+      "mentoria"
+    )
+    .eq(
+      "published",
+      true
+    )
+    .order(
+      "occurred_at",
+      {
+        ascending: false,
+      }
+    );
 
-  if (error) {
+  if (registrosError) {
     return NextResponse.json(
-      { error: error.message },
+      {
+        error:
+          registrosError.message,
+      },
       { status: 500 }
     );
   }
 
-  return NextResponse.json({
-    registros: data || [],
-  });
-}
+  const registrosComPdf =
+    await Promise.all(
+      (registros || []).map(
+        async (registro) => {
+          if (
+            !registro.pdf_storage_path
+          ) {
+            return {
+              ...registro,
 
-export async function POST(request: NextRequest) {
-  if (!(await autorizarAdmin(request))) {
-    return NextResponse.json(
-      {
-        error:
-          "Acesso administrativo não autorizado.",
-      },
-      { status: 401 }
-    );
-  }
+              pdf_download_url:
+                null,
+            };
+          }
 
-  const body = await request.json();
-  const registro = montarRegistro(body);
+          const {
+            data: urlData,
+          } =
+            await supabaseAdmin.storage
+              .from("mentoria-pdfs")
+              .createSignedUrl(
+                registro.pdf_storage_path,
+                60 * 60,
+                {
+                  download:
+                    registro.pdf_file_name ||
+                    true,
+                }
+              );
 
-  if (
-    !registro.client_id ||
-    !registro.title ||
-    !registro.occurred_at
-  ) {
-    return NextResponse.json(
-      {
-        error:
-          "Cliente, título e data são obrigatórios.",
-      },
-      { status: 400 }
-    );
-  }
+          return {
+            ...registro,
 
-  if (
-    !registro.video_file_id &&
-    !registro.pdf_file_id
-  ) {
-    return NextResponse.json(
-      {
-        error:
-          "Informe pelo menos um vídeo ou PDF.",
-      },
-      { status: 400 }
-    );
-  }
-
-  const { data, error } = await supabaseAdmin
-    .from("client_service_records")
-    .insert(registro)
-    .select(CAMPOS)
-    .single();
-
-  if (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json(
-    { registro: data },
-    { status: 201 }
-  );
-}
-
-export async function PATCH(request: NextRequest) {
-  if (!(await autorizarAdmin(request))) {
-    return NextResponse.json(
-      {
-        error:
-          "Acesso administrativo não autorizado.",
-      },
-      { status: 401 }
-    );
-  }
-
-  const body = await request.json();
-  const id = String(body.id || "").trim();
-
-  if (!id) {
-    return NextResponse.json(
-      { error: "Registro não informado." },
-      { status: 400 }
-    );
-  }
-
-    const registro = montarRegistro(body);
-
-  const alteracoes = {
-    ...registro,
-
-    ...(body.generated_report !== undefined
-      ? {
-          generated_report:
-            body.generated_report,
-
-          generated_report_at:
-            body.generated_report_at ||
-            new Date().toISOString(),
+            pdf_download_url:
+              urlData?.signedUrl ||
+              null,
+          };
         }
-      : {}),
-  };
-
-  const { data, error } = await supabaseAdmin
-    .from("client_service_records")
-    .update(alteracoes)
-    .eq("id", id)
-    .select(CAMPOS)
-    .single();
-
-  if (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
+      )
     );
-  }
 
   return NextResponse.json({
-    registro: data,
-  });
-}
+    cliente: {
+      nome:
+        cliente.nome_referencia ||
+        cliente.nome,
 
-export async function DELETE(
-  request: NextRequest
-) {
-  if (!(await autorizarAdmin(request))) {
-    return NextResponse.json(
-      {
-        error:
-          "Acesso administrativo não autorizado.",
-      },
-      { status: 401 }
-    );
-  }
+      plano:
+        cliente.plano,
+    },
 
-  const id =
-    request.nextUrl.searchParams.get("id");
-
-  if (!id) {
-    return NextResponse.json(
-      { error: "Registro não informado." },
-      { status: 400 }
-    );
-  }
-
-  const { error } = await supabaseAdmin
-    .from("client_service_records")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({
-    success: true,
+    registros:
+      registrosComPdf,
   });
 }

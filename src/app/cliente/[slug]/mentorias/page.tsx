@@ -14,6 +14,8 @@ type Registro = {
   report_adria: string | null;
   report_estella: string | null;
   pdf_file_id: string | null;
+  pdf_file_name: string | null;
+  pdf_download_url: string | null;
 };
 
 type ArquivoAberto = {
@@ -250,14 +252,27 @@ export default function MentoriasDaAssinantePage() {
                           )}
                         </div>
                       )}
-
-                      {registro.pdf_file_id && (
+                      {registro.pdf_download_url ? (
+                        <a
+                          href={
+                            registro.pdf_download_url
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-5 inline-flex rounded-xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-3 text-sm font-bold text-yellow-200 transition hover:bg-yellow-500/20"
+                        >
+                          📄 Baixar relatório em PDF
+                        </a>
+                      ) : registro.pdf_file_id ? (
                         <button
                           type="button"
                           onClick={() =>
                             setArquivoAberto({
                               tipo: "pdf",
-                              titulo: `Relatório — ${registro.title}`,
+
+                              titulo:
+                                `Relatório — ${registro.title}`,
+
                               fileId:
                                 registro.pdf_file_id!,
                             })
@@ -266,7 +281,8 @@ export default function MentoriasDaAssinantePage() {
                         >
                           📄 Visualizar relatório completo
                         </button>
-                      )}
+                      ) : null}
+                      
                     </article>
                   ))}
                 </div>
