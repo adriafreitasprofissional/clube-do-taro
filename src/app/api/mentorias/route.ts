@@ -109,8 +109,51 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+   const idsMentorias = (registros || []).map(
+    (registro) => registro.id
+  );
+
+  let interacoes: {
+    id: string;
+    source_id: string | null;
+    interaction_type: string;
+    message: string;
+    admin_reply: string | null;
+    replied_at: string | null;
+    status: string;
+    created_at: string;
+  }[] = [];
+
+  if (idsMentorias.length > 0) {
+    const { data: interacoesData } =
+      await supabaseAdmin
+        .from("client_interactions")
+        .select(`
+          id,
+          source_id,
+          interaction_type,
+          message,
+          admin_reply,
+          replied_at,
+          status,
+          created_at
+        `)
+        .eq("client_id", cliente.id)
+        .eq("source_type", "mentoria")
+        .in("source_id", idsMentorias)
+        .order("created_at", {
+          ascending: false,
+        });
+
+    interacoes = interacoesData || [];
+  }
+
   const registrosComPdf = await Promise.all(
     (registros || []).map(async (registro) => {
+
+
+
+
       let pdf_download_url: string | null = null;
 
       if (registro.pdf_storage_path) {
@@ -126,10 +169,17 @@ export async function GET(request: NextRequest) {
           urlData?.signedUrl || null;
       }
 
-      return {
+            return {
         ...registro,
+
         pdf_download_url,
+
+        interacoes: interacoes.filter(
+          (item) =>
+            item.source_id === registro.id
+        ),
       };
+
     })
   );
 

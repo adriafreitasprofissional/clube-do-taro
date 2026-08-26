@@ -6,6 +6,17 @@ import { useEffect, useMemo, useState } from "react";
 
 import { supabase } from "@/lib/supabase";
 
+type InteracaoMentoria = {
+  id: string;
+  source_id: string | null;
+  interaction_type: string;
+  message: string;
+  admin_reply: string | null;
+  replied_at: string | null;
+  status: string;
+  created_at: string;
+};
+
 type Registro = {
   id: string;
   title: string;
@@ -16,6 +27,7 @@ type Registro = {
   pdf_file_id: string | null;
   pdf_file_name: string | null;
   pdf_download_url: string | null;
+  interacoes: InteracaoMentoria[];
 };
 
 type ArquivoAberto = {
@@ -414,25 +426,74 @@ async function enviarInteracao(
                         />
 
                         {interacaoEnviada[registro.id] && (
-                          <p className="mt-3 text-sm font-bold text-green-300">
-                            ✓ Sua mensagem foi enviada para Ádria.
-                          </p>
-                        )}
+  <p className="mt-3 text-sm font-bold text-green-300">
+    ✓ Sua mensagem foi enviada para Ádria.
+  </p>
+)}
 
-                        <button
-                          type="button"
-                          disabled={
-                            enviandoInteracao === registro.id
-                          }
-                          onClick={() =>
-                            enviarInteracao(registro.id)
-                          }
-                          className="mt-4 rounded-xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-3 text-sm font-extrabold text-yellow-200 transition hover:bg-yellow-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {enviandoInteracao === registro.id
-                            ? "Enviando..."
-                            : "Enviar para Ádria"}
-                        </button>
+<button
+  type="button"
+  disabled={
+    enviandoInteracao === registro.id
+  }
+  onClick={() =>
+    enviarInteracao(registro.id)
+  }
+  className="mt-4 rounded-xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-3 text-sm font-extrabold text-yellow-200 transition hover:bg-yellow-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  {enviandoInteracao === registro.id
+    ? "Enviando..."
+    : "Enviar para Ádria"}
+</button>
+
+{registro.interacoes?.length > 0 && (
+  <div className="mt-6 border-t border-purple-400/15 pt-6">
+    <h5 className="font-extrabold text-yellow-300">
+      💬 Nosso acompanhamento
+    </h5>
+
+    <div className="mt-4 space-y-4">
+      {registro.interacoes.map((interacao) => (
+        <div
+          key={interacao.id}
+          className="rounded-2xl border border-purple-400/15 bg-[#100d24] p-4"
+        >
+          <p className="text-xs font-bold uppercase tracking-[0.15em] text-purple-300">
+            {interacao.interaction_type === "feedback"
+              ? "Sua percepção"
+              : interacao.interaction_type === "sugestao"
+              ? "Sua sugestão"
+              : "Sua dúvida"}
+          </p>
+
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-purple-100">
+            {interacao.message}
+          </p>
+
+          {interacao.admin_reply && (
+            <div className="mt-4 rounded-xl border border-yellow-400/20 bg-yellow-500/5 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-yellow-300">
+                🌹 Resposta da Ádria
+              </p>
+
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white">
+                {interacao.admin_reply}
+              </p>
+
+              {interacao.replied_at && (
+                <p className="mt-3 text-xs text-purple-300">
+                  {new Date(
+                    interacao.replied_at
+                  ).toLocaleString("pt-BR")}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
                       </div>
 
                     </article>
