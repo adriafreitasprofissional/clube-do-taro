@@ -12,6 +12,24 @@ type Cliente = {
   plano: string | null;
 };
 
+type RelatorioGerado = {
+  sintese: string;
+  pontos_desenvolver: string;
+  exercicios_praticos: string;
+  orientacoes_vida_saudavel: string;
+  plano_acompanhamento: string;
+  mensagem_final: string;
+};
+
+const RELATORIO_VAZIO: RelatorioGerado = {
+  sintese: "",
+  pontos_desenvolver: "",
+  exercicios_praticos: "",
+  orientacoes_vida_saudavel: "",
+  plano_acompanhamento: "",
+  mensagem_final: "",
+};
+
 type Registro = {
   id: string;
   client_id: string;
@@ -21,7 +39,12 @@ type Registro = {
   video_file_id: string | null;
   report_adria: string | null;
   report_estella: string | null;
+  generated_report:
+    | Partial<RelatorioGerado>
+    | null;
+  generated_report_at: string | null;
   pdf_file_id: string | null;
+  pdf_generated_at: string | null;
   published: boolean;
 
   club_clients?: {
@@ -40,6 +63,7 @@ type Formulario = {
   video_file_id: string;
   report_adria: string;
   report_estella: string;
+  generated_report: RelatorioGerado;
   pdf_file_id: string;
   published: boolean;
 };
@@ -52,6 +76,9 @@ const FORMULARIO_INICIAL: Formulario = {
   video_file_id: "",
   report_adria: "",
   report_estella: "",
+  generated_report: {
+    ...RELATORIO_VAZIO,
+  },
   pdf_file_id: "",
   published: false,
 };
@@ -77,6 +104,42 @@ function nomeCliente(registro: Registro) {
   );
 }
 
+function normalizarRelatorio(
+  relatorio:
+    | Partial<RelatorioGerado>
+    | null
+    | undefined
+): RelatorioGerado {
+  return {
+    sintese:
+      String(relatorio?.sintese || ""),
+
+    pontos_desenvolver:
+      String(
+        relatorio?.pontos_desenvolver || ""
+      ),
+
+    exercicios_praticos:
+      String(
+        relatorio?.exercicios_praticos || ""
+      ),
+
+    orientacoes_vida_saudavel:
+      String(
+        relatorio?.orientacoes_vida_saudavel ||
+          ""
+      ),
+
+    plano_acompanhamento:
+      String(
+        relatorio?.plano_acompanhamento || ""
+      ),
+
+    mensagem_final:
+      String(relatorio?.mensagem_final || ""),
+  };
+}
+
 export default function MentoriasAdminPage() {
   const [clientes, setClientes] =
     useState<Cliente[]>([]);
@@ -90,8 +153,13 @@ export default function MentoriasAdminPage() {
   const [carregando, setCarregando] =
     useState(true);
 
-  const [salvando, setSalvando] =
+    const [salvando, setSalvando] =
     useState(false);
+
+  const [
+    gerandoRelatorio,
+    setGerandoRelatorio,
+  ] = useState(false);
 
   const [erro, setErro] = useState("");
 
@@ -185,7 +253,7 @@ export default function MentoriasAdminPage() {
       window.clearTimeout(carregamento);
   }, []);
 
-  function atualizarCampo<
+    function atualizarCampo<
     K extends keyof Formulario
   >(
     campo: K,
@@ -194,6 +262,20 @@ export default function MentoriasAdminPage() {
     setFormulario((anterior) => ({
       ...anterior,
       [campo]: valor,
+    }));
+  }
+
+  function atualizarRelatorio(
+    campo: keyof RelatorioGerado,
+    valor: string
+  ) {
+    setFormulario((anterior) => ({
+      ...anterior,
+
+      generated_report: {
+        ...anterior.generated_report,
+        [campo]: valor,
+      },
     }));
   }
 
@@ -219,6 +301,11 @@ export default function MentoriasAdminPage() {
       pdf_file_id:
         registro.pdf_file_id || "",
 
+            generated_report:
+        normalizarRelatorio(
+          registro.generated_report
+        ),
+
       published: registro.published,
     });
 
@@ -228,11 +315,129 @@ export default function MentoriasAdminPage() {
     });
   }
 
-  function limparFormulario() {
-    setFormulario(FORMULARIO_INICIAL);
+    function limparFormulario() {
+    setFormulario({
+      ...FORMULARIO_INICIAL,
+
+      generated_report: {
+        ...RELATORIO_VAZIO,
+      },
+    });
+  }
+
+  async function gerarRelatorio() {
+    if (!formulario.client_id) {
+      alert("Escolha a assinante.");
+
+      return;
+    }
+
+    if (
+      !formulario.report_adria.trim() ||
+      !formulario.report_estella.trim()
+    ) {
+      alert(
+        "Preencha o relatório da Ádria e o relatório da Estella."
+      );
+
+      return;
+    }
+
+    setGerandoRelatorio(true);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error(
+          "Sessão administrativa expirada. Entre novamente."
+        );
+      }
+
+      const clienteSelecionada =
+        clientes.find(
+          (cliente) =>
+            cliente.id === formulario.client_id
+        );
+
+      const response = await fetch(
+        "/api/admin/mentorias/gerar-relatorio",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+
+          body: JSON.stringify({
+            nome_assinante:
+              clienteSelecionada
+                ?.nome_referencia ||
+              clienteSelecionada?.nome ||
+              "",
+
+            titulo: formulario.title,
+
+            report_adria:
+              formulario.report_adria,
+
+            report_estella:
+              formulario.report_estella,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Não foi possível gerar o relatório."
+        );
+      }
+
+      setFormulario((anterior) => ({
+        ...anterior,
+
+        generated_report:
+          normalizarRelatorio(
+            data.relatorio
+          ),
+      }));
+
+      window.setTimeout(() => {
+        document
+          .getElementById(
+            "relatorio-gerado"
+          )
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+      }, 100);
+
+      alert(
+        "Relatório criado. Revise e edite tudo antes de salvar."
+      );
+    } catch (error: unknown) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Erro ao gerar relatório."
+      );
+    } finally {
+      setGerandoRelatorio(false);
+    }
   }
 
   async function salvar() {
+
+
     if (
       !formulario.client_id ||
       !formulario.title ||
@@ -369,7 +574,85 @@ export default function MentoriasAdminPage() {
       return;
     }
 
-    await carregarDados();
+        await carregarDados();
+  }
+
+  async function alterarPublicacao(
+    registro: Registro
+  ) {
+    const publicar = !registro.published;
+
+    const confirmou = confirm(
+      publicar
+        ? `Publicar “${registro.title}” no portal da assinante?`
+        : `Ocultar “${registro.title}” do portal da assinante?`
+    );
+
+    if (!confirmou) {
+      return;
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      alert(
+        "Sessão administrativa expirada. Entre novamente."
+      );
+
+      return;
+    }
+
+    const response = await fetch(
+      "/api/admin/mentorias",
+      {
+        method: "PATCH",
+
+        headers: {
+          "Content-Type": "application/json",
+
+          Authorization:
+            `Bearer ${session.access_token}`,
+        },
+
+        body: JSON.stringify({
+          id: registro.id,
+          client_id: registro.client_id,
+          service_type: registro.service_type,
+          title: registro.title,
+          occurred_at: registro.occurred_at,
+          video_file_id:
+            registro.video_file_id,
+          report_adria:
+            registro.report_adria,
+          report_estella:
+            registro.report_estella,
+          pdf_file_id:
+            registro.pdf_file_id,
+          published: publicar,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(
+        data.error ||
+          "Não foi possível alterar a publicação."
+      );
+
+      return;
+    }
+
+    alert(
+      publicar
+        ? "Mentoria publicada no portal."
+        : "Mentoria retirada do portal."
+    );
+
+        await carregarDados();
   }
 
   return (
@@ -503,7 +786,7 @@ export default function MentoriasAdminPage() {
             />
           </label>
 
-          <label>
+                  <label>
             Relatório da Estella
 
             <textarea
@@ -518,6 +801,163 @@ export default function MentoriasAdminPage() {
               placeholder="Registre o parecer espiritual da Estella..."
             />
           </label>
+
+          <div
+            id="relatorio-gerado"
+            className="gerador-relatorio"
+          >
+            <div className="topo-gerador">
+              <div>
+                <p className="titulo-gerador">
+                  ✨ Gerador do Relatório
+                </p>
+
+                <p className="descricao-gerador">
+                  O agente usará os dois pareceres
+                  para criar exercícios, orientações
+                  e próximos passos.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={gerarRelatorio}
+                disabled={gerandoRelatorio}
+                className="botao-gerar"
+              >
+                {gerandoRelatorio
+                  ? "Criando relatório..."
+                  : "✨ Gerar com o agente"}
+              </button>
+            </div>
+
+            {Object.values(
+              formulario.generated_report
+            ).some((valor) =>
+              valor.trim()
+            ) && (
+              <div className="campos-gerados">
+                <p className="aviso-edicao">
+                  Revise e edite todo o conteúdo
+                  antes de gerar o PDF.
+                </p>
+
+                <label>
+                  Síntese do momento atual
+
+                  <textarea
+                    rows={6}
+                    value={
+                      formulario
+                        .generated_report
+                        .sintese
+                    }
+                    onChange={(event) =>
+                      atualizarRelatorio(
+                        "sintese",
+                        event.target.value
+                      )
+                    }
+                  />
+                </label>
+
+                <label>
+                  Pontos para desenvolver
+
+                  <textarea
+                    rows={7}
+                    value={
+                      formulario
+                        .generated_report
+                        .pontos_desenvolver
+                    }
+                    onChange={(event) =>
+                      atualizarRelatorio(
+                        "pontos_desenvolver",
+                        event.target.value
+                      )
+                    }
+                  />
+                </label>
+
+                <label>
+                  Exercícios personalizados
+
+                  <textarea
+                    rows={9}
+                    value={
+                      formulario
+                        .generated_report
+                        .exercicios_praticos
+                    }
+                    onChange={(event) =>
+                      atualizarRelatorio(
+                        "exercicios_praticos",
+                        event.target.value
+                      )
+                    }
+                  />
+                </label>
+
+                <label>
+                  Orientações para uma vida saudável
+
+                  <textarea
+                    rows={8}
+                    value={
+                      formulario
+                        .generated_report
+                        .orientacoes_vida_saudavel
+                    }
+                    onChange={(event) =>
+                      atualizarRelatorio(
+                        "orientacoes_vida_saudavel",
+                        event.target.value
+                      )
+                    }
+                  />
+                </label>
+
+                <label>
+                  Plano para os próximos sete dias
+
+                  <textarea
+                    rows={8}
+                    value={
+                      formulario
+                        .generated_report
+                        .plano_acompanhamento
+                    }
+                    onChange={(event) =>
+                      atualizarRelatorio(
+                        "plano_acompanhamento",
+                        event.target.value
+                      )
+                    }
+                  />
+                </label>
+
+                <label>
+                  Mensagem final
+
+                  <textarea
+                    rows={6}
+                    value={
+                      formulario
+                        .generated_report
+                        .mensagem_final
+                    }
+                    onChange={(event) =>
+                      atualizarRelatorio(
+                        "mensagem_final",
+                        event.target.value
+                      )
+                    }
+                  />
+                </label>
+              </div>
+            )}
+          </div>
 
           <label>
             Link ou código do PDF
@@ -642,26 +1082,43 @@ export default function MentoriasAdminPage() {
                     )}
                   </div>
 
-                  <div className="acoes-registro">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        editar(registro)
-                      }
-                    >
-                      ✏️ Editar
-                    </button>
+<div className="acoes-registro">
+  <button
+    type="button"
+    onClick={() =>
+      editar(registro)
+    }
+  >
+    ✏️ Editar
+  </button>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        excluir(registro)
-                      }
-                      className="excluir"
-                    >
-                      Excluir
-                    </button>
-                  </div>
+  <button
+    type="button"
+    onClick={() =>
+      alterarPublicacao(registro)
+    }
+    className={
+      registro.published
+        ? "ocultar-portal"
+        : "publicar-portal"
+    }
+  >
+    {registro.published
+      ? "🔒 Ocultar do portal"
+      : "✨ Publicar no portal"}
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      excluir(registro)
+    }
+    className="excluir"
+  >
+    Excluir
+  </button>
+</div>
+                  
                 </article>
               ))}
             </div>
@@ -769,12 +1226,89 @@ export default function MentoriasAdminPage() {
           font: inherit;
         }
 
-        textarea {
+                textarea {
           resize: vertical;
           line-height: 1.6;
         }
 
+        .gerador-relatorio {
+          margin: 26px 0;
+          padding: 20px;
+          border: 1px solid
+            rgba(244, 212, 106, 0.28);
+          border-radius: 18px;
+          background:
+            linear-gradient(
+              145deg,
+              rgba(139, 92, 246, 0.12),
+              rgba(244, 212, 106, 0.05)
+            );
+        }
+
+        .topo-gerador {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 18px;
+        }
+
+        .titulo-gerador {
+          margin: 0;
+          color: #f4d46a;
+          font-size: 18px;
+          font-weight: 800;
+        }
+
+        .descricao-gerador {
+          margin: 8px 0 0;
+          max-width: 470px;
+          color: rgba(255, 255, 255, 0.68);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+
+        .botao-gerar {
+          flex-shrink: 0;
+          border: 1px solid
+            rgba(244, 212, 106, 0.4);
+          background: #e7c96f;
+          color: #1a0921;
+        }
+
+        .botao-gerar:disabled {
+          cursor: wait;
+          opacity: 0.65;
+        }
+
+        .campos-gerados {
+          margin-top: 22px;
+          padding-top: 20px;
+          border-top: 1px solid
+            rgba(244, 212, 106, 0.18);
+        }
+
+        .aviso-edicao {
+          margin: 0 0 18px;
+          padding: 12px 14px;
+          border-radius: 11px;
+          background: rgba(74, 222, 128, 0.08);
+          color: #bbf7d0;
+          font-size: 13px;
+          line-height: 1.6;
+        }
+
+        @media (max-width: 680px) {
+          .topo-gerador {
+            flex-direction: column;
+          }
+
+          .botao-gerar {
+            width: 100%;
+          }
+        }
+
         .publicar {
+
           display: flex;
           align-items: center;
           gap: 10px;
@@ -885,9 +1419,19 @@ export default function MentoriasAdminPage() {
           font-size: 12px;
         }
 
-        .acoes-registro .excluir {
-          color: #fca5a5;
-        }
+        .acoes-registro .publicar-portal {
+  background: rgba(74, 222, 128, 0.14);
+  color: #86efac;
+}
+
+.acoes-registro .ocultar-portal {
+  background: rgba(250, 204, 21, 0.12);
+  color: #fde047;
+}
+
+.acoes-registro .excluir {
+  color: #fca5a5;
+}
 
         .vazio {
           color: rgba(255, 255, 255, 0.6);

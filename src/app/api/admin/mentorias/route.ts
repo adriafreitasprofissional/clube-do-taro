@@ -11,8 +11,11 @@ const CAMPOS = `
   video_provider,
   video_file_id,
   report_adria,
-  report_estella,
+   report_estella,
+  generated_report,
+  generated_report_at,
   pdf_file_id,
+  pdf_generated_at,
   published,
   created_at,
   updated_at
@@ -211,11 +214,26 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  const registro = montarRegistro(body);
+    const registro = montarRegistro(body);
+
+  const alteracoes = {
+    ...registro,
+
+    ...(body.generated_report !== undefined
+      ? {
+          generated_report:
+            body.generated_report,
+
+          generated_report_at:
+            body.generated_report_at ||
+            new Date().toISOString(),
+        }
+      : {}),
+  };
 
   const { data, error } = await supabaseAdmin
     .from("client_service_records")
-    .update(registro)
+    .update(alteracoes)
     .eq("id", id)
     .select(CAMPOS)
     .single();
