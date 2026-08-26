@@ -50,7 +50,19 @@ export default function MentoriasDaAssinantePage() {
     useState<ArquivoAberto>(null);
 
   const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState("");
+const [erro, setErro] = useState("");
+
+const [tipoInteracao, setTipoInteracao] =
+  useState<Record<string, string>>({});
+
+const [mensagemInteracao, setMensagemInteracao] =
+  useState<Record<string, string>>({});
+
+const [enviandoInteracao, setEnviandoInteracao] =
+  useState<string | null>(null);
+
+const [interacaoEnviada, setInteracaoEnviada] =
+  useState<Record<string, boolean>>({});
 
   useEffect(() => {
     async function carregar() {
@@ -100,6 +112,81 @@ export default function MentoriasDaAssinantePage() {
       carregar();
     }
   }, [router, slug]);
+
+async function enviarInteracao(
+  registroId: string
+) {
+  const tipo =
+    tipoInteracao[registroId] || "feedback";
+
+  const mensagem =
+    mensagemInteracao[registroId]?.trim() || "";
+
+  if (!mensagem) {
+    alert(
+      "Escreva sua percepção antes de enviar."
+    );
+    return;
+  }
+
+  setEnviandoInteracao(registroId);
+
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      router.replace("/login");
+      return;
+    }
+
+    const response = await fetch(
+      "/api/mentorias/interacoes",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          source_id: registroId,
+          interaction_type: tipo,
+          message: mensagem,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+          "Não foi possível enviar sua mensagem."
+      );
+    }
+
+    setMensagemInteracao((atual) => ({
+      ...atual,
+      [registroId]: "",
+    }));
+
+    setInteracaoEnviada((atual) => ({
+      ...atual,
+      [registroId]: true,
+    }));
+  } catch (error: unknown) {
+    alert(
+      error instanceof Error
+        ? error.message
+        : "Erro ao enviar sua mensagem."
+    );
+  } finally {
+    setEnviandoInteracao(null);
+  }
+}
+
 
   const meses = useMemo(() => {
     const grupos = new Map<string, Registro[]>();
@@ -252,7 +339,7 @@ export default function MentoriasDaAssinantePage() {
                             </div>
                           )}
 
-                          {registro.report_estella && (
+                                                    {registro.report_estella && (
                             <div className="rounded-2xl border border-purple-400/15 bg-black/20 p-5">
                               <h4 className="font-extrabold text-yellow-300">
                                 🔮 Parecer da Estella
@@ -265,7 +352,89 @@ export default function MentoriasDaAssinantePage() {
                           )}
                         </div>
                       )}
-                                            
+
+                      <div className="mt-7 rounded-2xl border border-purple-400/20 bg-black/20 p-5">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-purple-300">
+                          Sua voz também faz parte deste acompanhamento
+                        </p>
+
+                        <h4 className="mt-2 text-lg font-extrabold text-yellow-300">
+                          Deixe aqui sua percepção dessa mentoria
+                        </h4>
+
+                        <p className="mt-2 text-sm leading-6 text-purple-200">
+                          Conte como foi sua experiência, envie uma sugestão ou compartilhe uma dúvida.
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {[
+                            ["feedback", "Feedback"],
+                            ["sugestao", "Sugestão"],
+                            ["duvida", "Dúvida"],
+                          ].map(([valor, label]) => {
+                            const selecionado =
+                              (tipoInteracao[registro.id] ||
+                                "feedback") === valor;
+
+                            return (
+                              <button
+                                key={valor}
+                                type="button"
+                                onClick={() =>
+                                  setTipoInteracao((atual) => ({
+                                    ...atual,
+                                    [registro.id]: valor,
+                                  }))
+                                }
+                                className={
+                                  selecionado
+                                    ? "rounded-xl border border-yellow-400/50 bg-yellow-500/15 px-4 py-2 text-sm font-bold text-yellow-200"
+                                    : "rounded-xl border border-purple-400/20 bg-purple-900/20 px-4 py-2 text-sm font-bold text-purple-200 transition hover:bg-purple-800/30"
+                                }
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <textarea
+                          value={
+                            mensagemInteracao[registro.id] || ""
+                          }
+                          onChange={(event) =>
+                            setMensagemInteracao((atual) => ({
+                              ...atual,
+                              [registro.id]: event.target.value,
+                            }))
+                          }
+                          rows={4}
+                          placeholder="Escreva aqui..."
+                          className="mt-4 w-full resize-none rounded-2xl border border-purple-400/20 bg-[#100d24] px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-purple-400 focus:border-yellow-400/40"
+                        />
+
+                        {interacaoEnviada[registro.id] && (
+                          <p className="mt-3 text-sm font-bold text-green-300">
+                            ✓ Sua mensagem foi enviada para Ádria.
+                          </p>
+                        )}
+
+                        <button
+                          type="button"
+                          disabled={
+                            enviandoInteracao === registro.id
+                          }
+                          onClick={() =>
+                            enviarInteracao(registro.id)
+                          }
+                          className="mt-4 rounded-xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-3 text-sm font-extrabold text-yellow-200 transition hover:bg-yellow-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {enviandoInteracao === registro.id
+                            ? "Enviando..."
+                            : "Enviar para Ádria"}
+                        </button>
+                      </div>
+
                     </article>
                   ))}
                 </div>
