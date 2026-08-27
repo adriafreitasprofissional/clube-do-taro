@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 
+import { supabase } from "@/lib/supabase";
 
 const PLANILHA_CONTEUDOS_CSV =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSr7qra9Jsh2IO6vDO_8vVxe-8lkf9zbFeuDPtw5Wny7zHUKIhVa7lIqqshLo_4JbRDUhWjv0sb_5y3/pub?gid=0&single=true&output=csv";
@@ -18,6 +18,52 @@ type ConteudoPlanilha = {
   drive_file: string;
   ativo: string;
 };
+
+type PerguntaExclusiva = {
+  id: string;
+  cliente_id: string;
+  nome_cliente: string | null;
+  email_cliente: string | null;
+  plano: string | null;
+  categoria: string | null;
+  pergunta: string;
+  urgente: boolean | null;
+  referencia_mes: string | null;
+  status: string | null;
+  ativo: boolean | null;
+  created_at: string;
+};
+
+const NOMES_MESES = [
+  "janeiro",
+  "fevereiro",
+  "março",
+  "abril",
+  "maio",
+  "junho",
+  "julho",
+  "agosto",
+  "setembro",
+  "outubro",
+  "novembro",
+  "dezembro",
+];
+
+const ORDEM_MESES = [
+  "janeiro",
+  "fevereiro",
+  "março",
+  "marco",
+  "abril",
+  "maio",
+  "junho",
+  "julho",
+  "agosto",
+  "setembro",
+  "outubro",
+  "novembro",
+  "dezembro",
+];
 
 function lerCsv(linha: string) {
   const colunas: string[] = [];
@@ -38,8 +84,10 @@ function lerCsv(linha: string) {
   }
 
   colunas.push(atual.trim().replace(/^"|"$/g, ""));
+
   return colunas;
 }
+
 function linkDrive(valor: string, tipo: string) {
   if (!valor) return "";
 
@@ -52,1219 +100,2132 @@ function linkDrive(valor: string, tipo: string) {
   if (!idEncontrado) return "";
 
   const ehAudio =
-    tipo === "audio_individual" || tipo === "audio_geral";
+    tipo === "audio_individual" ||
+    tipo === "audio_geral";
 
   return ehAudio
     ? `https://drive.google.com/file/d/${idEncontrado}/preview`
     : `https://drive.google.com/file/d/${idEncontrado}/view`;
 }
 
+function nomeMes(numeroMes: number) {
+  return NOMES_MESES[numeroMes - 1] || "";
+}
+
+function capitalizar(texto: string) {
+  if (!texto) return "";
+
+  return (
+    texto.charAt(0).toUpperCase() +
+    texto.slice(1)
+  );
+}
+
+function referenciaDaPergunta(
+  pergunta: PerguntaExclusiva
+) {
+  if (
+    pergunta.referencia_mes &&
+    /^\d{4}-\d{2}$/.test(pergunta.referencia_mes)
+  ) {
+    return pergunta.referencia_mes;
+  }
+
+  const data = new Date(pergunta.created_at);
+
+  return `${data.getFullYear()}-${String(
+    data.getMonth() + 1
+  ).padStart(2, "0")}`;
+}
+
 export default function PortalPremium() {
   const params = useParams();
-  const slug = params.slug as string;
+  const router = useRouter();
 
-const router = useRouter();
-  const [audioAberto, setAudioAberto] = useState(false);
-  const [audioUrl, setAudioUrl] = useState("");
-  
-  const [direcionamentos, setDirecionamentos] =
-  useState<any[]>([]);
+  const slug = String(params.slug || "");
 
-const [direcionamentoExclusivo, setDirecionamentoExclusivo] =
-  useState<any>(null);
+  const agora = new Date();
 
-  const [reformulacao, setReformulacao] = useState<any>(null);
-const [mesAberto, setMesAberto] = useState<string | null>(null);
-  const [direcionamentoAberto, setDirecionamentoAberto] = useState(false);
-  const [categoria, setCategoria] = useState("");
-  const [urgente, setUrgente] = useState(false);
-  const [pergunta, setPergunta] = useState("");
-  const [nome, setNome] = useState("");
-  const [plano, setPlano] = useState("");
-const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-const [clienteId, setClienteId] = useState("");
-const [perguntasRestantes, setPerguntasRestantes] = useState(0);  
-const [conteudosPlanilha, setConteudosPlanilha] = useState<ConteudoPlanilha[]>([]);
-const [carregandoConteudos, setCarregandoConteudos] = useState(true);
- 
-const [mobile, setMobile] = useState(false);
+  const anoAtual = String(
+    agora.getFullYear()
+  );
 
-useEffect(() => {
-  const verificar = () => {
-    setMobile(window.innerWidth <= 900);
-  };
+  const numeroMesAtual =
+    agora.getMonth() + 1;
 
-  verificar();
+  const mesAtual =
+    NOMES_MESES[agora.getMonth()];
 
-  window.addEventListener("resize", verificar);
+  const referenciaAtual =
+    `${anoAtual}-${String(
+      numeroMesAtual
+    ).padStart(2, "0")}`;
 
-  return () =>
-    window.removeEventListener("resize", verificar);
-}, []);
+  const [audioAberto, setAudioAberto] =
+    useState(false);
 
-useEffect(() => {
-  async function carregarCliente() {
-    setLoading(true);
-    setError(null);
+  const [audioUrl, setAudioUrl] =
+    useState("");
 
-    try {
-      const { data, error } = await supabase
-        .from("club_clients")
-       .select("id, plano, nome, nome_referencia, slug")
-        .eq("slug", slug)
-        .maybeSingle();
+  const [
+    direcionamentos,
+    setDirecionamentos,
+  ] = useState<PerguntaExclusiva[]>([]);
 
-      if (error) throw new Error(error.message);
+  const [
+    direcionamentoExclusivo,
+    setDirecionamentoExclusivo,
+  ] = useState<PerguntaExclusiva | null>(
+    null
+  );
 
-      if (data) {
-  setClienteId(data.id);
+  const [
+    reformulacao,
+    setReformulacao,
+  ] = useState<any>(null);
 
-  setNome(data.nome_referencia || data.nome);
+  const [anoAberto, setAnoAberto] =
+    useState<string | null>(anoAtual);
 
-        const planoCliente = (data.plano || "").toLowerCase();
+  const [mesAberto, setMesAberto] =
+    useState<string | null>(
+      `${anoAtual}-${mesAtual}`
+    );
+
+  const [
+    direcionamentoAberto,
+    setDirecionamentoAberto,
+  ] = useState(false);
+
+  const [categoria, setCategoria] =
+    useState("");
+
+  const [urgente, setUrgente] =
+    useState(false);
+
+    const [mensagensAbertas, setMensagensAbertas] =
+  useState<Record<string, boolean>>({});
+
+  const [pergunta, setPergunta] =
+    useState("");
+
+  const [nome, setNome] =
+    useState("");
+
+  const [plano, setPlano] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [clienteId, setClienteId] =
+    useState("");
+
+  const [
+    perguntasRestantes,
+    setPerguntasRestantes,
+  ] = useState(0);
+
+  const [
+    conteudosPlanilha,
+    setConteudosPlanilha,
+  ] = useState<ConteudoPlanilha[]>([]);
+
+  const [
+    carregandoConteudos,
+    setCarregandoConteudos,
+  ] = useState(true);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const [mobile, setMobile] =
+    useState(false);
+
+  useEffect(() => {
+    const verificar = () => {
+      setMobile(
+        window.innerWidth <= 900
+      );
+    };
+
+    verificar();
+
+    window.addEventListener(
+      "resize",
+      verificar
+    );
+
+    return () =>
+      window.removeEventListener(
+        "resize",
+        verificar
+      );
+  }, []);
+
+  useEffect(() => {
+    async function carregarCliente() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const {
+          data,
+          error: clienteError,
+        } = await supabase
+          .from("club_clients")
+          .select(
+            `
+              id,
+              plano,
+              nome,
+              nome_referencia,
+              email,
+              slug
+            `
+          )
+          .eq("slug", slug)
+          .maybeSingle();
+
+        if (clienteError) {
+          throw new Error(
+            clienteError.message
+          );
+        }
+
+        if (!data) {
+          throw new Error(
+            "Assinante não encontrada."
+          );
+        }
+
+        setClienteId(data.id);
+
+        setNome(
+          data.nome_referencia ||
+            data.nome ||
+            ""
+        );
+
+        setEmail(data.email || "");
+
+        const planoCliente =
+          String(
+            data.plano || ""
+          ).toLowerCase();
 
         setPlano(planoCliente);
 
         const limitePerguntas =
-  planoCliente === "cortesia"
-    ? 1
-    : planoCliente === "bronze"
-    ? 1
-    : planoCliente === "prata"
-    ? 2
-    : planoCliente === "ouro"
-    ? 2
-    : planoCliente === "diamante"
-    ? 3
-    : 0;
+          planoCliente === "cortesia"
+            ? 1
+            : planoCliente === "bronze"
+            ? 1
+            : planoCliente === "prata"
+            ? 2
+            : planoCliente === "ouro"
+            ? 2
+            : planoCliente === "diamante"
+            ? 3
+            : 0;
 
-        const referenciaMes = `${new Date().getFullYear()}-${String(
-          new Date().getMonth() + 1
-        ).padStart(2, "0")}`;
+        const {
+          data: perguntasData,
+          error: perguntasError,
+        } = await supabase
+          .from("exclusive_questions")
+          .select("*")
+          .eq("cliente_id", data.id)
+          .order("created_at", {
+            ascending: true,
+          });
 
-       const { data: perguntas, error: perguntasError } = await supabase
-  .from("exclusive_questions")
-  .select("*")
-  .eq("cliente_id", data.id)
-  .eq("referencia_mes", referenciaMes)
-  .order("created_at", { ascending: true });
+        if (perguntasError) {
+          throw new Error(
+            perguntasError.message
+          );
+        }
 
-console.log("CLIENTE:", data.id);
-console.log("REFERÊNCIA:", referenciaMes);
-console.log("PERGUNTAS:", perguntas);
-console.log("ERRO:", perguntasError);
-        const usadas = perguntas?.length || 0;
+        const todasPerguntas =
+          (perguntasData || []) as PerguntaExclusiva[];
 
-        setPerguntasRestantes(
-          Math.max(0, limitePerguntas - usadas)
+        setDirecionamentos(
+          todasPerguntas
         );
 
-        const listaPerguntas =
-  (perguntas || []).sort(
-    (a, b) =>
-      new Date(a.created_at).getTime() -
-      new Date(b.created_at).getTime()
-  );
+        const perguntasDoMesAtual =
+          todasPerguntas.filter(
+            (item) =>
+              referenciaDaPergunta(
+                item
+              ) === referenciaAtual
+          );
 
-setDirecionamentos(listaPerguntas);
+        setPerguntasRestantes(
+          Math.max(
+            0,
+            limitePerguntas -
+              perguntasDoMesAtual.length
+          )
+        );
 
-const exclusivo =
-  listaPerguntas.length > 0
-    ? listaPerguntas[listaPerguntas.length - 1]
-    : null;
+        const exclusivo =
+          perguntasDoMesAtual.length > 0
+            ? perguntasDoMesAtual[
+                perguntasDoMesAtual.length -
+                  1
+              ]
+            : null;
 
-setDirecionamentoExclusivo(exclusivo);
+        setDirecionamentoExclusivo(
+          exclusivo
+        );
 
         if (exclusivo) {
-         const { data: recado, error } = await supabase
-            .from("exclusive_messages")
+          const {
+            data: recado,
+            error: recadoError,
+          } = await supabase
+            .from(
+              "exclusive_messages"
+            )
             .select("*")
-            .eq("question_id", exclusivo.id)
+            .eq(
+              "question_id",
+              exclusivo.id
+            )
             .eq("autor", "admin")
-            .order("created_at", { ascending: false })
+            .order("created_at", {
+              ascending: false,
+            })
             .limit(1)
             .maybeSingle();
 
-const recadoMsg = recado && recado.length > 0 ? recado[0] : null;
-setReformulacao(recadoMsg);
+          if (recadoError) {
+            console.error(
+              "Erro ao carregar reformulação:",
+              recadoError
+            );
+          }
 
-            console.log("ERRO RECADO:", error);
-            console.log("RECADO:", recado);
-
-          setReformulacao(recado);
-          console.log("RECADO:", recado);
+          setReformulacao(
+            recado || null
+          );
         } else {
           setReformulacao(null);
         }
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Erro ao carregar dados do cliente."
+        );
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      setError(err.message || "Erro ao carregar dados do cliente.");
-    } finally {
-      setLoading(false);
     }
-  }
 
-  if (slug) {
-    carregarCliente();
-  }
-}, [slug]);
-  
-     useEffect(() => {
- 
+    if (slug) {
+      carregarCliente();
+    }
+  }, [slug, referenciaAtual]);
+
+  useEffect(() => {
     async function carregarConteudosDaPlanilha() {
       try {
-        const resposta = await fetch(PLANILHA_CONTEUDOS_CSV, {
-          cache: "no-store",
-        });
-
-        if (!resposta.ok) {
-          throw new Error("Não foi possível carregar a planilha de conteúdos.");
-        }
-
-        const texto = await resposta.text();
-        const linhas = texto
-          .split(/\r?\n/)
-          .map((linha) => linha.trim())
-          .filter(Boolean);
-
-        const cabecalho = lerCsv(linhas[0]).map((item) =>
-          item.toLowerCase().trim()
+        const resposta = await fetch(
+          PLANILHA_CONTEUDOS_CSV,
+          {
+            cache: "no-store",
+          }
         );
 
-        const conteudos = linhas.slice(1).map((linha) => {
-          const valores = lerCsv(linha);
-          const item: Record<string, string> = {};
+        if (!resposta.ok) {
+          throw new Error(
+            "Não foi possível carregar a planilha de conteúdos."
+          );
+        }
 
-          cabecalho.forEach((coluna, indice) => {
-            item[coluna] = valores[indice] || "";
-          });
+        const texto =
+          await resposta.text();
 
+        const linhas = texto
+          .split(/\r?\n/)
+          .map((linha) =>
+            linha.trim()
+          )
+          .filter(Boolean);
 
-          return {
-            slug: (item.slug || "").toLowerCase().trim(),
-            ano: (item.ano || "").trim(),
-            mes: (item.mes || "").toLowerCase().trim(),
-            semana: (item.semana || "").trim(),
-            tipo: (item.tipo || "").toLowerCase().trim(),
-            titulo: (item.titulo || "").trim(),
-            drive_file: (item.drive_file || "").trim(),
-            ativo: (item.ativo || "").toLowerCase().trim(),
-          };
-        });
+        if (linhas.length === 0) {
+          setConteudosPlanilha([]);
+          return;
+        }
 
-        setConteudosPlanilha(conteudos);
-       
+        const cabecalho =
+          lerCsv(linhas[0]).map(
+            (item) =>
+              item
+                .toLowerCase()
+                .trim()
+          );
+
+        const conteudos =
+          linhas
+            .slice(1)
+            .map((linha) => {
+              const valores =
+                lerCsv(linha);
+
+              const item: Record<
+                string,
+                string
+              > = {};
+
+              cabecalho.forEach(
+                (
+                  coluna,
+                  indice
+                ) => {
+                  item[coluna] =
+                    valores[indice] ||
+                    "";
+                }
+              );
+
+              return {
+                slug: (
+                  item.slug || ""
+                )
+                  .toLowerCase()
+                  .trim(),
+
+                ano: (
+                  item.ano || ""
+                ).trim(),
+
+                mes: (
+                  item.mes || ""
+                )
+                  .toLowerCase()
+                  .trim(),
+
+                semana: (
+                  item.semana || ""
+                ).trim(),
+
+                tipo: (
+                  item.tipo || ""
+                )
+                  .toLowerCase()
+                  .trim(),
+
+                titulo: (
+                  item.titulo || ""
+                ).trim(),
+
+                drive_file: (
+                  item.drive_file ||
+                  ""
+                ).trim(),
+
+                ativo: (
+                  item.ativo || ""
+                )
+                  .toLowerCase()
+                  .trim(),
+              };
+            });
+
+        setConteudosPlanilha(
+          conteudos
+        );
       } catch (err) {
-        console.error("Erro ao carregar planilha:", err);
+        console.error(
+          "Erro ao carregar planilha:",
+          err
+        );
       } finally {
-        setCarregandoConteudos(false);
+        setCarregandoConteudos(
+          false
+        );
       }
     }
 
     carregarConteudosDaPlanilha();
   }, []);
-  
-  const meses = [
-  ...new Set(
-    conteudosPlanilha
-      .filter(
+
+  const anos = useMemo(() => {
+    const anosConteudos =
+      conteudosPlanilha
+        .filter(
+          (item) =>
+            item.slug === slug &&
+            item.ativo === "sim"
+        )
+        .map((item) => item.ano);
+
+    const anosPerguntas =
+      direcionamentos.map(
         (item) =>
-          item.slug === slug &&
-          item.ano === "2026" &&
-          item.ativo === "sim"
-      )
-      
-      .map((item) => item.mes)
-  ),
-].sort((a, b) => {
-  const ordem = [
-    "janeiro",
-    "fevereiro",
-    "março",
-    "marco",
-    "abril",
-    "maio",
-    "junho",
-    "julho",
-    "agosto",
-    "setembro",
-    "outubro",
-    "novembro",
-    "dezembro",
-  ];
+          referenciaDaPergunta(
+            item
+          ).slice(0, 4)
+      );
 
-  return ordem.indexOf(a) - ordem.indexOf(b);
-});
+    return [
+      ...new Set([
+        ...anosConteudos,
+        ...anosPerguntas,
+      ]),
+    ]
+      .filter(Boolean)
+      .sort(
+        (a, b) =>
+          Number(b) -
+          Number(a)
+      );
+  }, [
+    conteudosPlanilha,
+    direcionamentos,
+    slug,
+  ]);
 
-function conteudosDoMes(mes: string) {
-  return conteudosPlanilha.filter(
-    (item) =>
-      item.slug === slug &&
-      item.ano === "2026" &&
-      item.mes === mes &&
-      item.ativo === "sim"
-  );
-}
-function buscarConteudo(
-  mes: string,
-  semana: string,
-  tipo: string
-) {
-  return conteudosPlanilha.find(
-    (item) =>
-      item.slug === slug &&
-      item.ano === "2026" &&
-      item.mes === mes &&
-      item.semana === semana &&
-      item.tipo === tipo &&
-      item.ativo === "sim"
-  );
-}
+  function mesesDoAno(
+    ano: string
+  ) {
+    const mesesConteudos =
+      conteudosPlanilha
+        .filter(
+          (item) =>
+            item.slug === slug &&
+            item.ano === ano &&
+            item.ativo === "sim"
+        )
+        .map(
+          (item) =>
+            item.mes
+        );
 
-function abrirAudio(mes: string, semana: string) {
-  const conteudo = buscarConteudo(
-    mes,
-    semana,
-    "audio_individual"
-  );
+    const mesesPerguntas =
+      direcionamentos
+        .filter((item) =>
+          referenciaDaPergunta(
+            item
+          ).startsWith(
+            `${ano}-`
+          )
+        )
+        .map((item) => {
+          const referencia =
+            referenciaDaPergunta(
+              item
+            );
 
-  if (!conteudo) {
-    alert("Áudio ainda não disponível.");
-    return;
+          const numero =
+            Number(
+              referencia.slice(
+                5,
+                7
+              )
+            );
+
+          return nomeMes(
+            numero
+          );
+        });
+
+    return [
+      ...new Set([
+        ...mesesConteudos,
+        ...mesesPerguntas,
+      ]),
+    ]
+      .filter(Boolean)
+      .sort(
+        (a, b) =>
+          ORDEM_MESES.indexOf(
+            b
+          ) -
+          ORDEM_MESES.indexOf(
+            a
+          )
+      );
   }
 
-  const url = linkDrive(
-    conteudo.drive_file,
-    conteudo.tipo
-  );
-
-  console.log(url);
-
-  setAudioUrl(url);
-  setAudioAberto(true);
-}
-
- function abrirPdf(mes: string, semana: string) {
-  const conteudo = buscarConteudo(
-    mes,
-    semana,
-    "pdf_individual"
-  );
-
-  if (!conteudo) {
-    alert("PDF ainda não disponível.");
-    return;
+  function conteudosDoMes(
+    ano: string,
+    mes: string
+  ) {
+    return conteudosPlanilha.filter(
+      (item) =>
+        item.slug === slug &&
+        item.ano === ano &&
+        item.mes === mes &&
+        item.ativo === "sim"
+    );
   }
 
-  window.open(conteudo.drive_file, "_blank");
-}
+  function numeroDoMes(
+    mes: string
+  ) {
+    const indice =
+      ORDEM_MESES.indexOf(mes);
 
-if (loading) {
-  return <div>Carregando...</div>;
-}
-if (error) {
-  return <div>{error}</div>;
-}
+    if (indice === 3) {
+      return 3;
+    }
 
-return (
-  <main
-    style={{
-       display: "grid",
-gridTemplateColumns: mobile ? "1fr" : "280px 1fr",
-gap: mobile ? 20 : 30,
-alignItems: "start",
-padding: mobile ? 15 : 40,
-    }}
-  >
-    {/* MENU ESQUERDO */}
+    if (indice < 0) {
+      return 0;
+    }
 
-   <aside
-  style={{
-    background: "#1b0227",
-    borderRadius: 22,
-    padding: 30,
-    border: "1px solid rgba(244,212,106,.20)",
-    position: mobile ? "relative" : "sticky",
-top: mobile ? 0 : 30,
-minHeight: mobile ? "auto" : "calc(100vh - 80px)",
-marginBottom: mobile ? 20 : 0,
-    display: "flex",
-    flexDirection: "column",
-  }}
->
-      <h2
-        style={{
-          color: "#ffd000",
-          marginBottom: 30,
-        }}
-      >
-        ✨ Direcionamentos
-      </h2>
+    const ajusteMarco =
+      indice > 3 ? indice : indice + 1;
 
-     <h3
-  style={{
-    color: "#fff",
-    fontSize: 30,
-    fontWeight: 700,
-    lineHeight: 1.2,
-    letterSpacing: "0.3px",
-    marginTop: 24,
-    marginBottom: 12,
-  }}
->
-  {nome}
-</h3>
+    return ajusteMarco;
+  }
 
+  function perguntasDoMes(
+    ano: string,
+    mes: string
+  ) {
+    const numero =
+      numeroDoMes(mes);
+
+    if (!numero) {
+      return [];
+    }
+
+    const referencia =
+      `${ano}-${String(
+        numero
+      ).padStart(2, "0")}`;
+
+    return direcionamentos.filter(
+      (item) =>
+        referenciaDaPergunta(
+          item
+        ) === referencia
+    );
+  }
+
+  function buscarConteudo(
+    ano: string,
+    mes: string,
+    semana: string,
+    tipo: string
+  ) {
+    return conteudosPlanilha.find(
+      (item) =>
+        item.slug === slug &&
+        item.ano === ano &&
+        item.mes === mes &&
+        item.semana === semana &&
+        item.tipo === tipo &&
+        item.ativo === "sim"
+    );
+  }
+
+  function abrirAudio(
+    ano: string,
+    mes: string,
+    semana: string
+  ) {
+    const conteudo =
+      buscarConteudo(
+        ano,
+        mes,
+        semana,
+        "audio_individual"
+      );
+
+    if (!conteudo) {
+      alert(
+        "Áudio ainda não disponível."
+      );
+
+      return;
+    }
+
+    const url = linkDrive(
+      conteudo.drive_file,
+      conteudo.tipo
+    );
+
+    setAudioUrl(url);
+    setAudioAberto(true);
+  }
+
+  function abrirPdf(
+    ano: string,
+    mes: string,
+    semana: string
+  ) {
+    const conteudo =
+      buscarConteudo(
+        ano,
+        mes,
+        semana,
+        "pdf_individual"
+      );
+
+    if (!conteudo) {
+      alert(
+        "PDF ainda não disponível."
+      );
+
+      return;
+    }
+
+    window.open(
+      conteudo.drive_file,
+      "_blank"
+    );
+  }
+
+  function renderPergunta(
+    item: PerguntaExclusiva
+  ) {
+    return (
       <div
-  style={{
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "8px 16px",
-    borderRadius: 999,
-    border: "1px solid rgba(212,164,0,.65)",
-    background: "rgba(212,164,0,.08)",
-    color: "#ffd54a",
-    fontWeight: 700,
-    fontSize: 15,
-    width: "fit-content",
-    marginTop: 10,
-  }}
->
-  💎 Plano {plano}
-</div>
-<div
-  style={{
-    marginTop: 35,
-    padding: 18,
-    borderRadius: 18,
-    border: "1px solid rgba(244,212,106,.20)",
-    background: "rgba(255,255,255,.03)",
-  }}
->
-  <div
-    style={{
-      color: "#f4d46a",
-      fontWeight: 700,
-      fontSize: 17,
-      marginBottom: 12,
-    }}
-  >
-    🔮 Direcionamento Exclusivo
-  </div>
-
-  <p
-    style={{
-      color: "#ddd",
-      fontSize: 14,
-      lineHeight: 1.6,
-      marginBottom: 16,
-    }}
-  >
-    Receba uma orientação exclusiva da Cigana Estella.
-  </p>
-
-  <div
-    style={{
-      color: "#f4d46a",
-      fontWeight: 600,
-      fontSize: 14,
-      marginBottom: 6,
-    }}
-  >
-    Você possui
-  </div>
-
-  <div
-    style={{
-      color: "#fff",
-      fontSize: 26,
-      fontWeight: 700,
-      marginBottom: 6,
-    }}
-  >
-   {perguntasRestantes} pergunta{perguntasRestantes > 1 ? "s" : ""}
-
-  </div>
-
-  <div
-    style={{
-      color: "#bbb",
-      fontSize: 14,
-      marginBottom: 18,
-    }}
-  >
-    disponível{perguntasRestantes > 1 ? "is" : ""} neste mês.
-  </div>
-
-  {!reformulacao ? (
-  <button
-  disabled={perguntasRestantes === 0}
-  onClick={() => {
-    if (perguntasRestantes === 0) return;
-    setDirecionamentoAberto(true);
-  }}
-  style={{
-    width: "100%",
-    padding: 14,
-    borderRadius: 999,
-    border: "none",
-    cursor: perguntasRestantes === 0 ? "not-allowed" : "pointer",
-    background:
-      perguntasRestantes === 0
-        ? "#666"
-        : "linear-gradient(90deg,#6d28d9,#8b5cf6)",
-    color: "#fff",
-    fontWeight: 700,
-    fontSize: 15,
-    opacity: perguntasRestantes === 0 ? 0.6 : 1,
-  }}
->
-  {perguntasRestantes === 0
-    ? "Limite mensal atingido"
-    : "✨ Fazer minha pergunta"}
-</button>
-) : (
-  <button
-    onClick={() => {
-      setPergunta(direcionamentoExclusivo?.pergunta || "");
-      setCategoria(direcionamentoExclusivo?.categoria || "");
-      setDirecionamentoAberto(true);
-    }}
-    style={{
-      width: "100%",
-      padding: 14,
-      borderRadius: 999,
-      border: "none",
-      cursor: "pointer",
-      background: "#f4b400",
-      color: "#2b0a3d",
-      fontWeight: 700,
-      fontSize: 15,
-    }}
-  >
-    ✍️ Reformular minha pergunta
-  </button>
-)}
-{reformulacao && (
-  <div
-    style={{
-      marginTop: 18,
-      padding: 18,
-      borderRadius: 16,
-      background: "rgba(244,180,0,.10)",
-      border: "1px solid rgba(244,180,0,.35)",
-    }}
-  >
-    <h3
-      style={{
-        color: "#f4d46a",
-        marginBottom: 10,
-      }}
-    >
-      🟡 Reformule sua pergunta
-    </h3>
-
-    <p
-      style={{
-        color: "#ddd",
-        fontSize: 14,
-        lineHeight: 1.6,
-        marginBottom: 15,
-      }}
-    >
-      Para que seu <strong>Direcionamento Exclusivo</strong> seja o mais preciso possível,
-      a Cigana solicitou uma reformulação da sua pergunta.
-    </p>
-
-    <div
-      style={{
-        background: "rgba(255,255,255,.05)",
-        borderRadius: 12,
-        padding: 15,
-        color: "#fff",
-        lineHeight: 1.7,
-        whiteSpace: "pre-wrap",
-      }}
-    >
-      {reformulacao.mensagem}
-    </div>
-  </div>
-)}
-
-</div>
-
-      <button
-       onClick={() => router.push(`/cliente/${slug}`)}
+        key={item.id}
         style={{
-  width: "100%",
-  padding: 14,
-  borderRadius: 999,
-  background: "#6d28d9",
-  color: "#fff",
-  border: "none",
-  cursor: "pointer",
-  marginTop: "auto",
-}}
-      >
-        ← Voltar ao Portal
-      </button>
-    </aside>
-
-    {/* CONTEÚDO */}
-
-    <section>
-      <h1
-        style={{
-          color: "#f4d46a",
-          fontSize: 34,
-          marginBottom: 8,
-        }}
-      >
-        Portal de Direcionamentos
-      </h1>
-
-      <p
-  style={{
-    color: "#ddd",
-    marginBottom: 35,
-  }}
->
-  Que os oráculos iluminem seu caminho...
-</p>
-
-{direcionamentos.length > 0 && (
-  <>
-    <h2
-      style={{
-        color: "#f4d46a",
-        marginBottom: 18,
-        fontSize: 24,
-      }}
-    >
-      🔮 Mensagem da Estella
-    </h2>
-
-    {direcionamentos.map((direcionamentoExclusivo) => (
-      <div
-        key={direcionamentoExclusivo.id}
-        style={{
-          marginBottom: 30,
-          padding: 24,
-          borderRadius: 22,
+          marginTop: 15,
+          padding: 20,
+          borderRadius: 18,
           background: "#1b0227",
-          border: "1px solid rgba(244,212,106,.25)",
+          border:
+            "1px solid rgba(244,212,106,.20)",
         }}
       >
+        {reformulacao &&
+          direcionamentoExclusivo?.id ===
+            item.id &&
+          item.status ===
+            "Aguardando resposta da assinante" && (
+            <div
+              style={{
+                marginBottom: 18,
+                padding: 16,
+                borderRadius: 14,
+                background:
+                  "rgba(244,180,0,.10)",
+                border:
+                  "1px solid rgba(244,180,0,.35)",
+              }}
+            >
+              <strong
+                style={{
+                  color:
+                    "#f4d46a",
+                }}
+              >
+                🟡 Mensagem da Estella
+              </strong>
 
-  {/* REFORMULAR */}
+              <div
+                style={{
+                  color: "#fff",
+                  marginTop: 10,
+                  lineHeight: 1.7,
+                  whiteSpace:
+                    "pre-wrap",
+                }}
+              >
+                {
+                  reformulacao.mensagem
+                }
+              </div>
+            </div>
+          )}
 
-{reformulacao &&
-direcionamentoExclusivo.id === reformulacao.question_id && (
-             <>
-          <p
-            style={{
-              color: "#fff",
-              lineHeight: 1.8,
-            }}
-          >
-            A Cigana Estella pediu que você reformule sua
-            pergunta para que o direcionamento seja mais
-            preciso.
-          </p>
+        {item.status ===
+          "Respondida em áudio" && (
+          <>
+            <p
+              style={{
+                color: "#7CFC90",
+                fontWeight: 700,
+                fontSize: 17,
+              }}
+            >
+              ✅ Sua pergunta foi
+              respondida.
+            </p>
 
-          <div
-            style={{
-              marginTop: 18,
-              padding: 18,
-              borderRadius: 14,
-              background: "rgba(255,255,255,.05)",
-              color: "#fff",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {reformulacao.mensagem}
-          </div>
-        </>
-      )}
+            <p
+              style={{
+                color: "#ddd",
+                marginTop: 10,
+                lineHeight: 1.7,
+              }}
+            >
+              Esta pergunta foi
+              respondida no
+              Direcionamento
+              Exclusivo deste mês.
+            </p>
+          </>
+        )}
 
-       {/* HISTÓRICO */}
-    {direcionamentoExclusivo.status ===
-      "Respondida em áudio" && (
-      <>
-        <p
-          style={{
-            color: "#7CFC90",
-            fontWeight: 700,
-            fontSize: 18,
-          }}
-        >
-          ✅ Sua pergunta foi respondida.
-        </p>
+        {item.status ===
+          "Aceita" && (
+          <>
+            <p
+              style={{
+                color: "#7CFC90",
+                fontWeight: 700,
+                fontSize: 17,
+              }}
+            >
+              💜 Sua pergunta foi
+              aceita.
+            </p>
 
-        <p
-          style={{
-            color: "#ddd",
-            marginTop: 15,
-            lineHeight: 1.7,
-          }}
-        >
-          Esta pergunta foi respondida no Direcionamento
-          Exclusivo deste mês.
-        </p>
+            <p
+              style={{
+                color: "#ddd",
+                marginTop: 10,
+                lineHeight: 1.7,
+              }}
+            >
+              Ela será respondida
+              no próximo
+              direcionamento.
+            </p>
+          </>
+        )}
+
+        {item.status ===
+          "Nova pergunta" && (
+          <>
+            <p
+              style={{
+                color: "#fff",
+                fontWeight: 700,
+              }}
+            >
+              💜 Sua pergunta foi
+              recebida.
+            </p>
+
+            <p
+              style={{
+                color: "#ddd",
+                marginTop: 10,
+                lineHeight: 1.7,
+              }}
+            >
+              Ela está aguardando
+              análise.
+            </p>
+          </>
+        )}
+
+        {item.status ===
+          "Aguardando resposta da assinante" && (
+          <>
+            <p
+              style={{
+                color: "#f4d46a",
+                fontWeight: 700,
+                fontSize: 17,
+              }}
+            >
+              🟡 Sua pergunta
+              precisa ser
+              reformulada.
+            </p>
+
+            <p
+              style={{
+                color: "#ddd",
+                marginTop: 10,
+                lineHeight: 1.7,
+              }}
+            >
+              A Cigana Estella
+              solicitou uma
+              reformulação antes de
+              aceitar esta pergunta.
+            </p>
+          </>
+        )}
 
         <div
           style={{
-            marginTop: 18,
-            padding: 18,
-            borderRadius: 14,
-            background: "rgba(255,255,255,.05)",
+            marginTop: 16,
+            padding: 16,
+            borderRadius: 12,
+            background:
+              "rgba(255,255,255,.05)",
           }}
         >
-          <strong>Pergunta</strong>
+          <strong
+            style={{
+              color: "#fff",
+            }}
+          >
+            Pergunta
+          </strong>
 
           <div
             style={{
               marginTop: 10,
               color: "#ddd",
               fontStyle: "italic",
+              lineHeight: 1.7,
             }}
           >
-            "{direcionamentoExclusivo.pergunta}"
+            “{item.pergunta}”
           </div>
         </div>
-      </>
-    )}
 
-    {/* STATUS DA PERGUNTA */}
-
-{direcionamentoExclusivo.status === "Aceita" && (
-  <>
-    <p
-      style={{
-        color: "#7CFC90",
-        fontWeight: 700,
-        fontSize: 18,
-      }}
-    >
-      💜 Sua pergunta foi aceita e será respondida no próximo direcionamento.
-    </p>
-
-    <p
-      style={{
-        color: "#ddd",
-        marginTop: 10,
-        lineHeight: 1.7,
-      }}
-    >
-      Sua pergunta está aguardando o próximo Direcionamento Exclusivo.
-    </p>
-
-    <div
-      style={{
-        marginTop: 18,
-        padding: 18,
-        borderRadius: 14,
-        background: "rgba(255,255,255,.05)",
-      }}
-    >
-      <strong>Pergunta aceita</strong>
-
-      <div
-        style={{
-          marginTop: 10,
-          color: "#ddd",
-          fontStyle: "italic",
-        }}
-      >
-        "{direcionamentoExclusivo.pergunta}"
+        <div
+          style={{
+            marginTop: 15,
+            color: "#999",
+            fontSize: 13,
+          }}
+        >
+          📅{" "}
+          {new Date(
+            item.created_at
+          ).toLocaleDateString(
+            "pt-BR"
+          )}
+        </div>
       </div>
-    </div>
-  </>
-)}
+    );
+  }
 
-{direcionamentoExclusivo.status === "Nova pergunta" && (
-  <>
-    <p
-      style={{
-        color: "#fff",
-        lineHeight: 1.8,
-      }}
-    >
-      💜 Sua pergunta foi recebida.
-    </p>
-
-    <p
-      style={{
-        color: "#ddd",
-        marginTop: 10,
-      }}
-    >
-      Sua pergunta está aguardando análise para o próximo Direcionamento Exclusivo.
-    </p>
-
-    <div
-      style={{
-        marginTop: 18,
-        padding: 18,
-        borderRadius: 14,
-        background: "rgba(255,255,255,.05)",
-      }}
-    >
-      <strong>Pergunta enviada</strong>
-
-      <div
-        style={{
-          marginTop: 10,
-          color: "#ddd",
-          fontStyle: "italic",
-        }}
-      >
-        "{direcionamentoExclusivo.pergunta}"
+  if (loading) {
+    return (
+      <div>
+        Carregando...
       </div>
-    </div>
-  </>
-)}
+    );
+  }
 
-{direcionamentoExclusivo.status === "Aguardando resposta da assinante" && (
-  <>
-    <p
-      style={{
-        color: "#f4d46a",
-        fontWeight: 700,
-        fontSize: 18,
-      }}
-    >
-      🟡 Sua pergunta precisa ser reformulada.
-    </p>
-
-    <p
-      style={{
-        color: "#ddd",
-        marginTop: 10,
-        lineHeight: 1.7,
-      }}
-    >
-      A Cigana Estella solicitou uma reformulação antes de aceitar sua pergunta para o próximo direcionamento.
-    </p>
-  </>
-)}
-
-      <div
-        style={{
-          marginTop: 20,
-          color: "#999",
-          fontSize: 13,
-        }}
-      >
-        📅{" "}
-        {new Date(
-          direcionamentoExclusivo.created_at
-        ).toLocaleDateString("pt-BR")}
-      </div>
-    </div>
-  ))}
-</>
-)}
-
-
-{meses.map((mes) => {
-  const conteudos = conteudosDoMes(mes);
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
-        <div key={mes} style={{ marginBottom: 20 }}>
+    <main
+      style={{
+        display: "grid",
+        gridTemplateColumns:
+          mobile
+            ? "1fr"
+            : "280px 1fr",
+        gap: mobile ? 20 : 30,
+        alignItems: "start",
+        padding: mobile
+          ? 15
+          : 40,
+      }}
+    >
+      <aside
+        style={{
+          background: "#1b0227",
+          borderRadius: 22,
+          padding: 30,
+          border:
+            "1px solid rgba(244,212,106,.20)",
+          position: mobile
+            ? "relative"
+            : "sticky",
+          top: mobile ? 0 : 30,
+          minHeight: mobile
+            ? "auto"
+            : "calc(100vh - 80px)",
+          marginBottom: mobile
+            ? 20
+            : 0,
+          display: "flex",
+          flexDirection:
+            "column",
+        }}
+      >
+        <h2
+          style={{
+            color: "#ffd000",
+            marginBottom: 30,
+          }}
+        >
+          ✨ Direcionamentos
+        </h2>
+
+        <h3
+          style={{
+            color: "#fff",
+            fontSize: 30,
+            fontWeight: 700,
+            lineHeight: 1.2,
+            letterSpacing:
+              "0.3px",
+            marginTop: 24,
+            marginBottom: 12,
+          }}
+        >
+          {nome}
+        </h3>
+
+        <div
+          style={{
+            display:
+              "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding:
+              "8px 16px",
+            borderRadius: 999,
+            border:
+              "1px solid rgba(212,164,0,.65)",
+            background:
+              "rgba(212,164,0,.08)",
+            color: "#ffd54a",
+            fontWeight: 700,
+            fontSize: 15,
+            width:
+              "fit-content",
+            marginTop: 10,
+          }}
+        >
+          💎 Plano {plano}
+        </div>
+
+        <div
+          style={{
+            marginTop: 35,
+            padding: 18,
+            borderRadius: 18,
+            border:
+              "1px solid rgba(244,212,106,.20)",
+            background:
+              "rgba(255,255,255,.03)",
+          }}
+        >
           <div
-            onClick={() =>
-              setMesAberto(mesAberto === mes ? null : mes)
-            }
             style={{
-              padding: 20,
-              borderRadius: 18,
-              background: "#2a0738",
               color: "#f4d46a",
-              cursor: "pointer",
-              fontSize: 22,
-              fontWeight: 600,
+              fontWeight: 700,
+              fontSize: 17,
+              marginBottom: 12,
             }}
           >
-            {mesAberto === mes ? "▼" : "▶"}{" "}
-            {mes.charAt(0).toUpperCase() + mes.slice(1)}
+            🔮 Direcionamento
+            Exclusivo
           </div>
 
-          {mesAberto === mes && (
-            <div
+          <p
+            style={{
+              color: "#ddd",
+              fontSize: 14,
+              lineHeight: 1.6,
+              marginBottom: 16,
+            }}
+          >
+            Receba uma orientação
+            exclusiva da Cigana
+            Estella.
+          </p>
+
+          <div
+            style={{
+              color: "#f4d46a",
+              fontWeight: 600,
+              fontSize: 14,
+              marginBottom: 6,
+            }}
+          >
+            Você possui
+          </div>
+
+          <div
+            style={{
+              color: "#fff",
+              fontSize: 26,
+              fontWeight: 700,
+              marginBottom: 6,
+            }}
+          >
+            {perguntasRestantes}{" "}
+            pergunta
+            {perguntasRestantes !==
+            1
+              ? "s"
+              : ""}
+          </div>
+
+          <div
+            style={{
+              color: "#bbb",
+              fontSize: 14,
+              marginBottom: 18,
+            }}
+          >
+            disponível
+            {perguntasRestantes !==
+            1
+              ? "is"
+              : ""}{" "}
+            neste mês.
+          </div>
+
+          {!reformulacao ? (
+            <button
+              disabled={
+                perguntasRestantes ===
+                0
+              }
+              onClick={() => {
+                if (
+                  perguntasRestantes ===
+                  0
+                ) {
+                  return;
+                }
+
+                setDirecionamentoAberto(
+                  true
+                );
+              }}
               style={{
-                marginTop: 15,
-                marginLeft: 20,
-                display: "grid",
-                gap: 10,
+                width: "100%",
+                padding: 14,
+                borderRadius: 999,
+                border: "none",
+                cursor:
+                  perguntasRestantes ===
+                  0
+                    ? "not-allowed"
+                    : "pointer",
+                background:
+                  perguntasRestantes ===
+                  0
+                    ? "#666"
+                    : "linear-gradient(90deg,#6d28d9,#8b5cf6)",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: 15,
+                opacity:
+                  perguntasRestantes ===
+                  0
+                    ? 0.6
+                    : 1,
               }}
             >
+              {perguntasRestantes ===
+              0
+                ? "Limite mensal atingido"
+                : "✨ Fazer minha pergunta"}
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setPergunta(
+                  direcionamentoExclusivo?.pergunta ||
+                    ""
+                );
 
-{Array.from(
-  new Set(conteudos.map((c) => c.semana))
-).map((semana) => (
-  <div
-    key={semana}
-    style={{
-      background: "#1b0227",
-      borderRadius: 20,
-      padding: 24,
-      border: "1px solid rgba(244,212,106,.20)",
-      marginBottom: 20,
-    }}
-  >
-    <h3
-      style={{
-        color: "#f4d46a",
-        marginBottom: 10,
-      }}
-    >
-      ✦ {semana}ª Semana
-    </h3>
+                setCategoria(
+                  direcionamentoExclusivo?.categoria ||
+                    ""
+                );
 
-    <div
-      style={{
-        display: "flex",
-        gap: 12,
-        flexWrap: "wrap",
-      }}
-    >
-      <button
-        onClick={() => abrirAudio(mes, semana)}
-        style={{
-          background: "#6d28d9",
-          color: "#fff",
-          border: "none",
-          borderRadius: 999,
-          padding: "12px 20px",
-          cursor: "pointer",
-        }}
-      >
-        🎧 Ouvir Direcionamento
-      </button>
+                setDirecionamentoAberto(
+                  true
+                );
+              }}
+              style={{
+                width: "100%",
+                padding: 14,
+                borderRadius: 999,
+                border: "none",
+                cursor: "pointer",
+                background:
+                  "#f4b400",
+                color: "#2b0a3d",
+                fontWeight: 700,
+                fontSize: 15,
+              }}
+            >
+              ✍️ Reformular minha
+              pergunta
+            </button>
+          )}
 
-      <button
-        onClick={() => abrirPdf(mes, semana)}
-        style={{
-          background: "#6aa1f4",
-          color: "#2a0738",
-          border: "none",
-          borderRadius: 999,
-          padding: "12px 20px",
-          cursor: "pointer",
-          fontWeight: 700,
-        }}
-      >
-        📄 Baixar PDF
-      
-      </button>
-    </div>
-  </div>
-))}
+          {reformulacao && (
+            <div
+              style={{
+                marginTop: 18,
+                padding: 18,
+                borderRadius: 16,
+                background:
+                  "rgba(244,180,0,.10)",
+                border:
+                  "1px solid rgba(244,180,0,.35)",
+              }}
+            >
+              <h3
+                style={{
+                  color:
+                    "#f4d46a",
+                  marginBottom: 10,
+                }}
+              >
+                🟡 Reformule sua
+                pergunta
+              </h3>
+
+              <p
+                style={{
+                  color: "#ddd",
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  marginBottom: 15,
+                }}
+              >
+                Para que seu
+                Direcionamento
+                Exclusivo seja o
+                mais preciso
+                possível, a Cigana
+                solicitou uma
+                reformulação.
+              </p>
+
+              <div
+                style={{
+                  background:
+                    "rgba(255,255,255,.05)",
+                  borderRadius: 12,
+                  padding: 15,
+                  color: "#fff",
+                  lineHeight: 1.7,
+                  whiteSpace:
+                    "pre-wrap",
+                }}
+              >
+                {
+                  reformulacao.mensagem
+                }
+              </div>
             </div>
           )}
         </div>
-      );
-    })}
-
-    </section>
-
-    {audioAberto && (
-      <div
-        onClick={() => setAudioAberto(false)}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,.75)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 9999,
-        }}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            width: "90%",
-            maxWidth: 700,
-            background: "#1b0227",
-            borderRadius: 20,
-            padding: 24,
-          }}
-        >
-          <h2
-            style={{
-              color: "#f4d46a",
-              marginBottom: 20,
-            }}
-          >
-            🎧 Direcionamento da Semana
-          </h2>
-
-          <iframe
-  key={audioUrl}
-  src={audioUrl}
-  title="Direcionamento"
-  width="100%"
-  height="180"
-  allow="autoplay"
-  allowFullScreen
-  style={{
-    border: "none",
-    borderRadius: 12,
-    background: "#fff",
-  }}
-/>
-
-          <button
-            onClick={() => {
-              setAudioAberto(false);
-              setAudioUrl("");
-            }}
-            style={{
-              marginTop: 20,
-              background: "hsl(263, 70%, 50%)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 999,
-              padding: "12px 20px",
-              cursor: "pointer",
-            }}
-          >
-            Fechar
-          </button>
-        </div>
-      </div>
-    )}
-{direcionamentoAberto && (
-  <div
-    onClick={() => setDirecionamentoAberto(false)}
-    style={{
-      position: "fixed",
-      inset: 0,
-      background: "rgba(0,0,0,.75)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 9999,
-    }}
-  >
-    <div
-      onClick={(e) => e.stopPropagation()}
-      style={{
-        width: "95%",
-        maxWidth: 620,
-        background: "#1b0227",
-        borderRadius: 24,
-        padding: 28,
-        border: "1px solid rgba(244,212,106,.25)",
-      }}
-    >
-      <h2
-        style={{
-          color: "#f4d46a",
-          marginBottom: 20,
-        }}
-      >
-        🔮 Direcionamento Exclusivo
-      </h2>
-
-      <p style={{ color: "#fff", marginBottom: 18 }}>
-        Escolha a área da sua pergunta.
-      </p>
-
-      <select
-        value={categoria}
-        onChange={(e) => setCategoria(e.target.value)}
-        style={{
-          width: "100%",
-          padding: 14,
-          borderRadius: 12,
-          background: "#2a0738",
-          color: "#f4d46a",
-          border: "1px solid rgba(244,212,106,.30)",
-          marginBottom: 20,
-        }}
-      >
-        <option value="">Escolha o tema...</option>
-        <option>❤️ Amor</option>
-        <option>💰 Trabalho</option>
-        <option>🌿 Saúde</option>
-        <option>✨ Espiritualidade</option>
-        <option>👨‍👩‍👧 Relacionamentos</option>
-        <option>🧠 Emocional</option>
-      </select>
-
-<div
-  style={{
-    marginBottom: 20,
-  }}
->
-  <p
-    style={{
-      color: "#fff",
-      marginBottom: 10,
-      fontWeight: 600,
-    }}
-  >
-    Sua situação precisa de uma resposta antes da próxima leitura semanal?
-  </p>
-
-  <label
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      color: "#fff",
-      marginBottom: 8,
-      cursor: "pointer",
-    }}
-  >
-    <input
-      type="radio"
-      name="urgente"
-      checked={urgente === true}
-      onChange={() => setUrgente(true)}
-    />
-    Sim, preciso de uma orientação com urgência.
-  </label>
-
-  <label
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      color: "#fff",
-      cursor: "pointer",
-    }}
-  >
-    <input
-      type="radio"
-      name="urgente"
-      checked={urgente === false}
-      onChange={() => setUrgente(false)}
-    />
-    Não, posso aguardar normalmente.
-  </label>
-</div>
-
-      <textarea
-        value={pergunta}
-        onChange={(e) => setPergunta(e.target.value)}
-        placeholder="Digite sua pergunta..."
-        rows={6}
-        style={{
-          width: "100%",
-          padding: 16,
-          borderRadius: 12,
-          background: "#2a0738",
-          color: "#fff",
-          border: "1px solid rgba(244,212,106,.30)",
-          resize: "none",
-        }}
-      />
-
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          marginTop: 24,
-        }}
-      >
-    <button
-  onClick={async () => {
-    if (!categoria || !pergunta.trim()) {
-      alert("Escolha um tema e escreva sua pergunta.");
-      return;
-    }
-
-    let error = null;
-
-if (
-  direcionamentoExclusivo &&
-  direcionamentoExclusivo.status ===
-    "Aguardando resposta da assinante"
-) {
-  // Reformulação
-  const resultado = await supabase
-    .from("exclusive_questions")
-    .update({
-      categoria,
-      pergunta,
-      urgente,
-      status: "Aceita",
-    })
-    .eq("id", direcionamentoExclusivo.id);
-
-  error = resultado.error;
-} else {
-  // Nova pergunta
-  const resultado = await supabase
-    .from("exclusive_questions")
-    .insert({
-      cliente_id: clienteId,
-      nome_cliente: slug,
-      email_cliente: email,
-      plano,
-      categoria,
-      pergunta,
-      urgente,
-      referencia_mes: new Date().toISOString().slice(0, 7),
-      status: "Nova pergunta",
-      ativo: true,
-    });
-
-  error = resultado.error;
-}
-
-if (error) {
-  console.error(error);
-
-  alert(
-    `Erro: ${error.message}\nCódigo: ${error.code ?? ""}`
-  );
-
-  return;
-}
-
-    alert("Pergunta enviada com sucesso! 💜");
-
-    setCategoria("");
-    setPergunta("");
-    setDirecionamentoAberto(false);
-  }}
-  style={{
-    background: "#6d28d9",
-    color: "#fff",
-    border: "none",
-    borderRadius: 999,
-    padding: "12px 24px",
-    cursor: "pointer",
-  }}
->
-  ✨ Enviar Pergunta
-</button>
 
         <button
-          onClick={() => setDirecionamentoAberto(false)}
+          onClick={() =>
+            router.push(
+              `/cliente/${slug}`
+            )
+          }
           style={{
-            background: "#4b0f63",
+            width: "100%",
+            padding: 14,
+            borderRadius: 999,
+            background:
+              "#6d28d9",
             color: "#fff",
             border: "none",
-            borderRadius: 999,
-            padding: "12px 24px",
             cursor: "pointer",
+            marginTop: mobile
+              ? 25
+              : "auto",
           }}
         >
-          Fechar
+          ← Voltar ao Portal
         </button>
+      </aside>
+
+      <section>
+        <h1
+          style={{
+            color: "#f4d46a",
+            fontSize: mobile
+              ? 28
+              : 34,
+            marginBottom: 8,
+          }}
+        >
+          Portal de
+          Direcionamentos
+        </h1>
+
+        <p
+          style={{
+            color: "#ddd",
+            marginBottom: 35,
+          }}
+        >
+          Que os oráculos
+          iluminem seu caminho...
+        </p>
+
+        {carregandoConteudos &&
+          direcionamentos.length ===
+            0 && (
+            <div
+              style={{
+                color: "#aaa",
+                marginBottom: 20,
+              }}
+            >
+              Carregando histórico...
+            </div>
+          )}
+
+        {anos.length === 0 ? (
+          <div
+            style={{
+              padding: 25,
+              borderRadius: 20,
+              background:
+                "#1b0227",
+              border:
+                "1px solid rgba(244,212,106,.20)",
+              color: "#ddd",
+            }}
+          >
+            Ainda não há
+            direcionamentos
+            disponíveis.
+          </div>
+        ) : (
+          anos.map((ano) => {
+            const meses =
+              mesesDoAno(ano);
+
+            const aberto =
+              anoAberto === ano;
+
+            return (
+              <div
+                key={ano}
+                style={{
+                  marginBottom: 22,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAnoAberto(
+                      aberto
+                        ? null
+                        : ano
+                    );
+
+                    if (!aberto) {
+                      const mesesAno =
+                        mesesDoAno(
+                          ano
+                        );
+
+                      if (
+                        ano ===
+                          anoAtual &&
+                        mesesAno.includes(
+                          mesAtual
+                        )
+                      ) {
+                        setMesAberto(
+                          `${ano}-${mesAtual}`
+                        );
+                      } else {
+                        setMesAberto(
+                          null
+                        );
+                      }
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    padding: 22,
+                    borderRadius: 20,
+                    border:
+                      "1px solid rgba(244,212,106,.25)",
+                    background:
+                      "#21042e",
+                    color:
+                      "#f4d46a",
+                    cursor:
+                      "pointer",
+                    textAlign:
+                      "left",
+                    fontSize: 24,
+                    fontWeight: 800,
+                  }}
+                >
+                  {aberto
+                    ? "▼"
+                    : "▶"}{" "}
+                  {ano}
+                </button>
+
+                {aberto && (
+                  <div
+                    style={{
+                      marginTop: 15,
+                      display: "grid",
+                      gap: 14,
+                    }}
+                  >
+                    {meses.map(
+                      (mes) => {
+                        const chaveMes =
+                          `${ano}-${mes}`;
+
+                        const abertoMes =
+                          mesAberto ===
+                          chaveMes;
+
+                        const conteudos =
+                          conteudosDoMes(
+                            ano,
+                            mes
+                          );
+
+                        const perguntasMes =
+                          perguntasDoMes(
+                            ano,
+                            mes
+                          );
+
+                        const semanas =
+                          Array.from(
+                            new Set(
+                              conteudos.map(
+                                (item) =>
+                                  item.semana
+                              )
+                            )
+                          ).sort(
+                            (a, b) =>
+                              Number(a) -
+                              Number(b)
+                          );
+
+                        return (
+                          <div
+                            key={
+                              chaveMes
+                            }
+                          >
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setMesAberto(
+                                  abertoMes
+                                    ? null
+                                    : chaveMes
+                                )
+                              }
+                              style={{
+                                width:
+                                  "100%",
+                                padding:
+                                  20,
+                                borderRadius:
+                                  18,
+                                background:
+                                  "#2a0738",
+                                color:
+                                  "#f4d46a",
+                                border:
+                                  "1px solid rgba(244,212,106,.12)",
+                                cursor:
+                                  "pointer",
+                                fontSize:
+                                  21,
+                                fontWeight:
+                                  700,
+                                textAlign:
+                                  "left",
+                              }}
+                            >
+                              {abertoMes
+                                ? "▼"
+                                : "▶"}{" "}
+                              {capitalizar(
+                                mes
+                              )}
+                            </button>
+
+                            {abertoMes && (
+                              <div
+                                style={{
+                                  marginTop:
+                                    15,
+                                  display:
+                                    "grid",
+                                  gap: 18,
+                                  paddingLeft:
+                                    mobile
+                                      ? 0
+                                      : 18,
+                                }}
+                              >
+                                {perguntasMes.length > 0 && (
+  <div
+    style={{
+      border:
+        "1px solid rgba(244,212,106,.15)",
+      borderRadius: 16,
+      overflow: "hidden",
+    }}
+  >
+    <button
+      type="button"
+      onClick={() =>
+        setMensagensAbertas((atual) => ({
+          ...atual,
+          [chaveMes]:
+            !atual[chaveMes],
+        }))
+      }
+      style={{
+        width: "100%",
+        padding: 18,
+        border: "none",
+        background: "#1b0227",
+        color: "#f4d46a",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        fontWeight: 700,
+        fontSize: 17,
+        textAlign: "left",
+      }}
+    >
+      <span>
+        🔮 Mensagens da Estella
+      </span>
+
+      <span>
+        {mensagensAbertas[chaveMes]
+          ? "▲ Fechar"
+          : "▼ Ver histórico"}
+      </span>
+    </button>
+
+    {mensagensAbertas[chaveMes] && (
+      <div
+        style={{
+          padding: mobile
+            ? 12
+            : 18,
+        }}
+      >
+        {perguntasMes.map(
+          renderPergunta
+        )}
       </div>
-    </div>
+    )}
   </div>
 )}
-  </main>
-);
+
+                                {semanas.length >
+                                0 ? (
+                                  <div>
+                                    <h3
+                                      style={{
+                                        color:
+                                          "#f4d46a",
+                                        marginBottom:
+                                          12,
+                                      }}
+                                    >
+                                      🎧
+                                      Direcionamentos
+                                      da semana
+                                    </h3>
+
+                                    {semanas.map(
+                                      (
+                                        semana
+                                      ) => (
+                                        <div
+                                          key={
+                                            semana
+                                          }
+                                          style={{
+                                            background:
+                                              "#1b0227",
+                                            borderRadius:
+                                              20,
+                                            padding:
+                                              24,
+                                            border:
+                                              "1px solid rgba(244,212,106,.20)",
+                                            marginBottom:
+                                              14,
+                                          }}
+                                        >
+                                          <h4
+                                            style={{
+                                              color:
+                                                "#f4d46a",
+                                              marginBottom:
+                                                14,
+                                              fontSize:
+                                                18,
+                                            }}
+                                          >
+                                            ✦{" "}
+                                            {
+                                              semana
+                                            }
+                                            ª
+                                            Semana
+                                          </h4>
+
+                                          <div
+                                            style={{
+                                              display:
+                                                "flex",
+                                              gap: 12,
+                                              flexWrap:
+                                                "wrap",
+                                            }}
+                                          >
+                                            <button
+                                              onClick={() =>
+                                                abrirAudio(
+                                                  ano,
+                                                  mes,
+                                                  semana
+                                                )
+                                              }
+                                              style={{
+                                                background:
+                                                  "#6d28d9",
+                                                color:
+                                                  "#fff",
+                                                border:
+                                                  "none",
+                                                borderRadius:
+                                                  999,
+                                                padding:
+                                                  "12px 20px",
+                                                cursor:
+                                                  "pointer",
+                                              }}
+                                            >
+                                              🎧
+                                              Ouvir
+                                              Direcionamento
+                                            </button>
+
+                                            <button
+                                              onClick={() =>
+                                                abrirPdf(
+                                                  ano,
+                                                  mes,
+                                                  semana
+                                                )
+                                              }
+                                              style={{
+                                                background:
+                                                  "#6aa1f4",
+                                                color:
+                                                  "#2a0738",
+                                                border:
+                                                  "none",
+                                                borderRadius:
+                                                  999,
+                                                padding:
+                                                  "12px 20px",
+                                                cursor:
+                                                  "pointer",
+                                                fontWeight:
+                                                  700,
+                                              }}
+                                            >
+                                              📄
+                                              Baixar
+                                              PDF
+                                            </button>
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                ) : (
+                                  perguntasMes.length ===
+                                    0 && (
+                                    <div
+                                      style={{
+                                        color:
+                                          "#999",
+                                        padding:
+                                          18,
+                                      }}
+                                    >
+                                      Ainda
+                                      não há
+                                      conteúdo
+                                      neste
+                                      mês.
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </section>
+
+      {audioAberto && (
+        <div
+          onClick={() =>
+            setAudioAberto(false)
+          }
+          style={{
+            position: "fixed",
+            inset: 0,
+            background:
+              "rgba(0,0,0,.75)",
+            display: "flex",
+            justifyContent:
+              "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+            style={{
+              width: "90%",
+              maxWidth: 700,
+              background:
+                "#1b0227",
+              borderRadius: 20,
+              padding: 24,
+            }}
+          >
+            <h2
+              style={{
+                color:
+                  "#f4d46a",
+                marginBottom: 20,
+              }}
+            >
+              🎧 Direcionamento
+              da Semana
+            </h2>
+
+            <iframe
+              key={audioUrl}
+              src={audioUrl}
+              title="Direcionamento"
+              width="100%"
+              height="180"
+              allow="autoplay"
+              allowFullScreen
+              style={{
+                border: "none",
+                borderRadius: 12,
+                background:
+                  "#fff",
+              }}
+            />
+
+            <button
+              onClick={() => {
+                setAudioAberto(
+                  false
+                );
+                setAudioUrl("");
+              }}
+              style={{
+                marginTop: 20,
+                background:
+                  "#6d28d9",
+                color: "#fff",
+                border: "none",
+                borderRadius: 999,
+                padding:
+                  "12px 20px",
+                cursor:
+                  "pointer",
+              }}
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {direcionamentoAberto && (
+        <div
+          onClick={() =>
+            setDirecionamentoAberto(
+              false
+            )
+          }
+          style={{
+            position: "fixed",
+            inset: 0,
+            background:
+              "rgba(0,0,0,.75)",
+            display: "flex",
+            justifyContent:
+              "center",
+            alignItems: "center",
+            zIndex: 9999,
+            padding: 15,
+          }}
+        >
+          <div
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+            style={{
+              width: "95%",
+              maxWidth: 620,
+              background:
+                "#1b0227",
+              borderRadius: 24,
+              padding: 28,
+              border:
+                "1px solid rgba(244,212,106,.25)",
+            }}
+          >
+            <h2
+              style={{
+                color:
+                  "#f4d46a",
+                marginBottom: 20,
+              }}
+            >
+              🔮 Direcionamento
+              Exclusivo
+            </h2>
+
+            <p
+              style={{
+                color: "#fff",
+                marginBottom: 18,
+              }}
+            >
+              Escolha a área da
+              sua pergunta.
+            </p>
+
+            <select
+              value={categoria}
+              onChange={(e) =>
+                setCategoria(
+                  e.target.value
+                )
+              }
+              style={{
+                width: "100%",
+                padding: 14,
+                borderRadius: 12,
+                background:
+                  "#2a0738",
+                color:
+                  "#f4d46a",
+                border:
+                  "1px solid rgba(244,212,106,.30)",
+                marginBottom: 20,
+              }}
+            >
+              <option value="">
+                Escolha o tema...
+              </option>
+
+              <option>
+                ❤️ Amor
+              </option>
+
+              <option>
+                💰 Trabalho
+              </option>
+
+              <option>
+                🌿 Saúde
+              </option>
+
+              <option>
+                ✨ Espiritualidade
+              </option>
+
+              <option>
+                👨‍👩‍👧
+                Relacionamentos
+              </option>
+
+              <option>
+                🧠 Emocional
+              </option>
+            </select>
+
+            <div
+              style={{
+                marginBottom: 20,
+              }}
+            >
+              <p
+                style={{
+                  color: "#fff",
+                  marginBottom: 10,
+                  fontWeight: 600,
+                }}
+              >
+                Sua situação
+                precisa de uma
+                resposta antes da
+                próxima leitura
+                semanal?
+              </p>
+
+              <label
+                style={{
+                  display:
+                    "flex",
+                  alignItems:
+                    "center",
+                  gap: 8,
+                  color: "#fff",
+                  marginBottom: 8,
+                  cursor:
+                    "pointer",
+                }}
+              >
+                <input
+                  type="radio"
+                  name="urgente"
+                  checked={
+                    urgente ===
+                    true
+                  }
+                  onChange={() =>
+                    setUrgente(
+                      true
+                    )
+                  }
+                />
+
+                Sim, preciso de
+                uma orientação
+                com urgência.
+              </label>
+
+              <label
+                style={{
+                  display:
+                    "flex",
+                  alignItems:
+                    "center",
+                  gap: 8,
+                  color: "#fff",
+                  cursor:
+                    "pointer",
+                }}
+              >
+                <input
+                  type="radio"
+                  name="urgente"
+                  checked={
+                    urgente ===
+                    false
+                  }
+                  onChange={() =>
+                    setUrgente(
+                      false
+                    )
+                  }
+                />
+
+                Não, posso
+                aguardar
+                normalmente.
+              </label>
+            </div>
+
+            <textarea
+              value={pergunta}
+              onChange={(e) =>
+                setPergunta(
+                  e.target.value
+                )
+              }
+              placeholder="Digite sua pergunta..."
+              rows={6}
+              style={{
+                width: "100%",
+                padding: 16,
+                borderRadius: 12,
+                background:
+                  "#2a0738",
+                color: "#fff",
+                border:
+                  "1px solid rgba(244,212,106,.30)",
+                resize: "none",
+              }}
+            />
+
+            <div
+              style={{
+                display: "flex",
+                gap: 12,
+                marginTop: 24,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                onClick={async () => {
+                  if (
+                    !categoria ||
+                    !pergunta.trim()
+                  ) {
+                    alert(
+                      "Escolha um tema e escreva sua pergunta."
+                    );
+
+                    return;
+                  }
+
+                  let envioError =
+                    null;
+
+                  if (
+                    direcionamentoExclusivo &&
+                    direcionamentoExclusivo.status ===
+                      "Aguardando resposta da assinante"
+                  ) {
+                    const resultado =
+                      await supabase
+                        .from(
+                          "exclusive_questions"
+                        )
+                        .update({
+                          categoria,
+                          pergunta,
+                          urgente,
+                          status:
+                            "Aceita",
+                        })
+                        .eq(
+                          "id",
+                          direcionamentoExclusivo.id
+                        );
+
+                    envioError =
+                      resultado.error;
+                  } else {
+                    const resultado =
+                      await supabase
+                        .from(
+                          "exclusive_questions"
+                        )
+                        .insert({
+                          cliente_id:
+                            clienteId,
+                          nome_cliente:
+                            slug,
+                          email_cliente:
+                            email,
+                          plano,
+                          categoria,
+                          pergunta,
+                          urgente,
+                          referencia_mes:
+                            referenciaAtual,
+                          status:
+                            "Nova pergunta",
+                          ativo: true,
+                        });
+
+                    envioError =
+                      resultado.error;
+                  }
+
+                  if (
+                    envioError
+                  ) {
+                    console.error(
+                      envioError
+                    );
+
+                    alert(
+                      `Erro: ${envioError.message}`
+                    );
+
+                    return;
+                  }
+
+                  alert(
+                    "Pergunta enviada com sucesso! 💜"
+                  );
+
+                  setCategoria("");
+                  setPergunta("");
+                  setDirecionamentoAberto(
+                    false
+                  );
+
+                  window.location.reload();
+                }}
+                style={{
+                  background:
+                    "#6d28d9",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 999,
+                  padding:
+                    "12px 24px",
+                  cursor:
+                    "pointer",
+                }}
+              >
+                ✨ Enviar Pergunta
+              </button>
+
+              <button
+                onClick={() =>
+                  setDirecionamentoAberto(
+                    false
+                  )
+                }
+                style={{
+                  background:
+                    "#4b0f63",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 999,
+                  padding:
+                    "12px 24px",
+                  cursor:
+                    "pointer",
+                }}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  );
 }
