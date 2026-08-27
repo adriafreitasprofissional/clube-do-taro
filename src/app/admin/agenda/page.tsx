@@ -128,7 +128,7 @@ export default function AgendaPage() {
         </div>
 
         <div className="min-h-[420px] p-5">
-          <div className="flex min-h-[380px] items-center justify-center rounded-2xl border border-dashed border-purple-500/40 bg-black/10">
+          <div className="flex min-h-[380px] items-center justify-center rounded-2xl border border-dashed border-purple-500/40 bg-[#1d0023]">
             <div className="max-w-md px-6 text-center">
               <div className="mb-4 text-4xl">
                 📅
