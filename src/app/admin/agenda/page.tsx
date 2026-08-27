@@ -35,7 +35,7 @@ export default function AgendaPage() {
 
       {/* RESUMO */}
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-purple-500/40 bg-purple-950/90 p-5 shadow-lg shadow-black/20">
+        <div className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
           <p className="text-sm text-yellow-300">Hoje</p>
 
           <p className="mt-2 text-2xl font-semibold text-white">
@@ -47,7 +47,7 @@ export default function AgendaPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-purple-500/40 bg-purple-950/90 p-5 shadow-lg shadow-black/20">
+        <div className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
           <p className="text-sm text-yellow-300">
             Esta semana
           </p>
@@ -61,7 +61,7 @@ export default function AgendaPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-purple-500/40 bg-purple-950/90 p-5 shadow-lg shadow-black/20">
+        <div className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
           <p className="text-sm text-yellow-300">
             Atendimentos ativos
           </p>
@@ -75,7 +75,7 @@ export default function AgendaPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-purple-500/40 bg-purple-950/90 p-5 shadow-lg shadow-black/20">
+        <div className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
           <p className="text-sm text-yellow-300">
             Próximo atendimento
           </p>
@@ -91,7 +91,7 @@ export default function AgendaPage() {
       </div>
 
       {/* CALENDÁRIO */}
-      <div className="overflow-hidden rounded-2xl border border-purple-500/40 bg-purple-950/90 shadow-lg shadow-black/20">
+      <div className="overflow-hidden rounded-2xl border border-purple-500/40 bg-[#28002f] shadow-lg shadow-black/20">
         <div className="flex flex-col gap-4 border-b border-purple-500/30 p-5 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-white">
@@ -156,7 +156,7 @@ export default function AgendaPage() {
 
       {/* BLOCOS INFERIORES */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-purple-500/40 bg-purple-950/90 p-5 shadow-lg shadow-black/20">
+        <div className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
           <h2 className="text-lg font-semibold text-white">
             Próximos atendimentos
           </h2>
@@ -166,7 +166,7 @@ export default function AgendaPage() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-purple-500/40 bg-purple-950/90 p-5 shadow-lg shadow-black/20">
+        <div className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
           <h2 className="text-lg font-semibold text-white">
             Atendimentos recentes
           </h2>
