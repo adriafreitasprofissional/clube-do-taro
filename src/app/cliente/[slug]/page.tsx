@@ -28,8 +28,8 @@ const LINK_MENTORIA =
 const LINK_SORTEIOS =
   "https://mystic-draw-fix.lovable.app";
 
-
 function nomeDoPlano(plano?: string | null) {
+
   const nomes: Record<string, string> = {
     bronze: "Plano Bronze",
     prata: "Plano Prata",
@@ -41,6 +41,7 @@ function nomeDoPlano(plano?: string | null) {
 }
 
 export default function PortalDaAssinantePage() {
+
   const params = useParams();
   const slug = String(params.slug);
 
@@ -49,6 +50,9 @@ const [carregando, setCarregando] = useState(true);
 
 const [recados, setRecados] = useState<any[]>([]);
 const [recadoAberto, setRecadoAberto] = useState<any | null>(null);
+
+const [historicoRecadosAberto, setHistoricoRecadosAberto] =
+  useState(false);
 
   useEffect(() => {
     async function buscarCliente() {
@@ -359,71 +363,88 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
   </Link>
 )}
             </div>
-            {recados.length > 0 && (
-              <div className="mt-8 w-full max-w-4xl">
-                <div className="mb-4 flex items-center gap-2">
-                  <span className="text-xl text-yellow-300">✦</span>
+         {recados.length > 0 && (
+  <div className="mt-8 w-full max-w-4xl">
+    <button
+      type="button"
+      onClick={() =>
+        setHistoricoRecadosAberto((aberto) => !aberto)
+      }
+      className="mb-4 flex w-full items-center justify-between rounded-2xl border border-purple-500/20 bg-[#19172f] px-5 py-4 text-left transition hover:border-yellow-400/50"
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-xl text-yellow-300">
+          ✦
+        </span>
 
-                  <h3 className="text-lg font-extrabold text-yellow-300">
-                    Recados da Ádria
-                  </h3>
-                </div>
-
-                <div className="space-y-3">
-                  {recados.map((recado) => (
-                    <button
-                      key={recado.id}
-                      type="button"
-                      onClick={() => setRecadoAberto(recado)}
-                      className="group w-full rounded-2xl border border-purple-500/20 bg-[#19172f] p-4 text-left shadow-lg transition hover:-translate-y-0.5 hover:border-yellow-400/50"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="mt-1 text-lg text-yellow-300">
-                          ✦
-                        </span>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="font-bold text-white">
-                              {recado.titulo}
-                            </p>
-
-                            <span
-                              className={
-                                recado.lido
-                                  ? "text-xs text-green-300"
-                                  : "text-xs font-bold text-yellow-300"
-                              }
-                            >
-                              {recado.lido ? "Lido ✓" : "Novo"}
-                            </span>
-                          </div>
-
-                          <p className="mt-2 line-clamp-2 text-sm leading-6 text-purple-200">
-                            {recado.mensagem}
-                          </p>
-
-                          <p className="mt-2 text-xs text-purple-400">
-                            {new Date(
-                              recado.created_at
-                            ).toLocaleDateString("pt-BR")}
-                          </p>
-                        </div>
-
-                        <span className="text-yellow-300 opacity-60 transition group-hover:translate-x-1 group-hover:opacity-100">
-                          →
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-          </div>
-        </section>
+        <h3 className="text-lg font-extrabold text-yellow-300">
+          Recados da Ádria
+        </h3>
       </div>
 
+      <span className="text-sm font-bold text-yellow-300">
+        {historicoRecadosAberto
+          ? "▲ Fechar"
+          : "▼ Ver histórico"}
+      </span>
+    </button>
+
+    {historicoRecadosAberto && (
+      <div className="space-y-3">
+        {recados.map((recado) => (
+          <button
+            key={recado.id}
+            type="button"
+            onClick={() => setRecadoAberto(recado)}
+            className="group w-full rounded-2xl border border-purple-500/20 bg-[#19172f] p-4 text-left shadow-lg transition hover:-translate-y-0.5 hover:border-yellow-400/50"
+          >
+            <div className="flex items-start gap-3">
+              <span className="mt-1 text-lg text-yellow-300">
+                ✦
+              </span>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-bold text-white">
+                    {recado.titulo}
+                  </p>
+
+                  <span
+                    className={
+                      recado.lido
+                        ? "text-xs text-green-300"
+                        : "text-xs font-bold text-yellow-300"
+                    }
+                  >
+                    {recado.lido ? "Lido ✓" : "Novo"}
+                  </span>
+                </div>
+
+                <p className="mt-2 line-clamp-2 text-sm leading-6 text-purple-200">
+                  {recado.mensagem}
+                </p>
+
+                <p className="mt-2 text-xs text-purple-400">
+                  {new Date(
+                    recado.created_at
+                  ).toLocaleDateString("pt-BR")}
+                </p>
+              </div>
+
+              <span className="text-yellow-300 opacity-60 transition group-hover:translate-x-1 group-hover:opacity-100">
+                →
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+)}   
+   </div>
+        </section>
+      </div>
+      
       {recadoAberto && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-5 backdrop-blur-sm"
