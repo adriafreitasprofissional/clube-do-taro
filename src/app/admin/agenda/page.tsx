@@ -39,7 +39,9 @@ export default function AgendaPage() {
 
         <AgendaResumo />
 
-        <AgendaCalendario />
+        <AgendaCalendario
+  onNovoAtendimento={() => setNovoAtendimentoAberto(true)}
+/>
 
         <AgendaListas />
       </div>

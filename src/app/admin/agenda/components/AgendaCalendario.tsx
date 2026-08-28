@@ -4,7 +4,14 @@ import { useState } from "react";
 
 type Visualizacao = "mes" | "semana" | "dia";
 
-export default function AgendaCalendario() {
+type Props = {
+  onNovoAtendimento: () => void;
+};
+
+export default function AgendaCalendario({
+  onNovoAtendimento,
+}: Props) {
+
   const [visualizacao, setVisualizacao] =
     useState<Visualizacao>("semana");
 
@@ -60,11 +67,13 @@ export default function AgendaCalendario() {
             </p>
 
             <button
-              type="button"
-              className="mt-5 rounded-xl border border-yellow-300/50 bg-transparent px-5 py-2.5 text-sm font-semibold text-yellow-300 transition hover:bg-yellow-300 hover:text-purple-950"
-            >
-              Cadastrar primeiro atendimento
-            </button>
+  type="button"
+  onClick={onNovoAtendimento}
+  className="mt-5 rounded-xl border border-yellow-300/50 bg-transparent px-5 py-2.5 text-sm font-semibold text-yellow-300 transition hover:bg-yellow-300 hover:text-purple-950"
+>
+  Cadastrar primeiro atendimento
+</button>
+
           </div>
         </div>
       </div>
