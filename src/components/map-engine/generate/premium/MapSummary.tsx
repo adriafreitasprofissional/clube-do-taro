@@ -191,12 +191,13 @@ const chapters = [
 },
 
 {
-  id: "hiddenTalents",
+
+  id: "hidden-talent",
   number: "21",
-  title: "Talentos Ocultos",
+  title: "Talento Oculto",
   subtitle: "Potenciais que podem ser desenvolvidos ao longo da sua jornada",
   icon: Gem,
-  value: () => "✦",
+  value: (r: any) => r.numerology.hiddenTalent ?? "—",
 },
 ];
 
