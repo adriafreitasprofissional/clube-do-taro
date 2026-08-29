@@ -123,7 +123,7 @@ export class NumerologyEngine {
       calculateHiddenTendency(fullName)
 
     const hiddenTalent =
-      reduce(motivation + expression)
+  reduce(motivation + expression)
 
     const pinnacles =
       calculatePinnacles(
