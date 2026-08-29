@@ -116,7 +116,130 @@ function findBestCutRow(
 
   return bestRow;
 }
+function trimBottomEmptySpace(
+  canvas: HTMLCanvasElement
+) {
+  const context =
+    canvas.getContext("2d");
 
+  if (!context) {
+    return canvas;
+  }
+
+  const imageData =
+    context.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+  const data =
+    imageData.data;
+
+  let lastContentRow = 0;
+
+  for (
+    let y = canvas.height - 1;
+    y >= 0;
+    y--
+  ) {
+    let hasContent = false;
+
+    for (
+      let x = 0;
+      x < canvas.width;
+      x += 4
+    ) {
+      const index =
+        (y * canvas.width + x) * 4;
+
+      const r = data[index];
+      const g = data[index + 1];
+      const b = data[index + 2];
+      const a = data[index + 3];
+
+      if (
+        a > 20 &&
+        r + g + b > 180
+      ) {
+        hasContent = true;
+        break;
+      }
+    }
+
+    if (hasContent) {
+      lastContentRow = y;
+      break;
+    }
+  }
+
+  /*
+   * Mantém um pequeno respiro
+   * depois do último conteúdo.
+   */
+  const padding = 40;
+
+  const finalHeight =
+    Math.min(
+      canvas.height,
+      lastContentRow + padding
+    );
+
+  if (
+    finalHeight >=
+    canvas.height
+  ) {
+    return canvas;
+  }
+
+  const trimmedCanvas =
+    document.createElement(
+      "canvas"
+    );
+
+  trimmedCanvas.width =
+    canvas.width;
+
+  trimmedCanvas.height =
+    Math.max(
+      finalHeight,
+      1
+    );
+
+  const trimmedContext =
+    trimmedCanvas.getContext(
+      "2d"
+    );
+
+  if (!trimmedContext) {
+    return canvas;
+  }
+
+  trimmedContext.fillStyle =
+    PDF_BACKGROUND;
+
+  trimmedContext.fillRect(
+    0,
+    0,
+    trimmedCanvas.width,
+    trimmedCanvas.height
+  );
+
+  trimmedContext.drawImage(
+    canvas,
+    0,
+    0,
+    canvas.width,
+    trimmedCanvas.height,
+    0,
+    0,
+    canvas.width,
+    trimmedCanvas.height
+  );
+
+  return trimmedCanvas;
+}
 function addBackground(
   pdf: jsPDF,
   pageWidth: number,
@@ -463,22 +586,27 @@ export async function generatePdf(
       } de ${blocks.length}`
     );
 
-    const canvas =
-      await captureBlock(block);
+    const capturedCanvas =
+  await captureBlock(block);
 
-    if (!canvas) {
-      continue;
-    }
+if (!capturedCanvas) {
+  continue;
+}
 
-    if (
-      canvas.width <= 0 ||
-      canvas.height <= 0
-    ) {
-      continue;
-    }
+if (
+  capturedCanvas.width <= 0 ||
+  capturedCanvas.height <= 0
+) {
+  continue;
+}
 
-    const imageWidth =
-      contentWidth;
+const canvas =
+  trimBottomEmptySpace(
+    capturedCanvas
+  );
+
+const imageWidth =
+  contentWidth;
 
     const imageHeight =
       (canvas.height *
