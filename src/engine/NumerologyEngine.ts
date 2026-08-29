@@ -12,11 +12,14 @@ import { calculatePersonality } from "@/modules/numerology/personality"
 import { calculatePersonalYear } from "@/modules/numerology/personalYear"
 import { calculatePersonalMonth } from "@/modules/numerology/personalMonth"
 import { calculatePersonalDay } from "@/modules/numerology/personalDay"
-import { calculatePinnacles, PinnaclesResult } from "@/modules/numerology/pinnacles"
+import { calculatePinnacles } from "@/modules/numerology/pinnacles"
 import { calculateCycles } from "@/modules/numerology/cycles"
 import { calculateKarmicDebts } from "@/modules/numerology/karmicDebts"
-import { calculateHiddenTendency, HiddenTendencyResult } from "@/modules/numerology/hiddenTendency"
-
+import {
+  calculateHiddenTendency,
+  HiddenTendencyResult,
+} from "@/modules/numerology/hiddenTendency"
+import { reduce } from "@/modules/numerology/reduce"
 
 export interface NumerologyResult {
   success: boolean
@@ -49,12 +52,11 @@ export interface NumerologyResult {
 
   karmicDebts: number[]
   hiddenTendency: HiddenTendencyResult
+  hiddenTalent: number
 }
 
 export class NumerologyEngine {
-
   execute(client: ClientModel): NumerologyResult {
-
     if (!client.hasBirthDate) {
       return {
         success: false,
@@ -71,27 +73,30 @@ export class NumerologyEngine {
         personalYear: 0,
         personalMonth: 0,
         personalDay: 0,
+
         pinnacles: {
-        first: 0,
-        second: 0,
-        third: 0,
-        fourth: 0,
+          first: 0,
+          second: 0,
+          third: 0,
+          fourth: 0,
         },
+
         cycles: {
-        first: 0,
-        second: 0,
-        third: 0,
+          first: 0,
+          second: 0,
+          third: 0,
         },
-      karmicDebts: [],
-      hiddenTendency: calculateHiddenTendency(client.fullName),
+
+        karmicDebts: [],
+        hiddenTendency: calculateHiddenTendency(client.fullName),
+        hiddenTalent: 0,
       }
-  
     }
 
     const birthDate = client.data.dataNascimento!
     const birthDateObj = new Date(birthDate)
     const fullName = client.fullName
-    
+
     const soul = calculateSoul(fullName)
     const personality = calculatePersonality(fullName)
     const lifeLesson = calculateLifeLesson(birthDate)
@@ -99,16 +104,42 @@ export class NumerologyEngine {
     const expression = calculateExpression(fullName)
     const motivation = calculateMotivation(fullName)
     const impression = calculateImpression(fullName)
+
     const personalYear = calculatePersonalYear(birthDateObj)
     const personalMonth = calculatePersonalMonth(personalYear)
     const personalDay = calculatePersonalDay(personalMonth)
-    const mission = calculateMission(lifeLesson, destiny)
-    const maturity = calculateMaturity(destiny, expression)
-    const hiddenTendency = calculateHiddenTendency(fullName)
-    const pinnacles = calculatePinnacles( birthDateObj,lifeLesson)
-    const cycles = calculateCycles(birthDateObj)
-    const karmicDebts = calculateKarmicDebts(lifeLesson, destiny, expression)
-    
+
+    const mission = calculateMission(
+      lifeLesson,
+      destiny
+    )
+
+    const maturity = calculateMaturity(
+      destiny,
+      expression
+    )
+
+    const hiddenTendency =
+      calculateHiddenTendency(fullName)
+
+    const hiddenTalent =
+      reduce(motivation + expression)
+
+    const pinnacles =
+      calculatePinnacles(
+        birthDateObj,
+        lifeLesson
+      )
+
+    const cycles =
+      calculateCycles(birthDateObj)
+
+    const karmicDebts =
+      calculateKarmicDebts(
+        birthDate,
+        fullName
+      )
+
     return {
       success: true,
 
@@ -124,12 +155,12 @@ export class NumerologyEngine {
       personalYear,
       personalMonth,
       personalDay,
+
       pinnacles,
       cycles,
       karmicDebts,
       hiddenTendency,
+      hiddenTalent,
     }
-
   }
-
 }
