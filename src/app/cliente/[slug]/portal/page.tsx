@@ -729,35 +729,103 @@ export default function PortalPremium() {
     );
   }
 
-  function abrirAudio(
-    ano: string,
-    mes: string,
-    semana: string
-  ) {
-    const conteudo =
-      buscarConteudo(
-        ano,
-        mes,
-        semana,
-        "audio_individual"
-      );
+  async function abrirAudio(
+  ano: string,
+  mes: string,
+  semana: string
+) {
+  const conteudo = buscarConteudo(
+    ano,
+    mes,
+    semana,
+    "audio_individual"
+  );
 
-    if (!conteudo) {
-      alert(
-        "Áudio ainda não disponível."
-      );
+  if (!conteudo) {
+    alert("Áudio ainda não disponível.");
+    return;
+  }
 
-      return;
+  const url = linkDrive(
+    conteudo.drive_file,
+    conteudo.tipo
+  );
+
+  if (!clienteId) {
+    alert("Não foi possível identificar a assinante.");
+    return;
+  }
+
+  try {
+    const { data: escutaExistente, error: buscaError } =
+      await supabase
+        .from("direction_listens")
+        .select("id, listen_count")
+        .eq("cliente_id", clienteId)
+        .eq("ano", ano)
+        .eq("mes", mes)
+        .eq("semana", semana)
+        .eq("tipo", "audio")
+        .maybeSingle();
+
+    if (buscaError) {
+      throw buscaError;
     }
 
-    const url = linkDrive(
-      conteudo.drive_file,
-      conteudo.tipo
-    );
+    if (escutaExistente) {
+      const { error: updateError } = await supabase
+        .from("direction_listens")
+        .update({
+          last_listened_at: new Date().toISOString(),
+          listen_count:
+            (escutaExistente.listen_count || 0) + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", escutaExistente.id);
 
-    setAudioUrl(url);
-    setAudioAberto(true);
-  }
+      if (updateError) {
+        throw updateError;
+      }
+    } else {
+      const agora = new Date().toISOString();
+
+      const { error: insertError } = await supabase
+        .from("direction_listens")
+        .insert({
+          cliente_id: clienteId,
+          slug,
+          ano,
+          mes,
+          semana,
+          tipo: "audio",
+          first_listened_at: agora,
+          last_listened_at: agora,
+          listen_count: 1,
+          updated_at: agora,
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
+    }
+  } catch (erro: any) {
+  console.error(
+    "Erro ao registrar escuta do direcionamento:",
+    erro
+  );
+
+  alert(
+    `ERRO AO REGISTRAR ESCUTA:\n\n` +
+    `Mensagem: ${erro?.message || "sem mensagem"}\n` +
+    `Código: ${erro?.code || "sem código"}\n` +
+    `Detalhes: ${erro?.details || "sem detalhes"}\n` +
+    `Dica: ${erro?.hint || "sem dica"}`
+  );
+}
+
+  setAudioUrl(url);
+  setAudioAberto(true);
+}
 
   function abrirPdf(
     ano: string,

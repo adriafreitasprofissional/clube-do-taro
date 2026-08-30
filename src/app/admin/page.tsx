@@ -1,8 +1,11 @@
+import PainelAssiduidade from "./components/PainelAssiduidade";
+
 export default function AdminPage() {
   return (
     <div
       style={{
-        maxWidth: "760px",
+        width: "100%",
+        maxWidth: "1200px",
         paddingTop: "24px",
       }}
     >
@@ -35,11 +38,14 @@ export default function AdminPage() {
           color: "rgba(255,255,255,0.68)",
           fontSize: "17px",
           lineHeight: 1.7,
+          maxWidth: "760px",
         }}
       >
         Escolha uma opção no menu lateral para gerenciar assinantes,
         perguntas, recados, conteúdos e as atividades do Clube do Tarô.
       </p>
+
+      <PainelAssiduidade />
     </div>
   );
 }

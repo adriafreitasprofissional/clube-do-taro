@@ -53,6 +53,7 @@ export function Wizard() {
         {step === 2 && (
           <BirthStep
             client={client}
+            onBack={voltarParaClientes}
             onNext={(updatedClient) => {
               setClient(updatedClient);
               setStep(3);

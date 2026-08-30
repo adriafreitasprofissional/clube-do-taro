@@ -147,17 +147,28 @@ export function GenerateStep({
 
         </div>
 
-        <button
-          type="button"
-          onClick={gerarMapa}
-          disabled={gerando}
-          className="mx-auto mt-10 rounded-full border border-[#D4AF37] bg-[#1A132C] px-10 py-5 text-lg font-semibold text-[#D4AF37] transition hover:bg-[#2C2047] disabled:opacity-60"
-        >
-          ✦{" "}
-          {gerando
-            ? "Revelando seu mapa..."
-            : "Revelar meu mapa"}
-        </button>
+        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+  <button
+    type="button"
+    onClick={() => onBack?.()}
+    className="rounded-full border border-[#6C4D8B] bg-[#1A132C] px-10 py-5 text-lg font-semibold text-[#D7C9E7] transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
+  >
+    ← Voltar
+  </button>
+
+  <button
+    type="button"
+    onClick={gerarMapa}
+    disabled={gerando}
+    className="rounded-full border border-[#D4AF37] bg-[#1A132C] px-10 py-5 text-lg font-semibold text-[#D4AF37] transition hover:bg-[#2C2047] disabled:opacity-60"
+  >
+    ✦{" "}
+    {gerando
+      ? "Revelando seu mapa..."
+      : "Revelar meu mapa"}
+  </button>
+</div>
+        
 
       </section>
 

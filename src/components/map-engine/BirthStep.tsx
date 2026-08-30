@@ -5,6 +5,7 @@ import { useState } from "react";
 interface Props {
   client: any;
   onNext: (client: any) => void;
+  onBack: () => void;
 }
 
 const estados = [
@@ -40,6 +41,7 @@ const estados = [
 export function BirthStep({
   client,
   onNext,
+  onBack,
 }: Props) {
   const [form, setForm] = useState({
     ...client,
@@ -72,9 +74,7 @@ export function BirthStep({
 
         <input
           type="date"
-          value={
-            form.data_nascimento ?? ""
-          }
+          value={form.data_nascimento ?? ""}
           onChange={(e) =>
             update(
               "data_nascimento",
@@ -86,9 +86,7 @@ export function BirthStep({
 
         <input
           type="time"
-          value={
-            form.hora_nascimento ?? ""
-          }
+          value={form.hora_nascimento ?? ""}
           onChange={(e) =>
             update(
               "hora_nascimento",
@@ -100,9 +98,7 @@ export function BirthStep({
 
         <input
           placeholder="Cidade de nascimento"
-          value={
-            form.cidade_nascimento ?? ""
-          }
+          value={form.cidade_nascimento ?? ""}
           onChange={(e) =>
             update(
               "cidade_nascimento",
@@ -113,9 +109,7 @@ export function BirthStep({
         />
 
         <select
-          value={
-            form.estado_nascimento ?? ""
-          }
+          value={form.estado_nascimento ?? ""}
           onChange={(e) =>
             update(
               "estado_nascimento",
@@ -140,10 +134,7 @@ export function BirthStep({
 
         <input
           placeholder="País"
-          value={
-            form.pais_nascimento ??
-            "Brasil"
-          }
+          value={form.pais_nascimento ?? "Brasil"}
           onChange={(e) =>
             update(
               "pais_nascimento",
@@ -155,13 +146,25 @@ export function BirthStep({
 
       </div>
 
-      <button
-        type="button"
-        onClick={() => onNext(form)}
-        className="rounded-xl bg-yellow-500 px-8 py-4 font-bold text-black"
-      >
-        Salvar e Continuar
-      </button>
+      <div className="flex gap-4">
+
+        <button
+          type="button"
+          onClick={onBack}
+          className="rounded-xl border border-zinc-700 bg-zinc-900 px-8 py-4 font-bold text-white"
+        >
+          ← Voltar
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNext(form)}
+          className="rounded-xl bg-yellow-500 px-8 py-4 font-bold text-black"
+        >
+          Salvar e Continuar
+        </button>
+
+      </div>
 
     </div>
   );
