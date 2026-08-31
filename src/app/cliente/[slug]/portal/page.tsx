@@ -855,220 +855,228 @@ export default function PortalPremium() {
   }
 
   function renderPergunta(
-    item: PerguntaExclusiva
-  ) {
-    return (
-      <div
-        key={item.id}
-        style={{
-          marginTop: 15,
-          padding: 20,
-          borderRadius: 18,
-          background: "#1b0227",
-          border:
-            "1px solid rgba(244,212,106,.20)",
-        }}
-      >
-        {reformulacao &&
-          direcionamentoExclusivo?.id ===
-            item.id &&
-          item.status ===
-            "Aguardando resposta da assinante" && (
-            <div
-              style={{
-                marginBottom: 18,
-                padding: 16,
-                borderRadius: 14,
-                background:
-                  "rgba(244,180,0,.10)",
-                border:
-                  "1px solid rgba(244,180,0,.35)",
-              }}
-            >
-              <strong
-                style={{
-                  color:
-                    "#f4d46a",
-                }}
-              >
-                🟡 Mensagem da Estella
-              </strong>
-
-              <div
-                style={{
-                  color: "#fff",
-                  marginTop: 10,
-                  lineHeight: 1.7,
-                  whiteSpace:
-                    "pre-wrap",
-                }}
-              >
-                {
-                  reformulacao.mensagem
-                }
-              </div>
-            </div>
-          )}
-
-        {item.status ===
-          "Respondida em áudio" && (
-          <>
-            <p
-              style={{
-                color: "#7CFC90",
-                fontWeight: 700,
-                fontSize: 17,
-              }}
-            >
-              ✅ Sua pergunta foi
-              respondida.
-            </p>
-
-            <p
-              style={{
-                color: "#ddd",
-                marginTop: 10,
-                lineHeight: 1.7,
-              }}
-            >
-              Esta pergunta foi
-              respondida no
-              Direcionamento
-              Exclusivo deste mês.
-            </p>
-          </>
-        )}
-
-        {item.status ===
-          "Aceita" && (
-          <>
-            <p
-              style={{
-                color: "#7CFC90",
-                fontWeight: 700,
-                fontSize: 17,
-              }}
-            >
-              💜 Sua pergunta foi
-              aceita.
-            </p>
-
-            <p
-              style={{
-                color: "#ddd",
-                marginTop: 10,
-                lineHeight: 1.7,
-              }}
-            >
-              Ela será respondida
-              no próximo
-              direcionamento.
-            </p>
-          </>
-        )}
-
-        {item.status ===
-          "Nova pergunta" && (
-          <>
-            <p
-              style={{
-                color: "#fff",
-                fontWeight: 700,
-              }}
-            >
-              💜 Sua pergunta foi
-              recebida.
-            </p>
-
-            <p
-              style={{
-                color: "#ddd",
-                marginTop: 10,
-                lineHeight: 1.7,
-              }}
-            >
-              Ela está aguardando
-              análise.
-            </p>
-          </>
-        )}
-
-        {item.status ===
+  item: PerguntaExclusiva
+) {
+  return (
+    <div
+      key={item.id}
+      style={{
+        marginTop: 15,
+        padding: 20,
+        borderRadius: 18,
+        background: "#1b0227",
+        border:
+          "1px solid rgba(244,212,106,.20)",
+      }}
+    >
+      {reformulacao &&
+        direcionamentoExclusivo?.id === item.id &&
+        item.status ===
           "Aguardando resposta da assinante" && (
-          <>
-            <p
-              style={{
-                color: "#f4d46a",
-                fontWeight: 700,
-                fontSize: 17,
-              }}
-            >
-              🟡 Sua pergunta
-              precisa ser
-              reformulada.
-            </p>
-
-            <p
-              style={{
-                color: "#ddd",
-                marginTop: 10,
-                lineHeight: 1.7,
-              }}
-            >
-              A Cigana Estella
-              solicitou uma
-              reformulação antes de
-              aceitar esta pergunta.
-            </p>
-          </>
-        )}
-
-        <div
-          style={{
-            marginTop: 16,
-            padding: 16,
-            borderRadius: 12,
-            background:
-              "rgba(255,255,255,.05)",
-          }}
-        >
-          <strong
-            style={{
-              color: "#fff",
-            }}
-          >
-            Pergunta
-          </strong>
-
           <div
             style={{
-              marginTop: 10,
+              marginBottom: 18,
+              padding: 16,
+              borderRadius: 14,
+              background:
+                "rgba(244,180,0,.10)",
+              border:
+                "1px solid rgba(244,180,0,.35)",
+            }}
+          >
+            <strong
+              style={{
+                color: "#f4d46a",
+              }}
+            >
+              🟡 Mensagem da Estella
+            </strong>
+
+            <div
+              style={{
+                color: "#fff",
+                marginTop: 10,
+                lineHeight: 1.7,
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {reformulacao.mensagem}
+            </div>
+          </div>
+        )}
+
+      {item.status === "Respondida em áudio" && (
+        <>
+          <p
+            style={{
+              color: "#7CFC90",
+              fontWeight: 700,
+              fontSize: 17,
+            }}
+          >
+            ✅ Sua pergunta foi respondida.
+          </p>
+
+          <p
+            style={{
               color: "#ddd",
-              fontStyle: "italic",
+              marginTop: 10,
               lineHeight: 1.7,
             }}
           >
-            “{item.pergunta}”
-          </div>
-        </div>
+            Esta pergunta foi respondida no
+            Direcionamento Exclusivo deste mês.
+          </p>
+        </>
+      )}
+
+      {item.status === "Aceita" && (
+        <>
+          <p
+            style={{
+              color: "#7CFC90",
+              fontWeight: 700,
+              fontSize: 17,
+            }}
+          >
+            💜 Sua pergunta foi aceita.
+          </p>
+
+          <p
+            style={{
+              color: "#ddd",
+              marginTop: 10,
+              lineHeight: 1.7,
+            }}
+          >
+            Ela será respondida no próximo
+            direcionamento.
+          </p>
+        </>
+      )}
+
+      {item.status === "Nova pergunta" && (
+        <>
+          <p
+            style={{
+              color: "#fff",
+              fontWeight: 700,
+            }}
+          >
+            💜 Sua pergunta foi recebida.
+          </p>
+
+          <p
+            style={{
+              color: "#ddd",
+              marginTop: 10,
+              lineHeight: 1.7,
+            }}
+          >
+            Ela está aguardando análise.
+          </p>
+        </>
+      )}
+
+      {item.status ===
+        "Aguardando resposta da assinante" && (
+        <>
+          <p
+            style={{
+              color: "#f4d46a",
+              fontWeight: 700,
+              fontSize: 17,
+            }}
+          >
+            🟡 Sua pergunta precisa ser reformulada.
+          </p>
+
+          <p
+            style={{
+              color: "#ddd",
+              marginTop: 10,
+              lineHeight: 1.7,
+            }}
+          >
+            A Cigana Estella solicitou uma
+            reformulação antes de aceitar esta
+            pergunta.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => {
+              setDirecionamentoExclusivo(item);
+
+              setPergunta(item.pergunta || "");
+
+              setCategoria(item.categoria || "");
+
+              setUrgente(item.urgente || false);
+
+              setDirecionamentoAberto(true);
+            }}
+            style={{
+              marginTop: 16,
+              padding: "12px 20px",
+              borderRadius: 999,
+              border: "none",
+              background: "#f4b400",
+              color: "#2b0a3d",
+              cursor: "pointer",
+              fontWeight: 700,
+              fontSize: 15,
+            }}
+          >
+            ✍️ Reformular minha pergunta
+          </button>
+        </>
+      )}
+
+      <div
+        style={{
+          marginTop: 16,
+          padding: 16,
+          borderRadius: 12,
+          background:
+            "rgba(255,255,255,.05)",
+        }}
+      >
+        <strong
+          style={{
+            color: "#fff",
+          }}
+        >
+          Pergunta
+        </strong>
 
         <div
           style={{
-            marginTop: 15,
-            color: "#999",
-            fontSize: 13,
+            marginTop: 10,
+            color: "#ddd",
+            fontStyle: "italic",
+            lineHeight: 1.7,
           }}
         >
-          📅{" "}
-          {new Date(
-            item.created_at
-          ).toLocaleDateString(
-            "pt-BR"
-          )}
+          “{item.pergunta}”
         </div>
       </div>
-    );
-  }
+
+      <div
+        style={{
+          marginTop: 15,
+          color: "#999",
+          fontSize: 13,
+        }}
+      >
+        📅{" "}
+        {new Date(
+          item.created_at
+        ).toLocaleDateString("pt-BR")}
+      </div>
+    </div>
+  );
+}
 
   if (loading) {
     return (
