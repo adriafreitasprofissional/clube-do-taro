@@ -3,6 +3,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+import {
+  transformarCsvConteudos,
+  ordenarConteudos,
+  type ConteudoDirecionamento,
+} from "./assiduidadeUtils";
+
 type Cliente = {
   id: string;
   nome: string;
@@ -10,11 +16,13 @@ type Cliente = {
   plano?: string | null;
   status?: string | null;
   tipo_assinatura?: string | null;
+  slug?: string | null;
+  data_inicio?: string | null;
 };
 type Escuta = {
   id: string;
   cliente_id: string;
-  slug: string;
+  slug?: string | null;
   ano: string;
   mes: string;
   semana: string;
@@ -23,6 +31,11 @@ type Escuta = {
   last_listened_at: string;
   listen_count: number;
 };
+
+
+const PLANILHA_CONTEUDOS_CSV =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSr7qra9Jsh2IO6vDO_8vVxe-8lkf9zbFeuDPtw5Wny7zHUKIhVa7lIqqshLo_4JbRDUhWjv0sb_5y3/pub?gid=0&single=true&output=csv";
+
 const categorias = [
   "Bronze",
   "Prata",
@@ -49,9 +62,14 @@ function normalizarPlano(plano?: string | null) {
 }
 
 export default function PainelAssiduidade() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  
+    const [clientes, setClientes] = useState<Cliente[]>([]);
   const [carregando, setCarregando] = useState(true);
 const [escutas, setEscutas] = useState<Escuta[]>([]);
+
+const [conteudos, setConteudos] =
+  useState<ConteudoDirecionamento[]>([]);
+
   const [painelAberto, setPainelAberto] = useState(false);
 
   const [categoriaAberta, setCategoriaAberta] = useState<string | null>(
@@ -66,7 +84,37 @@ async function carregarDados() {
   await Promise.all([
     carregarClientes(),
     carregarEscutas(),
+    carregarConteudos(),
   ]);
+}
+
+async function carregarClientes() {
+  try {
+    setCarregando(true);
+
+    const response = await fetch("/api/admin/clientes", {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        "Não foi possível carregar os assinantes."
+      );
+    }
+
+    const data = await response.json();
+
+    setClientes(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error(
+      "Erro ao carregar assinantes:",
+      error
+    );
+
+    setClientes([]);
+  } finally {
+    setCarregando(false);
+  }
 }
 
 async function carregarEscutas() {
@@ -89,32 +137,47 @@ async function carregarEscutas() {
   setEscutas((data || []) as Escuta[]);
 }
 
-
-
-  async function carregarClientes() {
-    try {
-      setCarregando(true);
-
-      const response = await fetch("/api/admin/clientes", {
+async function carregarConteudos() {
+  try {
+    const resposta = await fetch(
+      PLANILHA_CONTEUDOS_CSV,
+      {
         cache: "no-store",
-      });
-
-      if (!response.ok) {
-        throw new Error("Não foi possível carregar os assinantes.");
       }
+    );
 
-      const data = await response.json();
-
-      setClientes(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Erro ao carregar assinantes:", error);
-      setClientes([]);
-    } finally {
-      setCarregando(false);
+    if (!resposta.ok) {
+      throw new Error(
+        "Não foi possível carregar os direcionamentos."
+      );
     }
-  }
 
-  const total = clientes.length;
+    const texto = await resposta.text();
+
+    const dados =
+      transformarCsvConteudos(texto);
+
+    setConteudos(
+      ordenarConteudos(dados)
+    );
+  } catch (error) {
+    console.error(
+      "Erro ao carregar direcionamentos:",
+      error
+    );
+
+    setConteudos([]);
+  }
+}
+
+  const clientesAtivos = clientes.filter(
+  (cliente) =>
+    (cliente.status || "")
+      .toLowerCase()
+      .trim() === "ativo"
+);
+
+const total = clientesAtivos.length;
 
   /*
     A assiduidade real ainda será conectada ao registro
@@ -123,9 +186,111 @@ async function carregarEscutas() {
     Por enquanto estes dois indicadores ficam zerados
     para não inventarmos dados de consumo.
   */
-  const precisamAtencao = 0;
-  const cortesiasEmRisco = 0;
+  function obterMetricasCliente(cliente: Cliente) {
+  const escutasCliente = escutas.filter(
+    (escuta) => escuta.cliente_id === cliente.id
+  );
 
+  const slugCliente = (
+    cliente.slug ||
+    escutasCliente[0]?.slug ||
+    ""
+  )
+    .toLowerCase()
+    .trim();
+
+  if (!slugCliente) {
+    return {
+      produzidos: 0,
+      consumidos: 0,
+      percentual: 0,
+      semanasSemOuvir: 0,
+    };
+  }
+
+  const conteudosCliente = conteudos.filter(
+    (conteudo) => conteudo.slug === slugCliente
+  );
+
+  const produzidos = conteudosCliente.length;
+
+  const foiConsumido = (
+    conteudo: ConteudoDirecionamento
+  ) =>
+    escutasCliente.some(
+      (escuta) =>
+        escuta.ano === conteudo.ano &&
+        escuta.mes.toLowerCase().trim() ===
+          conteudo.mes.toLowerCase().trim() &&
+        escuta.semana === conteudo.semana
+    );
+
+  const consumidos = conteudosCliente.filter(
+    foiConsumido
+  ).length;
+
+  const percentual =
+    produzidos > 0
+      ? Math.round((consumidos / produzidos) * 100)
+      : 0;
+
+  let semanasSemOuvir = 0;
+
+  for (
+    let i = conteudosCliente.length - 1;
+    i >= 0;
+    i--
+  ) {
+    if (foiConsumido(conteudosCliente[i])) {
+      break;
+    }
+
+    semanasSemOuvir++;
+  }
+
+  return {
+    produzidos,
+    consumidos,
+    percentual,
+    semanasSemOuvir,
+  };
+}
+
+const precisamAtencao = clientesAtivos.filter(
+  (cliente) => {
+    const metricas = obterMetricasCliente(cliente);
+
+    return (
+      metricas.produzidos > 0 &&
+      metricas.semanasSemOuvir >= 1
+    );
+  }
+).length;
+
+const cortesiasEmRisco = clientesAtivos.filter(
+  (cliente) => {
+    const cortesia =
+      (cliente.tipo_assinatura || "")
+        .toLowerCase()
+        .trim() === "cortesia";
+
+    if (!cortesia) {
+      return false;
+    }
+
+    const metricas = obterMetricasCliente(cliente);
+
+    return metricas.semanasSemOuvir >= 2;
+  }
+).length;
+
+const lidos = clientesAtivos.filter(
+  (cliente) => {
+    const metricas = obterMetricasCliente(cliente);
+
+    return metricas.consumidos > 0;
+  }
+).length;
   return (
     <section className="mt-8">
       <div className="mb-5">
@@ -143,7 +308,7 @@ async function carregarEscutas() {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <div className="rounded-2xl border border-white/10 bg-[#28002f] p-5">
           <p className="text-sm uppercase tracking-wider text-white/45">
             Assinantes
@@ -160,12 +325,7 @@ async function carregarEscutas() {
           </p>
 
           <p className="mt-2 text-3xl font-bold text-white">
-            {carregando
-              ? "..."
-              : clientes.filter(
-                  (cliente) =>
-                    (cliente.status || "").toLowerCase() === "ativo"
-                ).length}
+            {carregando ? "..." : clientesAtivos.length}
           </p>
         </div>
 
@@ -186,6 +346,16 @@ async function carregarEscutas() {
 
           <p className="mt-2 text-3xl font-bold text-white">
             {cortesiasEmRisco}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-[#28002f] p-5">
+          <p className="text-sm uppercase tracking-wider text-white/45">
+            Lidos
+          </p>
+
+          <p className="mt-2 text-3xl font-bold text-white">
+            {lidos}
           </p>
         </div>
       </div>
@@ -214,15 +384,16 @@ async function carregarEscutas() {
         {painelAberto && (
           <div className="border-t border-white/10 px-5 pb-5">
             {categorias.map((categoria) => {
-             const itens =
+             
+const itens =
   categoria === "Cortesias"
-    ? clientes.filter(
+    ? clientesAtivos.filter(
         (cliente) =>
           (cliente.tipo_assinatura || "")
             .toLowerCase()
             .trim() === "cortesia"
       )
-    : clientes.filter(
+    : clientesAtivos.filter(
         (cliente) =>
           normalizarPlano(cliente.plano) === categoria
       );
@@ -300,25 +471,44 @@ async function carregarEscutas() {
                                   <p className="text-xs uppercase tracking-wider text-white/35">
                                     Assiduidade
                                   </p>
-
-                                  {(() => {
+{(() => {
   const escutasCliente = escutas.filter(
     (escuta) =>
       escuta.cliente_id === cliente.id
   );
 
-  if (escutasCliente.length === 0) {
-    return (
-      <p className="mt-1 text-sm font-semibold text-white/55">
-        Ainda não ouviu nenhum áudio
-      </p>
-    );
-  }
+  const slugCliente = (
+    cliente.slug ||
+    escutasCliente[0]?.slug ||
+    ""
+  )
+    .toLowerCase()
+    .trim();
 
-  const ultimaEscuta = escutasCliente[0];
+  const conteudosCliente = conteudos.filter(
+    (conteudo) =>
+      conteudo.slug === slugCliente
+  );
 
-  const totalDirecionamentos =
-    escutasCliente.length;
+  const produzidos = conteudosCliente.length;
+
+  const consumidos = conteudosCliente.filter(
+    (conteudo) =>
+      escutasCliente.some(
+        (escuta) =>
+          escuta.ano === conteudo.ano &&
+          escuta.mes.toLowerCase().trim() ===
+            conteudo.mes.toLowerCase().trim() &&
+          escuta.semana === conteudo.semana
+      )
+  ).length;
+
+  const percentual =
+    produzidos > 0
+      ? Math.round(
+          (consumidos / produzidos) * 100
+        )
+      : 0;
 
   const totalReproducoes =
     escutasCliente.reduce(
@@ -327,30 +517,64 @@ async function carregarEscutas() {
       0
     );
 
+  const ultimaEscuta =
+    escutasCliente.length > 0
+      ? escutasCliente[0]
+      : null;
+
+  if (produzidos === 0) {
+    return (
+      <div className="mt-1">
+        <p className="text-sm font-semibold text-white/55">
+          Nenhum direcionamento disponível
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-1">
-      <p className="text-sm font-semibold text-green-300">
-        ✓ Ouviu {totalDirecionamentos}{" "}
-        direcionamento
-        {totalDirecionamentos !== 1
-          ? "s"
-          : ""}
+      <p
+        className={`text-sm font-semibold ${
+          percentual >= 75
+            ? "text-green-300"
+            : percentual >= 50
+            ? "text-yellow-300"
+            : "text-orange-300"
+        }`}
+      >
+        {consumidos}/{produzidos} consumidos
       </p>
 
-      <p className="mt-1 text-xs text-white/45">
-        Última escuta:{" "}
-        {new Date(
-          ultimaEscuta.last_listened_at
-        ).toLocaleDateString("pt-BR")}
+      <p className="mt-1 text-xs text-white/55">
+        Assiduidade: {percentual}%
       </p>
 
-      <p className="mt-1 text-xs text-white/35">
-        {totalReproducoes} reprodução
-        {totalReproducoes !== 1 ? "ões" : ""}
-      </p>
+      {ultimaEscuta ? (
+        <p className="mt-1 text-xs text-white/45">
+          Última escuta:{" "}
+          {new Date(
+            ultimaEscuta.last_listened_at
+          ).toLocaleDateString("pt-BR")}
+        </p>
+      ) : (
+        <p className="mt-1 text-xs text-white/45">
+          Ainda não ouviu nenhum áudio
+        </p>
+      )}
+
+      {totalReproducoes > 0 && (
+        <p className="mt-1 text-xs text-white/35">
+          {totalReproducoes} reprodução
+          {totalReproducoes !== 1
+            ? "ões"
+            : ""}
+        </p>
+      )}
     </div>
   );
 })()}
+                                  
                                 </div>
                               </div>
                             </div>

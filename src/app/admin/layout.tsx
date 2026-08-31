@@ -9,12 +9,13 @@ const menuGroups = [
   {
     title: "GESTÃO",
     items: [
-      { href: "/admin", icon: "🏠", label: "Dashboard" },
+      
       { href: "/admin/assinantes", icon: "👥", label: "Assinantes" },
       { href: "/admin/financeiro", icon: "💳", label: "Financeiro" },
       { href: "/admin/atendimento", icon: "🌹", label: "Atendimento" },
 { href: "/admin/recados", icon: "📢", label: "Recados" },
 { href: "/admin/agenda", icon: "📅", label: "Agenda" },
+{ href: "/admin/assiduidade", icon: "📊", label: "Assiduidade" },
 {
   href: "/admin/mentorias",
   icon: "🎥",

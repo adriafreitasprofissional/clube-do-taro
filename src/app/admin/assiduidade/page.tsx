@@ -1,6 +1,6 @@
-import DashboardGestao from "./components/DashboardGestao";
+import PainelAssiduidade from "../components/PainelAssiduidade";
 
-export default function AdminPage() {
+export default function AssiduidadePage() {
   return (
     <div
       style={{
@@ -24,12 +24,12 @@ export default function AdminPage() {
       <h1
         style={{
           marginTop: "14px",
-          marginBottom: "8px",
+          marginBottom: "14px",
           color: "#ffffff",
           fontSize: "38px",
         }}
       >
-        Visão Geral
+        Assiduidade
       </h1>
 
       <p
@@ -38,12 +38,14 @@ export default function AdminPage() {
           color: "rgba(255,255,255,0.68)",
           fontSize: "17px",
           lineHeight: 1.7,
+          maxWidth: "760px",
         }}
       >
-        Indicadores principais de gestão do Clube do Tarô.
+        Acompanhe o consumo dos Direcionamentos e identifique quem
+        precisa de atenção.
       </p>
 
-      <DashboardGestao />
+      <PainelAssiduidade />
     </div>
   );
 }
