@@ -2178,56 +2178,46 @@ export default function PortalPremium() {
                     null;
 
                   if (
-                    direcionamentoExclusivo &&
-                    direcionamentoExclusivo.status ===
-                      "Aguardando resposta da assinante"
-                  ) {
-                    const resultado =
-                      await supabase
-                        .from(
-                          "exclusive_questions"
-                        )
-                        .update({
-                          categoria,
-                          pergunta,
-                          urgente,
-                          status:
-                            "Aceita",
-                        })
-                        .eq(
-                          "id",
-                          direcionamentoExclusivo.id
-                        );
+  direcionamentoExclusivo &&
+  direcionamentoExclusivo.status ===
+    "Aguardando resposta da assinante"
+) {
+  const resultado =
+    await supabase
+      .from("exclusive_questions")
+      .update({
+        categoria,
+        pergunta: pergunta.trim(),
+        urgente,
+        status: "Nova pergunta",
+      })
+      .eq(
+        "id",
+        direcionamentoExclusivo.id
+      );
 
-                    envioError =
-                      resultado.error;
-                  } else {
-                    const resultado =
-                      await supabase
-                        .from(
-                          "exclusive_questions"
-                        )
-                        .insert({
-                          cliente_id:
-                            clienteId,
-                          nome_cliente:
-                            slug,
-                          email_cliente:
-                            email,
-                          plano,
-                          categoria,
-                          pergunta,
-                          urgente,
-                          referencia_mes:
-                            referenciaAtual,
-                          status:
-                            "Nova pergunta",
-                          ativo: true,
-                        });
+  envioError = resultado.error;
 
-                    envioError =
-                      resultado.error;
-                  }
+  if (!envioError) {
+    const { error: mensagemError } =
+      await supabase
+        .from("exclusive_messages")
+        .insert({
+          question_id:
+            direcionamentoExclusivo.id,
+          autor: "assinante",
+          mensagem:
+            pergunta.trim(),
+        });
+
+    if (mensagemError) {
+      console.error(
+        "Erro ao registrar reformulação:",
+        mensagemError
+      );
+    }
+  }
+}
 
                   if (
                     envioError
