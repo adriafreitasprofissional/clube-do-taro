@@ -75,6 +75,10 @@ async function carregarMensagens() {
 
   setMensagens(data);
 }
+useEffect(() => {
+  carregarMensagens();
+}, []);
+
 
   return (
     <div style={{ padding: "30px", color: "#fff" }}>
