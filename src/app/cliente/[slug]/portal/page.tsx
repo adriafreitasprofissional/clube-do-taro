@@ -34,6 +34,23 @@ type PerguntaExclusiva = {
   created_at: string;
 };
 
+type InteracaoDirecionamento = {
+  id: string;
+  source_id: string | null;
+  interaction_type: "feedback" | "sugestao" | "duvida";
+  message: string;
+  admin_reply: string | null;
+  replied_at: string | null;
+  status: string;
+  created_at: string;
+};
+
+type TipoAcompanhamento =
+  | "muito_bom"
+  | "duvida"
+  | "elogio"
+  | "sugestao";
+
 const NOMES_MESES = [
   "janeiro",
   "fevereiro",
@@ -138,6 +155,47 @@ function referenciaDaPergunta(
   ).padStart(2, "0")}`;
 }
 
+function chaveDirecionamento(
+  ano: string,
+  mes: string,
+  semana: string
+) {
+  return `${ano}-${mes}-${semana}`;
+}
+
+function rotuloInteracao(
+  interacao: InteracaoDirecionamento
+) {
+  const encontrado = interacao.message.match(
+    /^📍[^\n]*\n🏷️\s*([^\n]+)/
+  );
+
+  if (encontrado?.[1]) {
+    return encontrado[1].trim();
+  }
+
+  if (interacao.interaction_type === "duvida") {
+    return "Ainda tenho dúvidas";
+  }
+
+  if (interacao.interaction_type === "sugestao") {
+    return "Sugestões";
+  }
+
+  return "Feedback";
+}
+
+function mensagemDaInteracao(
+  mensagem: string
+) {
+  return mensagem
+    .replace(
+      /^📍[^\n]*\n🏷️[^\n]*\n\n?/,
+      ""
+    )
+    .trim();
+}
+
 export default function PortalPremium() {
   const params = useParams();
   const router = useRouter();
@@ -205,6 +263,46 @@ export default function PortalPremium() {
 
     const [mensagensAbertas, setMensagensAbertas] =
   useState<Record<string, boolean>>({});
+
+  const [
+    acompanhamentosAbertos,
+    setAcompanhamentosAbertos,
+  ] = useState<Record<string, boolean>>({});
+
+  const [
+    tipoAcompanhamento,
+    setTipoAcompanhamento,
+  ] = useState<Record<string, TipoAcompanhamento | "">>({});
+
+  const [
+    textoAcompanhamento,
+    setTextoAcompanhamento,
+  ] = useState<Record<string, string>>({});
+
+  const [
+    enviandoAcompanhamento,
+    setEnviandoAcompanhamento,
+  ] = useState<string | null>(null);
+
+  const [
+    historicosDirecionamento,
+    setHistoricosDirecionamento,
+  ] = useState<Record<string, InteracaoDirecionamento[]>>({});
+
+  const [
+    historicosAbertos,
+    setHistoricosAbertos,
+  ] = useState<Record<string, boolean>>({});
+
+  const [
+    carregandoHistorico,
+    setCarregandoHistorico,
+  ] = useState<string | null>(null);
+
+  const [
+    acompanhamentoEnviado,
+    setAcompanhamentoEnviado,
+  ] = useState<Record<string, boolean>>({});
 
   const [pergunta, setPergunta] =
     useState("");
@@ -852,6 +950,228 @@ export default function PortalPremium() {
       conteudo.drive_file,
       "_blank"
     );
+  }
+
+  async function carregarHistoricoDirecionamento(
+    ano: string,
+    mes: string,
+    semana: string
+  ) {
+    const chave = chaveDirecionamento(
+      ano,
+      mes,
+      semana
+    );
+
+    setCarregandoHistorico(chave);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        router.replace("/login");
+        return;
+      }
+
+      const parametros =
+        new URLSearchParams({
+          slug,
+          ano,
+          mes,
+          semana,
+        });
+
+      const response = await fetch(
+        `/api/direcionamentos/interacoes?${parametros.toString()}`,
+        {
+          cache: "no-store",
+          headers: {
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Não foi possível carregar o histórico."
+        );
+      }
+
+      setHistoricosDirecionamento(
+        (atual) => ({
+          ...atual,
+          [chave]:
+            Array.isArray(data.interacoes)
+              ? data.interacoes
+              : [],
+        })
+      );
+    } catch (erro: unknown) {
+      console.error(
+        "Erro ao carregar acompanhamento:",
+        erro
+      );
+    } finally {
+      setCarregandoHistorico(null);
+    }
+  }
+
+  async function abrirAcompanhamento(
+    ano: string,
+    mes: string,
+    semana: string
+  ) {
+    const chave =
+      chaveDirecionamento(
+        ano,
+        mes,
+        semana
+      );
+
+    const vaiAbrir =
+      !acompanhamentosAbertos[chave];
+
+    setAcompanhamentosAbertos(
+      (atual) => ({
+        ...atual,
+        [chave]: vaiAbrir,
+      })
+    );
+
+    if (vaiAbrir) {
+      await carregarHistoricoDirecionamento(
+        ano,
+        mes,
+        semana
+      );
+    }
+  }
+
+  async function enviarAcompanhamento(
+    ano: string,
+    mes: string,
+    semana: string
+  ) {
+    const chave =
+      chaveDirecionamento(
+        ano,
+        mes,
+        semana
+      );
+
+    const tipo =
+      tipoAcompanhamento[chave];
+
+    const mensagem =
+      (
+        textoAcompanhamento[chave] ||
+        ""
+      ).trim();
+
+    if (!tipo) {
+      alert(
+        "Escolha uma opção sobre este direcionamento."
+      );
+      return;
+    }
+
+    if (!mensagem) {
+      alert(
+        "Escreva sua percepção, dúvida, elogio ou sugestão."
+      );
+      return;
+    }
+
+    setEnviandoAcompanhamento(chave);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        router.replace("/login");
+        return;
+      }
+
+      const response = await fetch(
+        "/api/direcionamentos/interacoes",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            slug,
+            ano,
+            mes,
+            semana,
+            escolha: tipo,
+            message: mensagem,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Não foi possível enviar sua mensagem."
+        );
+      }
+
+      setTextoAcompanhamento(
+        (atual) => ({
+          ...atual,
+          [chave]: "",
+        })
+      );
+
+      setTipoAcompanhamento(
+        (atual) => ({
+          ...atual,
+          [chave]: "",
+        })
+      );
+
+      setAcompanhamentoEnviado(
+        (atual) => ({
+          ...atual,
+          [chave]: true,
+        })
+      );
+
+      setHistoricosAbertos(
+        (atual) => ({
+          ...atual,
+          [chave]: true,
+        })
+      );
+
+      await carregarHistoricoDirecionamento(
+        ano,
+        mes,
+        semana
+      );
+    } catch (erro: unknown) {
+      alert(
+        erro instanceof Error
+          ? erro.message
+          : "Erro ao enviar sua mensagem."
+      );
+    } finally {
+      setEnviandoAcompanhamento(null);
+    }
   }
 
   function renderPergunta(
@@ -1725,113 +2045,765 @@ export default function PortalPremium() {
                                     </h3>
 
                                     {semanas.map(
-                                      (
-                                        semana
-                                      ) => (
-                                        <div
-                                          key={
+                                      (semana) => {
+                                        const chave =
+                                          chaveDirecionamento(
+                                            ano,
+                                            mes,
                                             semana
-                                          }
-                                          style={{
-                                            background:
-                                              "#1b0227",
-                                            borderRadius:
-                                              20,
-                                            padding:
-                                              24,
-                                            border:
-                                              "1px solid rgba(244,212,106,.20)",
-                                            marginBottom:
-                                              14,
-                                          }}
-                                        >
-                                          <h4
-                                            style={{
-                                              color:
-                                                "#f4d46a",
-                                              marginBottom:
-                                                14,
-                                              fontSize:
-                                                18,
-                                            }}
-                                          >
-                                            ✦{" "}
-                                            {
+                                          );
+
+                                        const historico =
+                                          historicosDirecionamento[
+                                            chave
+                                          ] || [];
+
+                                        const opcoes: {
+                                          valor: TipoAcompanhamento;
+                                          label: string;
+                                        }[] = [
+                                          {
+                                            valor:
+                                              "muito_bom",
+                                            label:
+                                              "Muito bom",
+                                          },
+                                          {
+                                            valor:
+                                              "duvida",
+                                            label:
+                                              "Ainda tenho dúvidas",
+                                          },
+                                          {
+                                            valor:
+                                              "elogio",
+                                            label:
+                                              "Elogios",
+                                          },
+                                          {
+                                            valor:
+                                              "sugestao",
+                                            label:
+                                              "Sugestões",
+                                          },
+                                        ];
+
+                                        return (
+                                          <div
+                                            key={
                                               semana
                                             }
-                                            ª
-                                            Semana
-                                          </h4>
-
-                                          <div
                                             style={{
-                                              display:
-                                                "flex",
-                                              gap: 12,
-                                              flexWrap:
-                                                "wrap",
+                                              background:
+                                                "#1b0227",
+                                              borderRadius:
+                                                20,
+                                              padding:
+                                                24,
+                                              border:
+                                                "1px solid rgba(244,212,106,.20)",
+                                              marginBottom:
+                                                14,
                                             }}
                                           >
-                                            <button
-                                              onClick={() =>
-                                                abrirAudio(
-                                                  ano,
-                                                  mes,
-                                                  semana
-                                                )
-                                              }
+                                            <h4
                                               style={{
-                                                background:
-                                                  "#6d28d9",
                                                 color:
-                                                  "#fff",
-                                                border:
-                                                  "none",
-                                                borderRadius:
-                                                  999,
-                                                padding:
-                                                  "12px 20px",
-                                                cursor:
-                                                  "pointer",
+                                                  "#f4d46a",
+                                                marginBottom:
+                                                  14,
+                                                fontSize:
+                                                  18,
                                               }}
                                             >
-                                              🎧
-                                              Ouvir
-                                              Direcionamento
-                                            </button>
+                                              ✦{" "}
+                                              {
+                                                semana
+                                              }
+                                              ª
+                                              Semana
+                                            </h4>
 
-                                            <button
-                                              onClick={() =>
-                                                abrirPdf(
-                                                  ano,
-                                                  mes,
-                                                  semana
-                                                )
-                                              }
+                                            <div
                                               style={{
-                                                background:
-                                                  "#6aa1f4",
-                                                color:
-                                                  "#2a0738",
-                                                border:
-                                                  "none",
-                                                borderRadius:
-                                                  999,
-                                                padding:
-                                                  "12px 20px",
-                                                cursor:
-                                                  "pointer",
-                                                fontWeight:
-                                                  700,
+                                                display:
+                                                  "flex",
+                                                gap: 12,
+                                                flexWrap:
+                                                  "wrap",
+                                                alignItems:
+                                                  "center",
                                               }}
                                             >
-                                              📄
-                                              Baixar
-                                              PDF
-                                            </button>
+                                              <button
+                                                onClick={() =>
+                                                  abrirAudio(
+                                                    ano,
+                                                    mes,
+                                                    semana
+                                                  )
+                                                }
+                                                style={{
+                                                  background:
+                                                    "#6d28d9",
+                                                  color:
+                                                    "#fff",
+                                                  border:
+                                                    "none",
+                                                  borderRadius:
+                                                    999,
+                                                  padding:
+                                                    "12px 20px",
+                                                  cursor:
+                                                    "pointer",
+                                                }}
+                                              >
+                                                🎧
+                                                Ouvir
+                                                Direcionamento
+                                              </button>
+
+                                              <button
+                                                onClick={() =>
+                                                  abrirPdf(
+                                                    ano,
+                                                    mes,
+                                                    semana
+                                                  )
+                                                }
+                                                style={{
+                                                  background:
+                                                    "#6aa1f4",
+                                                  color:
+                                                    "#2a0738",
+                                                  border:
+                                                    "none",
+                                                  borderRadius:
+                                                    999,
+                                                  padding:
+                                                    "12px 20px",
+                                                  cursor:
+                                                    "pointer",
+                                                  fontWeight:
+                                                    700,
+                                                }}
+                                              >
+                                                📄
+                                                Baixar
+                                                PDF
+                                              </button>
+
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  abrirAcompanhamento(
+                                                    ano,
+                                                    mes,
+                                                    semana
+                                                  )
+                                                }
+                                                style={{
+                                                  marginLeft:
+                                                    mobile
+                                                      ? 0
+                                                      : 18,
+                                                  background:
+                                                    acompanhamentosAbertos[
+                                                      chave
+                                                    ]
+                                                      ? "rgba(244,212,106,.18)"
+                                                      : "rgba(244,212,106,.07)",
+                                                  color:
+                                                    "#f4d46a",
+                                                  border:
+                                                    "1px solid rgba(244,212,106,.32)",
+                                                  borderRadius:
+                                                    999,
+                                                  padding:
+                                                    "12px 20px",
+                                                  cursor:
+                                                    "pointer",
+                                                  fontWeight:
+                                                    700,
+                                                }}
+                                              >
+                                                ✏️ O
+                                                que
+                                                achou
+                                                do
+                                                direcionamento?
+                                              </button>
+                                            </div>
+
+                                            {acompanhamentosAbertos[
+                                              chave
+                                            ] && (
+                                              <div
+                                                style={{
+                                                  marginTop:
+                                                    20,
+                                                  padding:
+                                                    mobile
+                                                      ? 16
+                                                      : 20,
+                                                  borderRadius:
+                                                    18,
+                                                  background:
+                                                    "rgba(255,255,255,.035)",
+                                                  border:
+                                                    "1px solid rgba(244,212,106,.18)",
+                                                }}
+                                              >
+                                                <div
+                                                  style={{
+                                                    color:
+                                                      "#f4d46a",
+                                                    fontWeight:
+                                                      800,
+                                                    fontSize:
+                                                      16,
+                                                    letterSpacing:
+                                                      ".04em",
+                                                    marginBottom:
+                                                      8,
+                                                  }}
+                                                >
+                                                  O
+                                                  QUE
+                                                  ACHOU
+                                                  DO
+                                                  DIRECIONAMENTO?
+                                                </div>
+
+                                                <p
+                                                  style={{
+                                                    color:
+                                                      "#ccc",
+                                                    fontSize:
+                                                      14,
+                                                    lineHeight:
+                                                      1.6,
+                                                    marginBottom:
+                                                      14,
+                                                  }}
+                                                >
+                                                  Escolha
+                                                  uma
+                                                  opção
+                                                  e
+                                                  deixe
+                                                  sua
+                                                  mensagem
+                                                  sobre
+                                                  esta
+                                                  semana.
+                                                </p>
+
+                                                <div
+                                                  style={{
+                                                    display:
+                                                      "flex",
+                                                    gap: 8,
+                                                    flexWrap:
+                                                      "wrap",
+                                                  }}
+                                                >
+                                                  {opcoes.map(
+                                                    (
+                                                      opcao
+                                                    ) => {
+                                                      const selecionada =
+                                                        tipoAcompanhamento[
+                                                          chave
+                                                        ] ===
+                                                        opcao.valor;
+
+                                                      return (
+                                                        <button
+                                                          key={
+                                                            opcao.valor
+                                                          }
+                                                          type="button"
+                                                          onClick={() =>
+                                                            setTipoAcompanhamento(
+                                                              (
+                                                                atual
+                                                              ) => ({
+                                                                ...atual,
+                                                                [chave]:
+                                                                  opcao.valor,
+                                                              })
+                                                            )
+                                                          }
+                                                          style={{
+                                                            padding:
+                                                              "9px 14px",
+                                                            borderRadius:
+                                                              999,
+                                                            cursor:
+                                                              "pointer",
+                                                            fontWeight:
+                                                              700,
+                                                            fontSize:
+                                                              13,
+                                                            color:
+                                                              selecionada
+                                                                ? "#2a0738"
+                                                                : "#f4d46a",
+                                                            background:
+                                                              selecionada
+                                                                ? "#f4d46a"
+                                                                : "transparent",
+                                                            border:
+                                                              "1px solid rgba(244,212,106,.35)",
+                                                          }}
+                                                        >
+                                                          {
+                                                            opcao.label
+                                                          }
+                                                        </button>
+                                                      );
+                                                    }
+                                                  )}
+                                                </div>
+
+                                                <div
+                                                  style={{
+                                                    marginTop:
+                                                      14,
+                                                  }}
+                                                >
+                                                  <textarea
+                                                    value={
+                                                      textoAcompanhamento[
+                                                        chave
+                                                      ] ||
+                                                      ""
+                                                    }
+                                                    onChange={(
+                                                      event
+                                                    ) =>
+                                                      setTextoAcompanhamento(
+                                                        (
+                                                          atual
+                                                        ) => ({
+                                                          ...atual,
+                                                          [chave]:
+                                                            event
+                                                              .target
+                                                              .value,
+                                                        })
+                                                      )
+                                                    }
+                                                    rows={
+                                                      3
+                                                    }
+                                                    placeholder="✏️ Escreva aqui sua percepção, dúvida, elogio ou sugestão..."
+                                                    style={{
+                                                      width:
+                                                        "100%",
+                                                      boxSizing:
+                                                        "border-box",
+                                                      padding:
+                                                        "12px 14px",
+                                                      borderRadius:
+                                                        14,
+                                                      resize:
+                                                        "none",
+                                                      background:
+                                                        "#12001b",
+                                                      color:
+                                                        "#fff",
+                                                      border:
+                                                        "1px solid rgba(244,212,106,.25)",
+                                                      outline:
+                                                        "none",
+                                                      lineHeight:
+                                                        1.5,
+                                                    }}
+                                                  />
+                                                </div>
+
+                                                {acompanhamentoEnviado[
+                                                  chave
+                                                ] && (
+                                                  <p
+                                                    style={{
+                                                      marginTop:
+                                                        10,
+                                                      color:
+                                                        "#7CFC90",
+                                                      fontWeight:
+                                                        700,
+                                                      fontSize:
+                                                        13,
+                                                    }}
+                                                  >
+                                                    ✓
+                                                    Sua
+                                                    mensagem
+                                                    foi
+                                                    enviada
+                                                    para
+                                                    Ádria.
+                                                  </p>
+                                                )}
+
+                                                <div
+                                                  style={{
+                                                    display:
+                                                      "flex",
+                                                    gap: 10,
+                                                    flexWrap:
+                                                      "wrap",
+                                                    marginTop:
+                                                      14,
+                                                  }}
+                                                >
+                                                  <button
+                                                    type="button"
+                                                    disabled={
+                                                      enviandoAcompanhamento ===
+                                                      chave
+                                                    }
+                                                    onClick={() =>
+                                                      enviarAcompanhamento(
+                                                        ano,
+                                                        mes,
+                                                        semana
+                                                      )
+                                                    }
+                                                    style={{
+                                                      padding:
+                                                        "11px 18px",
+                                                      borderRadius:
+                                                        999,
+                                                      border:
+                                                        "none",
+                                                      background:
+                                                        "#6d28d9",
+                                                      color:
+                                                        "#fff",
+                                                      cursor:
+                                                        enviandoAcompanhamento ===
+                                                        chave
+                                                          ? "not-allowed"
+                                                          : "pointer",
+                                                      opacity:
+                                                        enviandoAcompanhamento ===
+                                                        chave
+                                                          ? 0.6
+                                                          : 1,
+                                                      fontWeight:
+                                                        700,
+                                                    }}
+                                                  >
+                                                    {enviandoAcompanhamento ===
+                                                    chave
+                                                      ? "Enviando..."
+                                                      : "Enviar para Ádria"}
+                                                  </button>
+
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      setAcompanhamentosAbertos(
+                                                        (
+                                                          atual
+                                                        ) => ({
+                                                          ...atual,
+                                                          [chave]:
+                                                            false,
+                                                        })
+                                                      )
+                                                    }
+                                                    style={{
+                                                      padding:
+                                                        "11px 18px",
+                                                      borderRadius:
+                                                        999,
+                                                      border:
+                                                        "1px solid rgba(244,212,106,.20)",
+                                                      background:
+                                                        "transparent",
+                                                      color:
+                                                        "#ccc",
+                                                      cursor:
+                                                        "pointer",
+                                                    }}
+                                                  >
+                                                    Fechar
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            )}
+
+                                            <div
+                                                style={{
+                                                  marginTop:
+                                                    14,
+                                                  borderRadius:
+                                                    16,
+                                                  border:
+                                                    "1px solid rgba(244,212,106,.14)",
+                                                  overflow:
+                                                    "hidden",
+                                                }}
+                                              >
+                                                <button
+                                                  type="button"
+                                                  onClick={async () => {
+                                                    const abrir =
+                                                      !historicosAbertos[
+                                                        chave
+                                                      ];
+
+                                                    setHistoricosAbertos(
+                                                      (
+                                                        atual
+                                                      ) => ({
+                                                        ...atual,
+                                                        [chave]:
+                                                          abrir,
+                                                      })
+                                                    );
+
+                                                    if (
+                                                      abrir
+                                                    ) {
+                                                      await carregarHistoricoDirecionamento(
+                                                        ano,
+                                                        mes,
+                                                        semana
+                                                      );
+                                                    }
+                                                  }}
+                                                  style={{
+                                                    width:
+                                                      "100%",
+                                                    display:
+                                                      "flex",
+                                                    alignItems:
+                                                      "center",
+                                                    justifyContent:
+                                                      "space-between",
+                                                    gap: 12,
+                                                    padding:
+                                                      "13px 15px",
+                                                    border:
+                                                      "none",
+                                                    background:
+                                                      "rgba(0,0,0,.12)",
+                                                    color:
+                                                      "#ddd",
+                                                    cursor:
+                                                      "pointer",
+                                                    textAlign:
+                                                      "left",
+                                                    fontWeight:
+                                                      700,
+                                                  }}
+                                                >
+                                                  <span>
+                                                    {
+                                                      historicosAbertos[
+                                                        chave
+                                                      ]
+                                                        ? "▼"
+                                                        : "▶"
+                                                    }{" "}
+                                                    Seu
+                                                    acompanhamento
+                                                    deste
+                                                    direcionamento
+                                                  </span>
+
+                                                  <span
+                                                    style={{
+                                                      color:
+                                                        "#f4d46a",
+                                                      fontSize:
+                                                        12,
+                                                    }}
+                                                  >
+                                                    {
+                                                      historico.length
+                                                    }
+                                                  </span>
+                                                </button>
+
+                                                {historicosAbertos[
+                                                  chave
+                                                ] && (
+                                                  <div
+                                                    style={{
+                                                      padding:
+                                                        mobile
+                                                          ? 12
+                                                          : 16,
+                                                      display:
+                                                        "grid",
+                                                      gap: 12,
+                                                    }}
+                                                  >
+                                                    {historico.map(
+                                                      (
+                                                        item
+                                                      ) => (
+                                                        <div
+                                                          key={
+                                                            item.id
+                                                          }
+                                                          style={{
+                                                            padding:
+                                                              14,
+                                                            borderRadius:
+                                                              14,
+                                                            background:
+                                                              "#12001b",
+                                                            border:
+                                                              "1px solid rgba(255,255,255,.06)",
+                                                          }}
+                                                        >
+                                                          <div
+                                                            style={{
+                                                              color:
+                                                                "#f4d46a",
+                                                              fontWeight:
+                                                                700,
+                                                              fontSize:
+                                                                13,
+                                                            }}
+                                                          >
+                                                            {
+                                                              rotuloInteracao(
+                                                                item
+                                                              )
+                                                            }
+                                                          </div>
+
+                                                          <p
+                                                            style={{
+                                                              color:
+                                                                "#eee",
+                                                              marginTop:
+                                                                8,
+                                                              lineHeight:
+                                                                1.6,
+                                                              whiteSpace:
+                                                                "pre-wrap",
+                                                            }}
+                                                          >
+                                                            {
+                                                              mensagemDaInteracao(
+                                                                item.message
+                                                              )
+                                                            }
+                                                          </p>
+
+                                                          <div
+                                                            style={{
+                                                              marginTop:
+                                                                8,
+                                                              color:
+                                                                "#888",
+                                                              fontSize:
+                                                                12,
+                                                            }}
+                                                          >
+                                                            {new Date(
+                                                              item.created_at
+                                                            ).toLocaleString(
+                                                              "pt-BR"
+                                                            )}
+                                                          </div>
+
+                                                          {item.admin_reply && (
+                                                            <div
+                                                              style={{
+                                                                marginTop:
+                                                                  12,
+                                                                padding:
+                                                                  12,
+                                                                borderRadius:
+                                                                  12,
+                                                                background:
+                                                                  "rgba(244,212,106,.07)",
+                                                                border:
+                                                                  "1px solid rgba(244,212,106,.15)",
+                                                              }}
+                                                            >
+                                                              <div
+                                                                style={{
+                                                                  color:
+                                                                    "#f4d46a",
+                                                                  fontWeight:
+                                                                    700,
+                                                                  fontSize:
+                                                                    12,
+                                                                }}
+                                                              >
+                                                                🌹
+                                                                Resposta
+                                                                da
+                                                                Ádria
+                                                              </div>
+
+                                                              <p
+                                                                style={{
+                                                                  color:
+                                                                    "#fff",
+                                                                  marginTop:
+                                                                    7,
+                                                                  lineHeight:
+                                                                    1.6,
+                                                                  whiteSpace:
+                                                                    "pre-wrap",
+                                                                }}
+                                                              >
+                                                                {
+                                                                  item.admin_reply
+                                                                }
+                                                              </p>
+                                                            </div>
+                                                          )}
+                                                        </div>
+                                                      )
+                                                    )}
+                                                  </div>
+                                                )}
+
+                                                {historicosAbertos[
+                                                  chave
+                                                ] &&
+                                                  carregandoHistorico !==
+                                                    chave &&
+                                                  historico.length ===
+                                                    0 && (
+                                                    <div
+                                                      style={{
+                                                        padding:
+                                                          14,
+                                                        color:
+                                                          "#888",
+                                                        fontSize:
+                                                          13,
+                                                      }}
+                                                    >
+                                                      Você
+                                                      ainda
+                                                      não
+                                                      enviou
+                                                      mensagens
+                                                      sobre
+                                                      este
+                                                      direcionamento.
+                                                    </div>
+                                                  )}
+                                              </div>
                                           </div>
-                                        </div>
-                                      )
+                                        );
+                                      }
                                     )}
                                   </div>
                                 ) : (
