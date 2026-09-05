@@ -247,6 +247,9 @@ export async function GET(
     );
   }
 
+  const cliente =
+    autorizado.cliente;
+
   const {
     data,
     error,
@@ -263,7 +266,7 @@ export async function GET(
     `)
     .eq(
       "client_id",
-      autorizado.cliente.id
+      cliente.id
     )
     .eq(
       "source_type",
@@ -354,12 +357,19 @@ export async function POST(
 
   const opcao =
     String(
-      body.opcao || ""
+      body.opcao ||
+      body.escolha ||
+      body.tipo ||
+      body.interaction_type ||
+      ""
     ).trim() as OpcaoDirecionamento;
 
   const message =
     String(
-      body.message || ""
+      body.message ||
+      body.mensagem ||
+      body.texto ||
+      ""
     ).trim();
 
   const opcoesValidas:
@@ -370,18 +380,41 @@ export async function POST(
       "sugestao",
     ];
 
-  if (
-    !slug ||
-    !ano ||
-    !mes ||
-    !semana ||
-    !opcoesValidas.includes(opcao) ||
-    !message
-  ) {
+  if (!slug) {
     return NextResponse.json(
       {
         error:
-          "Preencha a opção e a mensagem antes de enviar.",
+          "Não foi possível identificar a assinante.",
+      },
+      { status: 400 }
+    );
+  }
+
+  if (!ano || !mes || !semana) {
+    return NextResponse.json(
+      {
+        error:
+          "Não foi possível identificar este direcionamento semanal.",
+      },
+      { status: 400 }
+    );
+  }
+
+  if (!opcoesValidas.includes(opcao)) {
+    return NextResponse.json(
+      {
+        error:
+          "Escolha uma opção antes de enviar.",
+      },
+      { status: 400 }
+    );
+  }
+
+  if (!message) {
+    return NextResponse.json(
+      {
+        error:
+          "Escreva sua mensagem antes de enviar.",
       },
       { status: 400 }
     );
@@ -404,6 +437,9 @@ export async function POST(
     );
   }
 
+  const cliente =
+    autorizado.cliente;
+
   const {
     data,
     error,
@@ -411,10 +447,11 @@ export async function POST(
     .from("client_interactions")
     .insert({
       client_id:
-        autorizado.cliente.id,
+        cliente.id,
       source_type:
         "direcionamento",
-      source_id: null,
+      source_id:
+        null,
       interaction_type:
         tipoDaInteracao(opcao),
       message:
@@ -425,7 +462,8 @@ export async function POST(
           opcao,
           message
         ),
-      status: "novo",
+      status:
+        "novo",
     })
     .select(
       "id, created_at"
@@ -435,7 +473,8 @@ export async function POST(
   if (error) {
     return NextResponse.json(
       {
-        error: error.message,
+        error:
+          error.message,
       },
       { status: 500 }
     );
