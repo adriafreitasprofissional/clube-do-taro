@@ -5,27 +5,6 @@ import {
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const CAMPOS = `
-  id,
-  client_id,
-  service_type,
-  title,
-  occurred_at,
-  video_provider,
-  video_file_id,
-  report_adria,
-  report_estella,
-  generated_report,
-  generated_report_at,
-  pdf_file_id,
-  pdf_storage_path,
-  pdf_file_name,
-  pdf_generated_at,
-  published,
-  created_at,
-  updated_at
-`;
-
 function bearerToken(request: NextRequest) {
   const authorization =
     request.headers.get("authorization") || "";
@@ -35,387 +14,308 @@ function bearerToken(request: NextRequest) {
     : "";
 }
 
-async function autorizarAdmin(
-  request: NextRequest
-) {
-  const token = bearerToken(request);
-
-  if (!token) {
-    return false;
-  }
-
-  const {
-    data: { user },
-  } = await supabaseAdmin.auth.getUser(token);
-
-  if (!user?.email) {
-    return false;
-  }
-
-  const { data: admin } =
-    await supabaseAdmin
-      .from("club_clients")
-      .select("id")
-      .ilike("email", user.email)
-      .eq("role", "admin")
-      .maybeSingle();
-
-  return Boolean(admin);
-}
-
-function limparIdDrive(valor: unknown) {
-  const texto =
-    String(valor || "").trim();
-
-  if (!texto) {
-    return null;
-  }
-
-  const encontrado =
-    texto.match(
-      /\/d\/([^/?]+)/
-    )?.[1];
-
-  return encontrado || texto;
-}
-
-function montarRegistro(
-  body: Record<string, unknown>
-) {
-  return {
-    client_id:
-      String(
-        body.client_id || ""
-      ).trim(),
-
-    service_type:
-      String(
-        body.service_type ||
-          "mentoria"
-      ).trim(),
-
-    title:
-      String(
-        body.title || ""
-      ).trim(),
-
-    occurred_at:
-      String(
-        body.occurred_at || ""
-      ).trim(),
-
-    video_provider:
-      "google_drive",
-
-    video_file_id:
-      limparIdDrive(
-        body.video_file_id
-      ),
-
-    report_adria:
-      String(
-        body.report_adria || ""
-      ).trim() || null,
-
-    report_estella:
-      String(
-        body.report_estella || ""
-      ).trim() || null,
-
-    pdf_file_id:
-      limparIdDrive(
-        body.pdf_file_id
-      ),
-
-    published:
-      Boolean(body.published),
-  };
-}
-
-function incluirRelatorioGerado(
-  body: Record<string, unknown>
-) {
-  return {
-    ...montarRegistro(body),
-
-    ...(body.generated_report !==
-    undefined
-      ? {
-          generated_report:
-            body.generated_report,
-
-          generated_report_at:
-            body.generated_report_at ||
-            new Date().toISOString(),
-        }
-      : {}),
-  };
-}
-
 export async function GET(
   request: NextRequest
 ) {
-  if (
-    !(await autorizarAdmin(request))
-  ) {
+  const slug =
+    request.nextUrl.searchParams
+      .get("slug")
+      ?.trim();
+
+  const token = bearerToken(request);
+
+  if (!slug || !token) {
     return NextResponse.json(
       {
-        error:
-          "Acesso administrativo não autorizado.",
+        error: "Acesso não autorizado.",
       },
       { status: 401 }
     );
   }
 
-  const { data, error } =
-    await supabaseAdmin
-      .from(
-        "client_service_records"
-      )
-      .select(
-        `${CAMPOS}, club_clients(nome, nome_referencia, slug, plano)`
-      )
-      .order(
-        "occurred_at",
-        {
-          ascending: false,
-        }
-      );
+  const {
+    data: { user },
+    error: usuarioError,
+  } = await supabaseAdmin.auth.getUser(token);
 
-  if (error) {
+  if (
+    usuarioError ||
+    !user?.email
+  ) {
     return NextResponse.json(
       {
         error:
-          error.message,
+          "Sessão inválida. Entre novamente no portal.",
+      },
+      { status: 401 }
+    );
+  }
+
+  const {
+    data: cliente,
+    error: clienteError,
+  } = await supabaseAdmin
+    .from("club_clients")
+    .select(
+      `
+        id,
+        nome,
+        nome_referencia,
+        email,
+        slug,
+        plano,
+        status,
+        role
+      `
+    )
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (
+    clienteError ||
+    !cliente
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Assinante não encontrada.",
+      },
+      { status: 404 }
+    );
+  }
+
+  const mesmoEmail =
+    String(
+      cliente.email || ""
+    ).toLowerCase() ===
+    user.email.toLowerCase();
+
+  let usuarioEhAdmin = false;
+
+  if (!mesmoEmail) {
+    const { data: admin } =
+      await supabaseAdmin
+        .from("club_clients")
+        .select("id")
+        .ilike(
+          "email",
+          user.email
+        )
+        .eq("role", "admin")
+        .maybeSingle();
+
+    usuarioEhAdmin =
+      Boolean(admin);
+  }
+
+  if (
+    !mesmoEmail &&
+    !usuarioEhAdmin
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Você não pode acessar as mentorias desta assinante.",
+      },
+      { status: 403 }
+    );
+  }
+
+  if (
+    String(
+      cliente.status || ""
+    ).toLowerCase() !== "ativo"
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Este acesso não está ativo.",
+      },
+      { status: 403 }
+    );
+  }
+
+  const {
+    data: registros,
+    error: registrosError,
+  } = await supabaseAdmin
+    .from(
+      "client_service_records"
+    )
+    .select(`
+      id,
+      service_type,
+      title,
+      occurred_at,
+      video_provider,
+      video_file_id,
+      report_adria,
+      report_estella,
+      pdf_file_id,
+      pdf_storage_path,
+      pdf_file_name,
+      pdf_generated_at
+    `)
+    .eq(
+      "client_id",
+      cliente.id
+    )
+    .eq(
+      "service_type",
+      "mentoria"
+    )
+    .eq(
+      "published",
+      true
+    )
+    .order(
+      "occurred_at",
+      {
+        ascending: false,
+      }
+    );
+
+  if (registrosError) {
+    return NextResponse.json(
+      {
+        error:
+          registrosError.message,
       },
       { status: 500 }
     );
   }
 
-  const registros =
-    await Promise.all(
-      (data || []).map(
-        async (registro) => {
-          if (
-            !registro.pdf_storage_path
-          ) {
-            return {
-              ...registro,
-              pdf_url: null,
-            };
-          }
+  const idsMentorias =
+    (registros || []).map(
+      (registro) =>
+        registro.id
+    );
 
-          const {
-            data: urlData,
-          } =
-            await supabaseAdmin.storage
-              .from("mentoria-pdfs")
-              .createSignedUrl(
-                registro.pdf_storage_path,
-                60 * 60
+  let interacoes: {
+    id: string;
+    source_id: string | null;
+    interaction_type: string;
+    message: string;
+    admin_reply: string | null;
+    replied_at: string | null;
+    status: string;
+    created_at: string;
+  }[] = [];
+
+  if (
+    idsMentorias.length > 0
+  ) {
+    const {
+      data: interacoesData,
+      error: interacoesError,
+    } = await supabaseAdmin
+      .from(
+        "client_interactions"
+      )
+      .select(`
+        id,
+        source_id,
+        interaction_type,
+        message,
+        admin_reply,
+        replied_at,
+        status,
+        created_at
+      `)
+      .eq(
+        "client_id",
+        cliente.id
+      )
+      .eq(
+        "source_type",
+        "mentoria"
+      )
+      .in(
+        "source_id",
+        idsMentorias
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false,
+        }
+      );
+
+    if (interacoesError) {
+      console.error(
+        "Erro ao carregar interações:",
+        interacoesError
+      );
+    }
+
+    interacoes =
+      interacoesData || [];
+  }
+
+  const registrosComPdf =
+    await Promise.all(
+      (registros || []).map(
+        async (registro) => {
+          let pdf_download_url:
+            | string
+            | null = null;
+
+          if (
+            registro.pdf_storage_path
+          ) {
+            const {
+              data: urlData,
+              error: urlError,
+            } =
+              await supabaseAdmin
+                .storage
+                .from(
+                  "mentoria-pdfs"
+                )
+                .createSignedUrl(
+                  registro.pdf_storage_path,
+                  60 * 60
+                );
+
+            if (urlError) {
+              console.error(
+                "Erro ao gerar URL do PDF:",
+                urlError
               );
+            }
+
+            pdf_download_url =
+              urlData?.signedUrl ||
+              null;
+          }
 
           return {
             ...registro,
 
-            pdf_url:
-              urlData?.signedUrl ||
-              null,
+            pdf_download_url,
+
+            interacoes:
+              interacoes.filter(
+                (item) =>
+                  item.source_id ===
+                  registro.id
+              ),
           };
         }
       )
     );
 
   return NextResponse.json({
-    registros,
-  });
-}
+    cliente: {
+      nome:
+        cliente.nome_referencia ||
+        cliente.nome,
 
-export async function POST(
-  request: NextRequest
-) {
-  if (
-    !(await autorizarAdmin(request))
-  ) {
-    return NextResponse.json(
-      {
-        error:
-          "Acesso administrativo não autorizado.",
-      },
-      { status: 401 }
-    );
-  }
-
-  const body =
-    await request.json();
-
-  const registro =
-    incluirRelatorioGerado(body);
-
-  if (
-    !registro.client_id ||
-    !registro.title ||
-    !registro.occurred_at
-  ) {
-    return NextResponse.json(
-      {
-        error:
-          "Cliente, título e data são obrigatórios.",
-      },
-      { status: 400 }
-    );
-  }
-
-  if (
-    !registro.video_file_id &&
-    !registro.pdf_file_id
-  ) {
-    return NextResponse.json(
-      {
-        error:
-          "Informe o vídeo da mentoria.",
-      },
-      { status: 400 }
-    );
-  }
-
-  const { data, error } =
-    await supabaseAdmin
-      .from(
-        "client_service_records"
-      )
-      .insert(registro)
-      .select(CAMPOS)
-      .single();
-
-  if (error) {
-    return NextResponse.json(
-      {
-        error:
-          error.message,
-      },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json(
-    {
-      registro: data,
+      plano:
+        cliente.plano,
     },
-    { status: 201 }
-  );
-}
 
-export async function PATCH(
-  request: NextRequest
-) {
-  if (
-    !(await autorizarAdmin(request))
-  ) {
-    return NextResponse.json(
-      {
-        error:
-          "Acesso administrativo não autorizado.",
-      },
-      { status: 401 }
-    );
-  }
-
-  const body =
-    await request.json();
-
-  const id =
-    String(
-      body.id || ""
-    ).trim();
-
-  if (!id) {
-    return NextResponse.json(
-      {
-        error:
-          "Registro não informado.",
-      },
-      { status: 400 }
-    );
-  }
-
-  const alteracoes =
-    incluirRelatorioGerado(body);
-
-  const { data, error } =
-    await supabaseAdmin
-      .from(
-        "client_service_records"
-      )
-      .update(alteracoes)
-      .eq("id", id)
-      .select(CAMPOS)
-      .single();
-
-  if (error) {
-    return NextResponse.json(
-      {
-        error:
-          error.message,
-      },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({
-    registro: data,
-  });
-}
-
-export async function DELETE(
-  request: NextRequest
-) {
-  if (
-    !(await autorizarAdmin(request))
-  ) {
-    return NextResponse.json(
-      {
-        error:
-          "Acesso administrativo não autorizado.",
-      },
-      { status: 401 }
-    );
-  }
-
-  const id =
-    request.nextUrl.searchParams.get(
-      "id"
-    );
-
-  if (!id) {
-    return NextResponse.json(
-      {
-        error:
-          "Registro não informado.",
-      },
-      { status: 400 }
-    );
-  }
-
-  const { error } =
-    await supabaseAdmin
-      .from(
-        "client_service_records"
-      )
-      .delete()
-      .eq("id", id);
-
-  if (error) {
-    return NextResponse.json(
-      {
-        error:
-          error.message,
-      },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({
-    success: true,
+    registros:
+      registrosComPdf,
   });
 }
