@@ -83,15 +83,15 @@ export default function TerapiaAdminLoginPage() {
           E-mail
         </label>
 
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-          className="mt-2 w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 outline-none focus:border-[#5E7357]"
-        />
+       <input
+  type="email"
+  required
+  value={email}
+  onChange={(e) =>
+    setEmail(e.target.value)
+  }
+  className="mt-2 w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 text-[#4F5E4A] outline-none focus:border-[#5E7357]"
+/>
 
         <label className="mt-5 block text-sm font-bold text-[#5E7357]">
           Senha
@@ -105,7 +105,7 @@ export default function TerapiaAdminLoginPage() {
             onChange={(e) =>
               setSenha(e.target.value)
             }
-            className="w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 pr-12 outline-none focus:border-[#5E7357]"
+           className="w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 pr-12 text-[#4F5E4A] outline-none focus:border-[#5E7357]"
           />
 
           <button
@@ -120,7 +120,31 @@ export default function TerapiaAdminLoginPage() {
                 : "Mostrar senha"
             }
           >
-            {mostrarSenha ? "🙈" : "👁"}
+           {mostrarSenha ? (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    className="h-5 w-5"
+  >
+    <path d="M3 3l18 18" />
+    <path d="M10.6 10.6a2 2 0 002.8 2.8" />
+    <path d="M9.9 4.2A10.8 10.8 0 0112 4c5.5 0 9 5 9 5a16 16 0 01-2.1 2.7" />
+    <path d="M6.6 6.6C4.4 8.1 3 10 3 10s3.5 5 9 5a10.8 10.8 0 004.1-.8" />
+  </svg>
+) : (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    className="h-5 w-5"
+  >
+    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
+    <circle cx="12" cy="12" r="2.5" />
+  </svg>
+)}
           </button>
         </div>
 
