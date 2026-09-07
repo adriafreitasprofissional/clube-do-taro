@@ -8,8 +8,8 @@ export function proxy(request: NextRequest) {
     .toLowerCase();
 
   const dominioTerapia =
-    host === "adriafreitasterapias.com.br" ||
-    host === "www.adriafreitasterapias.com.br";
+    host === "adriafreitasterapeuta.com.br" ||
+    host === "www.adriafreitasterapeuta.com.br";
 
   if (
     dominioTerapia &&
