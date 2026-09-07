@@ -60,6 +60,11 @@ export default function ResumoAtendimento({
         />
 
         <Item
+          titulo="Google Meet"
+          valor={atendimento.meetUrl ? "Link adicionado" : "Não informado"}
+        />
+
+        <Item
           titulo="Cobrança"
           valor={financeiro.formaCobranca.replaceAll("_", " ")}
         />

@@ -7,6 +7,7 @@ export type AtendimentoDados = {
   horario: string;
   duracao: string;
   observacoes: string;
+  meetUrl: string;
 };
 
 type Props = {
@@ -88,6 +89,19 @@ export default function DadosAtendimento({ dados, setDados }: Props) {
         <option value="90">1 hora e 30 minutos</option>
         <option value="120">2 horas</option>
       </select>
+
+      <div>
+        <label className="mb-2 block text-sm text-purple-300">
+          Link do Google Meet
+        </label>
+
+        <input
+          value={dados.meetUrl}
+          onChange={(e) => atualizar("meetUrl", e.target.value)}
+          placeholder="https://meet.google.com/..."
+          className={campo}
+        />
+      </div>
 
       <textarea
         value={dados.observacoes}

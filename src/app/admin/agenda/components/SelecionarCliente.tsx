@@ -8,6 +8,15 @@ type Props = {
   clientes: any[];
 };
 
+function nomeDoCliente(cliente: any) {
+  return (
+    cliente?.nome_referencia ||
+    cliente?.nomeReferencia ||
+    cliente?.nome ||
+    "Cliente"
+  );
+}
+
 export default function SelecionarCliente({
   tipo,
   setTipo,
@@ -37,7 +46,9 @@ export default function SelecionarCliente({
               : "border-purple-500/30 bg-[#1d0023] text-purple-300"
           }`}
         >
-          <span className="block font-semibold">Cliente existente</span>
+          <span className="block font-semibold">
+            Cliente existente
+          </span>
           <span className="mt-1 block text-xs opacity-70">
             Buscar alguém que já está cadastrado.
           </span>
@@ -52,7 +63,9 @@ export default function SelecionarCliente({
               : "border-purple-500/30 bg-[#1d0023] text-purple-300"
           }`}
         >
-          <span className="block font-semibold">Novo cliente</span>
+          <span className="block font-semibold">
+            Novo cliente
+          </span>
           <span className="mt-1 block text-xs opacity-70">
             Cadastrar uma nova pessoa.
           </span>
@@ -69,7 +82,7 @@ export default function SelecionarCliente({
 
           {clientes.map((cliente) => (
             <option key={cliente.id} value={cliente.id}>
-              {cliente.nome}
+              {nomeDoCliente(cliente)}
             </option>
           ))}
         </select>

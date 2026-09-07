@@ -17,7 +17,10 @@ export default function FinanceiroAtendimento({
   dados,
   setDados,
 }: Props) {
-  function atualizar(campo: keyof FinanceiroDados, valor: string) {
+  function atualizar(
+    campo: keyof FinanceiroDados,
+    valor: string
+  ) {
     setDados({
       ...dados,
       [campo]: valor,
@@ -25,6 +28,7 @@ export default function FinanceiroAtendimento({
   }
 
   const precisaValor =
+    dados.formaCobranca === "pacote_pago" ||
     dados.formaCobranca === "pago_antecipado" ||
     dados.formaCobranca === "pagar_no_dia";
 
@@ -42,20 +46,31 @@ export default function FinanceiroAtendimento({
 
       <select
         value={dados.formaCobranca}
-        onChange={(e) => atualizar("formaCobranca", e.target.value)}
+        onChange={(e) =>
+          atualizar("formaCobranca", e.target.value)
+        }
         className={campo}
       >
-        <option value="incluido_plano">Incluído no plano</option>
+        <option value="incluido_pacote">
+          Incluído em pacote
+        </option>
+        <option value="pacote_pago">
+          Pacote pago antecipadamente
+        </option>
+        <option value="pago_antecipado">
+          Atendimento pago antecipadamente
+        </option>
+        <option value="pagar_no_dia">
+          Pagar no dia
+        </option>
         <option value="cortesia">Cortesia</option>
-        <option value="pago_antecipado">Pagamento antecipado</option>
-        <option value="pagar_no_dia">Pagar no dia</option>
         <option value="gratuito">Gratuito</option>
       </select>
 
       {precisaValor && (
         <div>
           <label className="mb-2 block text-sm text-purple-300">
-            Valor do atendimento
+            Valor
           </label>
 
           <input
@@ -63,26 +78,27 @@ export default function FinanceiroAtendimento({
             min="0"
             step="0.01"
             value={dados.valor}
-            onChange={(e) => atualizar("valor", e.target.value)}
+            onChange={(e) =>
+              atualizar("valor", e.target.value)
+            }
             placeholder="0,00"
             className={campo}
           />
         </div>
       )}
 
-      {dados.formaCobranca === "incluido_plano" && (
+      {dados.formaCobranca === "incluido_pacote" && (
         <div className="rounded-xl border border-yellow-300/30 bg-yellow-300/5 p-4">
           <p className="text-sm font-medium text-yellow-300">
-            Atendimento incluído no plano — R$ 0,00
+            Esta sessão já está incluída no pacote da cliente.
           </p>
         </div>
       )}
 
-      {dados.formaCobranca === "pago_antecipado" && (
-        <div className="rounded-xl border border-purple-500/30 bg-[#1d0023] p-4">
-          <p className="text-sm text-purple-300">
-            O pagamento será conectado ao Mercado Pago na próxima etapa de
-            desenvolvimento.
+      {dados.formaCobranca === "pacote_pago" && (
+        <div className="rounded-xl border border-yellow-300/30 bg-yellow-300/5 p-4">
+          <p className="text-sm font-medium text-yellow-300">
+            Use esta opção para registrar o valor total do pacote já pago.
           </p>
         </div>
       )}
