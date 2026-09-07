@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 import AgendaResumo from "./components/AgendaResumo";
@@ -247,7 +248,15 @@ export default function AgendaPage() {
             </p>
           </div>
 
-          <button
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin/agenda/mentorias"
+              className="rounded-xl border border-yellow-400/30 bg-yellow-400/10 px-5 py-3 text-sm font-semibold text-yellow-200 transition hover:bg-yellow-400/20"
+            >
+              Agenda de Mentorias
+            </Link>
+
+            <button
             type="button"
             onClick={() =>
               setNovoAtendimentoAberto(true)
@@ -256,6 +265,7 @@ export default function AgendaPage() {
           >
             + Novo atendimento
           </button>
+          </div>
         </div>
 
         {erro && (

@@ -22,8 +22,6 @@ const WHATSAPP_CLUBE_VIP =
 const WHATSAPP_DIAMANTE =
   "https://chat.whatsapp.com/ECIcVTVZgSz7jXvqK36FeS";
 
-const LINK_MENTORIA =
-  "https://mystic-lunar-flow.lovable.app/";
 
 const LINK_SORTEIOS =
   "https://mystic-draw-fix.lovable.app";
@@ -320,10 +318,8 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
               )}
 
               {ehDiamante && (
-  <a
-    href={LINK_MENTORIA}
-    target="_blank"
-    rel="noreferrer"
+  <Link
+    href={`/cliente/${slug}/agenda-mentoria`}
     className="rounded-2xl border border-yellow-400/50 bg-yellow-500/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-300"
   >
     <p className="text-3xl">🗓️</p>
@@ -333,32 +329,32 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
     </h3>
 
     <p className="mt-3 text-sm leading-6 text-purple-50">
-      Escolha o melhor horário para sua mentoria exclusiva.
+      Veja os horarios individuais e confirme as mentorias em grupo.
     </p>
 
     <p className="mt-5 text-sm font-bold text-yellow-200">
-      Agendar mentoria →
+      Abrir minha agenda →
     </p>
-  </a>
+  </Link>
 )}
 
 {ehDiamante && (
   <Link
-    href={`/cliente/${slug}/mentorias`}
-    className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
+    href={`/cliente/${slug}/agenda-mentoria`}
+    className="rounded-2xl border border-yellow-400/50 bg-yellow-500/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-300"
   >
-    <p className="text-3xl">🎥</p>
+    <p className="text-3xl">🗓️</p>
 
-    <h3 className="mt-4 text-xl font-extrabold text-yellow-400">
-      Minhas Mentorias Gravadas
+    <h3 className="mt-4 text-xl font-extrabold text-yellow-300">
+      Agendamento de Mentoria
     </h3>
 
-    <p className="mt-3 text-sm leading-6 text-purple-100">
-      Reveja seus encontros e acesse seus relatórios exclusivos.
+    <p className="mt-3 text-sm leading-6 text-purple-50">
+      Veja os horários individuais e confirme as mentorias em grupo.
     </p>
 
-    <p className="mt-5 text-sm font-bold text-yellow-300">
-      Abrir minhas mentorias →
+    <p className="mt-5 text-sm font-bold text-yellow-200">
+      Abrir minha agenda →
     </p>
   </Link>
 )}

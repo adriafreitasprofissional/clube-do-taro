@@ -37,6 +37,49 @@ async function autorizarAdmin(
   return Boolean(admin);
 }
 
+async function espelhoAtivo(professional: string) {
+  const { data } = await supabaseAdmin
+    .from("professional_schedule_settings")
+    .select("mirror_club_therapy")
+    .eq("professional", professional)
+    .maybeSingle();
+
+  return data?.mirror_club_therapy === true;
+}
+
+async function existeConflito({
+  professional,
+  scheduledAt,
+  durationMinutes,
+  excludeAppointmentId = null,
+}: {
+  professional: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  excludeAppointmentId?: string | null;
+}) {
+  const mirror = await espelhoAtivo(professional);
+
+  const { data, error } = await supabaseAdmin.rpc(
+    "professional_schedule_has_conflict",
+    {
+      p_professional: professional,
+      p_starts_at: scheduledAt,
+      p_duration_minutes: durationMinutes,
+      p_include_appointments: true,
+      p_include_mentoring: mirror,
+      p_exclude_appointment_id: excludeAppointmentId,
+      p_exclude_mentoring_event_id: null,
+    }
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data === true;
+}
+
 const CAMPOS = `
   id,
   client_id,
@@ -295,6 +338,22 @@ export async function POST(
       );
     }
 
+    if (
+      await existeConflito({
+        professional,
+        scheduledAt,
+        durationMinutes,
+      })
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Este horário já está ocupado na Agenda-Mãe. Escolha outro horário.",
+        },
+        { status: 409 }
+      );
+    }
+
     const { data, error } = await supabaseAdmin
       .from("appointments")
       .insert({
@@ -476,6 +535,44 @@ export async function PATCH(
     if (body.completed_at !== undefined) {
       atualizacoes.completed_at =
         body.completed_at || null;
+    }
+
+    const agendaMudou =
+      atualizacoes.scheduled_at !== undefined ||
+      atualizacoes.duration_minutes !== undefined ||
+      atualizacoes.professional !== undefined;
+
+    if (agendaMudou) {
+      const professional =
+        atualizacoes.professional ??
+        atual.professional;
+
+      const scheduledAt =
+        atualizacoes.scheduled_at ??
+        atual.scheduled_at;
+
+      const durationMinutes = Number(
+        atualizacoes.duration_minutes ??
+        atual.duration_minutes ??
+        60
+      );
+
+      if (
+        await existeConflito({
+          professional,
+          scheduledAt,
+          durationMinutes,
+          excludeAppointmentId: id,
+        })
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Este horário já está ocupado na Agenda-Mãe. Escolha outro horário.",
+          },
+          { status: 409 }
+        );
+      }
     }
 
     const { data, error } = await supabaseAdmin
