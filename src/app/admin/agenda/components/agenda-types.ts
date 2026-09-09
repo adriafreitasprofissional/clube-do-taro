@@ -17,10 +17,15 @@ export type AgendaAtendimento = {
   charge_type: string;
   amount?: number | null;
 
-  private_session_notes?: string | null;
-  evolution_summary?: string | null;
-  client_activity?: string | null;
-  published_to_client?: boolean;
+ private_session_notes?: string | null;
+evolution_summary?: string | null;
+client_activity?: string | null;
+
+session_title?: string | null;
+recording_url?: string | null;
+client_report?: string | null;
+
+published_to_client?: boolean;
   completed_at?: string | null;
 
   created_at?: string;

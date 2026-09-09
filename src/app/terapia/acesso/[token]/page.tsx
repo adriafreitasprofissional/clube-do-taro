@@ -6,6 +6,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { jsPDF } from "jspdf";
 
 type ProximoAtendimento = {
   id: string;
@@ -32,6 +33,18 @@ type PortalData = {
     | ProximoAtendimento
     | null;
 
+jornada: {
+  id: string;
+  service_type: string;
+  scheduled_at: string;
+  session_title: string | null;
+  recording_url: string | null;
+  client_report: string | null;
+  client_activity: string | null;
+  published_to_client: boolean;
+  completed_at: string | null;
+}[];
+
   anamnese: {
     preenchida: boolean;
     status: string | null;
@@ -57,7 +70,41 @@ function formatarDataHora(
     }
   );
 }
+function baixarRelatorioPDF(
+  nomeCliente: string,
+  titulo: string,
+  dataSessao: string,
+  relatorio: string
+) {
+  const pdf = new jsPDF();
 
+  pdf.setFontSize(18);
+  pdf.text("Terapia em Dia", 20, 20);
+
+  pdf.setFontSize(12);
+  pdf.text(`Cliente: ${nomeCliente}`, 20, 32);
+  pdf.text(`Sessão: ${titulo}`, 20, 40);
+  pdf.text(
+    `Data: ${new Date(
+      dataSessao
+    ).toLocaleDateString("pt-BR")}`,
+    20,
+    48
+  );
+
+  const linhas = pdf.splitTextToSize(
+    relatorio,
+    170
+  );
+
+  pdf.text(linhas, 20, 62);
+
+  pdf.save(
+    `relatorio-${titulo
+      .toLowerCase()
+      .replace(/\s+/g, "-")}.pdf`
+  );
+}
 export default function TerapiaPortalPage() {
   const params = useParams();
   const token = String(
@@ -286,26 +333,100 @@ export default function TerapiaPortalPage() {
                     : "Preencher agora →"}
                 </p>
               </Link>
+            <div className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg md:col-span-2">
+  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">
+    🌿
+  </div>
 
-              <div className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">
-                  🌿
-                </div>
+  <h2 className="mt-4 text-xl font-extrabold">
+    Minha Jornada
+  </h2>
 
-                <h2 className="mt-4 text-xl font-extrabold">
-                  Minha Jornada
-                </h2>
+  <p className="mt-2 text-sm leading-6 text-[#6C8465]">
+    Aqui ficam organizadas suas sessões,
+    gravações, relatórios e orientações.
+  </p>
 
-                <p className="mt-3 text-sm leading-6 text-[#6C8465]">
-                  Sessões, atividades, materiais
-                  e sua evolução ficarão organizados
-                  aqui durante o acompanhamento.
+  {dados.jornada.length === 0 ? (
+    <div className="mt-5 rounded-2xl bg-[#F7F1E4] p-5 text-sm text-[#6C8465]">
+      Sua jornada será registrada aqui durante
+      o acompanhamento.
+    </div>
+  ) : (
+    <div className="mt-6 space-y-4">
+      {dados.jornada.map((sessao) => {
+        const titulo =
+          sessao.session_title ||
+          sessao.service_type ||
+          "Sessão";
+
+        return (
+          <div
+            key={sessao.id}
+            className="rounded-2xl border border-[#DCCFB8] bg-[#FDFBF7] p-5"
+          >
+            <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
+              {new Date(
+                sessao.scheduled_at
+              ).toLocaleDateString("pt-BR")}
+            </p>
+
+            <h3 className="mt-2 text-lg font-extrabold text-[#4F5E4A]">
+              {titulo}
+            </h3>
+
+            <p className="mt-1 text-sm text-[#6C8465]">
+              {sessao.service_type}
+            </p>
+
+            {sessao.client_activity && (
+              <div className="mt-4 rounded-xl bg-[#F3EEE4] p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
+                  Orientação
                 </p>
 
-                <p className="mt-5 text-xs font-bold uppercase tracking-wide text-[#6C8465]">
-                  Em construção
+                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#5E7357]">
+                  {sessao.client_activity}
                 </p>
               </div>
+            )}
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              {sessao.recording_url && (
+                <a
+                  href={sessao.recording_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex rounded-xl bg-[#8AA27A] px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-[#769566]"
+                >
+                  ▶ Assistir gravação
+                </a>
+              )}
+
+              {sessao.client_report && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    baixarRelatorioPDF(
+                      dados.cliente.nome,
+                      titulo,
+                      sessao.scheduled_at,
+                      sessao.client_report || ""
+                    )
+                  }
+                  className="inline-flex rounded-xl border border-[#8AA27A] bg-white px-4 py-3 text-sm font-bold text-[#5E7357] shadow transition hover:bg-[#F7F1E4]"
+                >
+                  📄 Baixar relatório
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
+              
 
               <div className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">

@@ -112,11 +112,39 @@ export async function GET(request: NextRequest) {
         agendaError
       );
     }
+const {
+  data: jornada,
+  error: jornadaError,
+} = await supabaseAdmin
+  .from("appointments")
+  .select(`
+    id,
+    service_type,
+    scheduled_at,
+    session_title,
+    recording_url,
+    client_report,
+    client_activity,
+    published_to_client,
+    completed_at
+  `)
+  .eq("client_id", acesso.client_id)
+  .eq("published_to_client", true)
+  .order("scheduled_at", {
+    ascending: false,
+  });
 
+if (jornadaError) {
+  console.error(
+    "Erro ao carregar jornada:",
+    jornadaError
+  );
+}
     const {
       data: anamnese,
       error: anamneseError,
     } = await supabaseAdmin
+
       .from("therapy_anamneses")
       .select("id, status, submitted_at")
       .eq("client_id", acesso.client_id)
@@ -156,6 +184,7 @@ export async function GET(request: NextRequest) {
         proximo_atendimento:
           proximoAtendimento || null,
 
+        jornada: jornada || [],
         anamnese: anamnese
           ? {
               preenchida:

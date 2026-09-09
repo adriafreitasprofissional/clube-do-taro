@@ -93,10 +93,15 @@ const CAMPOS = `
   charge_type,
   amount,
   private_session_notes,
-  evolution_summary,
-  client_activity,
-  published_to_client,
-  completed_at,
+evolution_summary,
+client_activity,
+
+session_title,
+recording_url,
+client_report,
+
+published_to_client,
+completed_at,
   created_at,
   updated_at,
   club_clients (
@@ -146,9 +151,19 @@ function mapearAtendimento(item: any) {
     evolution_summary:
       item.evolution_summary,
     client_activity:
-      item.client_activity,
-    published_to_client:
-      item.published_to_client,
+  item.client_activity,
+
+session_title:
+  item.session_title,
+recording_url:
+  item.recording_url,
+client_report:
+  item.client_report,
+
+published_to_client:
+  item.published_to_client,
+
+
     completed_at:
       item.completed_at,
 
@@ -524,7 +539,26 @@ export async function PATCH(
           body.client_activity || ""
         ).trim() || null;
     }
+if (body.session_title !== undefined) {
+  atualizacoes.session_title =
+    String(
+      body.session_title || ""
+    ).trim() || null;
+}
 
+if (body.recording_url !== undefined) {
+  atualizacoes.recording_url =
+    String(
+      body.recording_url || ""
+    ).trim() || null;
+}
+
+if (body.client_report !== undefined) {
+  atualizacoes.client_report =
+    String(
+      body.client_report || ""
+    ).trim() || null;
+}
     if (
       body.published_to_client !== undefined
     ) {

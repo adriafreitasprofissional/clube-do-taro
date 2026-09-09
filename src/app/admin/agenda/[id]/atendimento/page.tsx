@@ -30,6 +30,14 @@ export default function AtendimentoPage() {
   const [activity, setActivity] =
     useState("");
 
+    const [sessionTitle, setSessionTitle] =
+  useState("");
+const [recordingUrl, setRecordingUrl] =
+  useState("");
+const [clientReport, setClientReport] =
+  useState("");
+const [publishedToClient, setPublishedToClient] =
+  useState(false);
   const [carregando, setCarregando] =
     useState(true);
   const [salvando, setSalvando] =
@@ -94,6 +102,19 @@ export default function AtendimentoPage() {
       setActivity(
         atendimento.client_activity || ""
       );
+     setSessionTitle(
+  atendimento.session_title || ""
+);
+setRecordingUrl(
+  atendimento.recording_url || ""
+);
+setClientReport(
+  atendimento.client_report || ""
+);
+setPublishedToClient(
+  atendimento.published_to_client === true
+);
+
     } catch (error) {
       setErro(
         error instanceof Error
@@ -138,6 +159,10 @@ export default function AtendimentoPage() {
               privateNotes,
             evolution_summary: evolution,
             client_activity: activity,
+            session_title: sessionTitle,
+recording_url: recordingUrl,
+client_report: clientReport,
+published_to_client: publishedToClient,
             ...(finalizar
               ? {
                   status: "realizado",
@@ -333,7 +358,84 @@ export default function AtendimentoPage() {
         <h2 className="text-lg font-semibold text-yellow-300">
           Atividade para a cliente
         </h2>
+      <section className="rounded-2xl border border-purple-500/30 bg-[#28002f] p-5">
+  <h2 className="text-lg font-semibold text-yellow-300">
+    Conteúdo para o portal da cliente
+  </h2>
 
+  <p className="mt-1 text-xs text-purple-300">
+    Preencha o que a cliente poderá acessar em Minha Jornada.
+  </p>
+
+  <div className="mt-5 space-y-4">
+    <div>
+      <label className="mb-2 block text-sm text-purple-300">
+        Título da sessão
+      </label>
+
+      <input
+        value={sessionTitle}
+        onChange={(e) =>
+          setSessionTitle(e.target.value)
+        }
+        placeholder="Ex.: Apresentação e alinhamento inicial"
+        className={campo}
+      />
+    </div>
+
+    <div>
+      <label className="mb-2 block text-sm text-purple-300">
+        Link da gravação
+      </label>
+
+      <input
+        value={recordingUrl}
+        onChange={(e) =>
+          setRecordingUrl(e.target.value)
+        }
+        placeholder="https://drive.google.com/..."
+        className={campo}
+      />
+    </div>
+
+    <div>
+      <label className="mb-2 block text-sm text-purple-300">
+        Relatório para a cliente
+      </label>
+
+      <textarea
+        value={clientReport}
+        onChange={(e) =>
+          setClientReport(e.target.value)
+        }
+        rows={10}
+        placeholder="Escreva aqui o relatório que será disponibilizado para a cliente..."
+        className={campo}
+      />
+    </div>
+
+    <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-purple-500/30 bg-[#1d0023] p-4">
+      <input
+        type="checkbox"
+        checked={publishedToClient}
+        onChange={(e) =>
+          setPublishedToClient(e.target.checked)
+        }
+        className="h-4 w-4"
+      />
+
+      <div>
+        <p className="text-sm font-semibold text-white">
+          Publicar no portal da cliente
+        </p>
+
+        <p className="mt-1 text-xs text-purple-300">
+          Quando marcado, este conteúdo poderá aparecer em Minha Jornada.
+        </p>
+      </div>
+    </label>
+  </div>
+</section>
         <p className="mt-1 text-xs text-purple-300">
           Depois conectaremos este campo ao portal da cliente.
         </p>
