@@ -143,11 +143,12 @@ async function comprar(plano: (typeof planos)[number]) {
         </button>
 
         <button
-          onClick={() => comprar(planoSelecionado)}
-          className="flex-1 rounded-lg bg-violet-600 py-3 font-semibold text-white"
-        >
-          Continuar
-        </button>
+  type="button"
+  disabled
+  className="mt-2 flex h-12 w-full cursor-not-allowed items-center justify-center rounded-full border border-white/15 bg-white/10 text-sm font-semibold uppercase tracking-[0.16em] text-white/55"
+>
+  Vagas esgotadas
+</button>
       </div>
     </div>
   </div>
@@ -166,7 +167,8 @@ async function comprar(plano: (typeof planos)[number]) {
           </h2>
 
           <p className="mt-6 text-lg text-gray-300">
-            Comece hoje e tenha acesso imediato ao Clube do Tarô.
+            As vagas para novas assinaturas mensais estão esgotadas.
+            Confira abaixo as opções de assinatura anual disponíveis.
           </p>
 
         </div>
