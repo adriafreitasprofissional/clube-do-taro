@@ -11,6 +11,8 @@ import {
 import { supabase } from "@/lib/supabase";
 import type { AgendaAtendimento } from "../../components/agenda-types";
 
+import MiniPalestrasSessao from "./MiniPalestrasSessao";
+
 const campo =
   "w-full rounded-xl border border-purple-500/30 bg-[#1d0023] p-4 text-white placeholder:text-purple-300/60 outline-none focus:border-yellow-300/50";
 
@@ -450,7 +452,11 @@ published_to_client: publishedToClient,
           className={`${campo} mt-4`}
         />
       </section>
-
+          <MiniPalestrasSessao
+        clientId={item.client_id}
+        appointmentId={item.id}
+        sessionDate={item.scheduled_at.slice(0, 10)}
+      />
       <div className="flex flex-col gap-3 border-t border-purple-500/20 pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"

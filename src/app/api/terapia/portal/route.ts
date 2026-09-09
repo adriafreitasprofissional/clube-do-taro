@@ -141,6 +141,61 @@ if (jornadaError) {
   );
 }
     const {
+      data: indicacoesPalestras,
+      error: palestrasError,
+    } = await supabaseAdmin
+      .from("therapy_lecture_assignments")
+      .select(`
+        id,
+        lecture_id,
+        appointment_id,
+        session_date,
+        therapist_note,
+        featured,
+        assigned_at,
+        therapy_lectures (
+          id,
+          title,
+          subtitle,
+          description,
+          category,
+          video_url,
+          cover_url,
+          duration_minutes,
+          visibility,
+          active
+        )
+      `)
+      .eq("client_id", acesso.client_id)
+      .order("assigned_at", {
+        ascending: false,
+      });
+
+    if (palestrasError) {
+      console.error(
+        "Erro ao carregar mini palestras:",
+        palestrasError
+      );
+    }
+
+    const miniPalestras = (
+      indicacoesPalestras || []
+    ).filter((item: any) => {
+      const palestra = Array.isArray(
+        item.therapy_lectures
+      )
+        ? item.therapy_lectures[0]
+        : item.therapy_lectures;
+
+      return (
+        palestra &&
+        palestra.active === true &&
+        palestra.visibility !== "private"
+      );
+    });
+
+
+    const {
       data: anamnese,
       error: anamneseError,
     } = await supabaseAdmin
@@ -184,7 +239,11 @@ if (jornadaError) {
         proximo_atendimento:
           proximoAtendimento || null,
 
-        jornada: jornada || [],
+                jornada: jornada || [],
+
+        mini_palestras:
+          miniPalestras,
+
         anamnese: anamnese
           ? {
               preenchida:

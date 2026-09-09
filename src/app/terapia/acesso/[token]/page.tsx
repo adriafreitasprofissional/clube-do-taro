@@ -11,6 +11,7 @@ import {
 } from "next/navigation";
 import { jsPDF } from "jspdf";
 import { supabase } from "@/lib/supabase";
+
 type ProximoAtendimento = {
   id: string;
   service_type: string;
@@ -20,7 +21,46 @@ type ProximoAtendimento = {
   status: string;
   meet_url: string | null;
 };
+type MiniPalestraConteudo = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  category: string | null;
+  video_url: string;
+  cover_url: string | null;
+  duration_minutes: number | null;
+  visibility: string;
+  active: boolean;
+};
 
+type MiniPalestraIndicacao = {
+  id: string;
+  lecture_id: string;
+  appointment_id: string | null;
+  session_date: string | null;
+  therapist_note: string | null;
+  featured: boolean;
+  assigned_at: string;
+
+  therapy_lectures:
+    | MiniPalestraConteudo
+    | MiniPalestraConteudo[]
+    | null;
+};
+
+function normalizarMiniPalestra(
+  relacao:
+    | MiniPalestraConteudo
+    | MiniPalestraConteudo[]
+    | null
+) {
+  if (Array.isArray(relacao)) {
+    return relacao[0] || null;
+  }
+
+  return relacao || null;
+}
 type PortalData = {
   cliente: {
     id: string;
@@ -47,6 +87,8 @@ jornada: {
   published_to_client: boolean;
   completed_at: string | null;
 }[];
+ 
+mini_palestras: MiniPalestraIndicacao[];
 
   anamnese: {
     preenchida: boolean;
@@ -479,8 +521,19 @@ async function sair() {
     );
   }
 
-  const proximo =
+    const proximo =
     dados.proximo_atendimento;
+
+  const miniPalestras =
+    dados.mini_palestras || [];
+
+  const palestraDestaque =
+    miniPalestras.length > 0
+      ? normalizarMiniPalestra(
+          miniPalestras[0]
+            .therapy_lectures
+        )
+      : null;
 
   return (
     <main className="min-h-screen bg-[#F8F4EC] text-[#4F5E4A]">
@@ -597,7 +650,180 @@ async function sair() {
                 )}
               </div>
             )}
+            {palestraDestaque && (
+              <section className="mt-8 overflow-hidden rounded-3xl border border-[#CBD6C2] bg-white shadow-lg">
+                <div className="bg-[#EAF0E4] px-6 py-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#6C8465]">
+                    Para entender melhor
+                  </p>
 
+                  <p className="mt-1 text-sm text-[#6C8465]">
+                    Uma explicação preparada para
+                    complementar o que conversamos
+                    em sessão.
+                  </p>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex flex-wrap gap-2">
+                    {palestraDestaque.category && (
+                      <span className="rounded-full bg-[#F0F3EB] px-3 py-1 text-xs font-bold text-[#6C8465]">
+                        {palestraDestaque.category}
+                      </span>
+                    )}
+
+                    {palestraDestaque.duration_minutes && (
+                      <span className="rounded-full bg-[#F7F1E4] px-3 py-1 text-xs font-bold text-[#7A826F]">
+                        {
+                          palestraDestaque.duration_minutes
+                        }{" "}
+                        min
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 className="mt-4 text-2xl font-extrabold text-[#4F5E4A]">
+                    {palestraDestaque.title}
+                  </h2>
+
+                  {palestraDestaque.subtitle && (
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-[#6C8465]">
+                      {
+                        palestraDestaque.subtitle
+                      }
+                    </p>
+                  )}
+
+                  {miniPalestras[0]
+                    ?.therapist_note && (
+                    <div className="mt-5 rounded-2xl bg-[#F7F1E4] p-4">
+                      <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
+                        Um recado para você
+                      </p>
+
+                      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#5E7357]">
+                        {
+                          miniPalestras[0]
+                            .therapist_note
+                        }
+                      </p>
+                    </div>
+                  )}
+
+                  <a
+                    href={
+                      palestraDestaque.video_url
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-5 inline-flex rounded-xl bg-[#6C8465] px-5 py-3 text-sm font-bold text-white shadow transition hover:bg-[#5E7357]"
+                  >
+                    ▶ Assistir mini palestra
+                  </a>
+
+                  <p className="mt-4 text-xs leading-5 text-[#8A9284]">
+                    Assista no seu tempo. Você
+                    poderá voltar a este conteúdo
+                    sempre que quiser.
+                  </p>
+                </div>
+              </section>
+            )}
+
+            {miniPalestras.length > 1 && (
+              <section className="mt-6 rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8AA27A]">
+                    Seu aprendizado
+                  </p>
+
+                  <h2 className="mt-2 text-xl font-extrabold text-[#4F5E4A]">
+                    Minhas mini palestras
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-[#6C8465]">
+                    Aqui ficam os conteúdos que
+                    foram indicados ao longo do
+                    seu acompanhamento.
+                  </p>
+                </div>
+
+                <div className="mt-5 grid gap-3">
+                  {miniPalestras
+                    .slice(1)
+                    .map((indicacao) => {
+                      const palestra =
+                        normalizarMiniPalestra(
+                          indicacao
+                            .therapy_lectures
+                        );
+
+                      if (!palestra) {
+                        return null;
+                      }
+
+                      return (
+                        <div
+                          key={indicacao.id}
+                          className="rounded-2xl border border-[#DFE3D9] bg-[#FDFBF7] p-4"
+                        >
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <p className="font-bold text-[#4F5E4A]">
+                                {palestra.title}
+                              </p>
+
+                              <div className="mt-1 flex flex-wrap gap-2 text-xs text-[#818A7B]">
+                                {palestra.category && (
+                                  <span>
+                                    {
+                                      palestra.category
+                                    }
+                                  </span>
+                                )}
+
+                                {palestra.duration_minutes && (
+                                  <span>
+                                    •{" "}
+                                    {
+                                      palestra.duration_minutes
+                                    }{" "}
+                                    min
+                                  </span>
+                                )}
+                              </div>
+
+                              {indicacao.session_date && (
+                                <p className="mt-2 text-xs text-[#93998D]">
+                                  Indicada na sessão de{" "}
+                                  {new Date(
+                                    `${indicacao.session_date}T12:00:00`
+                                  ).toLocaleDateString(
+                                    "pt-BR"
+                                  )}
+                                </p>
+                              )}
+                            </div>
+
+                            <a
+                              href={
+                                palestra.video_url
+                              }
+                              target="_blank"
+                              rel="noreferrer"
+                              className="shrink-0 rounded-xl border border-[#8AA27A] bg-white px-4 py-2 text-sm font-bold text-[#5E7357] transition hover:bg-[#F0F3EB]"
+                            >
+                              ▶ Assistir
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </section>
+            )}
+
+            <div className="mt-8 grid gap-5 md:grid-cols-2"></div>
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               <Link
                 href={`/terapia/acesso/${token}/anamnese`}
