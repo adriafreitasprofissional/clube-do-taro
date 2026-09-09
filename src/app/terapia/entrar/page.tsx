@@ -42,14 +42,19 @@ export default function TerapiaEntrarPage() {
           );
         }
 
-        window.localStorage.setItem(
-          "terapia_em_dia_access_token",
-          data.access_token
-        );
+        if (data.tipo === "admin") {
+  router.replace("/terapia/admin");
+  return;
+}
 
-        router.replace(
-          `/terapia/acesso/${data.access_token}`
-        );
+window.localStorage.setItem(
+  "terapia_em_dia_access_token",
+  data.access_token
+);
+
+router.replace(
+  `/terapia/acesso/${data.access_token}`
+);
       } catch (error) {
         setErro(
           error instanceof Error

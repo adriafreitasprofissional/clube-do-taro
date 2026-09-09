@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const { data: cliente, error: clienteError } =
       await supabaseAdmin
         .from("club_clients")
-        .select("id, nome, email")
+       .select("id, nome, email, role")
         .ilike("email", user.email)
         .maybeSingle();
 
@@ -46,7 +46,12 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-
+if (cliente.role === "admin") {
+  return NextResponse.json({
+    success: true,
+    tipo: "admin",
+  });
+}
     const { data: acesso, error: acessoError } =
       await supabaseAdmin
         .from("therapy_client_access")
