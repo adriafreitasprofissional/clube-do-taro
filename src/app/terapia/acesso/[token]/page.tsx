@@ -5,9 +5,12 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import {
+  useParams,
+  useRouter,
+} from "next/navigation";
 import { jsPDF } from "jspdf";
-
+import { supabase } from "@/lib/supabase";
 type ProximoAtendimento = {
   id: string;
   service_type: string;
@@ -390,7 +393,17 @@ export default function TerapiaPortalPage() {
   const token = String(
     params?.token || ""
   );
+const router = useRouter();
 
+async function sair() {
+  await supabase.auth.signOut();
+
+  window.localStorage.removeItem(
+    "terapia_em_dia_access_token"
+  );
+
+  router.replace("/terapia");
+}
   const [dados, setDados] =
     useState<PortalData | null>(null);
 
@@ -520,6 +533,13 @@ export default function TerapiaPortalPage() {
                 Minha Anamnese
               </Link>
             </nav>
+            <button
+  type="button"
+  onClick={sair}
+  className="mt-10 w-full rounded-xl border border-[#DCCFB8] bg-white px-4 py-3 text-sm font-bold text-[#5E7357] transition hover:bg-[#EFE5D3]"
+>
+  Sair
+</button>
           </div>
         </aside>
 
