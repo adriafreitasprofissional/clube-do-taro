@@ -76,35 +76,315 @@ function baixarRelatorioPDF(
   dataSessao: string,
   relatorio: string
 ) {
+  const pdf = new jsPDF({
+    unit: "mm",
+    format: "a4",
+  });
+
+  const pageWidth =
+    pdf.internal.pageSize.getWidth();
+  const pageHeight =
+    pdf.internal.pageSize.getHeight();
+
+  const margin = 18;
+  const contentWidth =
+    pageWidth - margin * 2;
+
+  const corPrincipal = [94, 115, 87];
+  const corSecundaria = [138, 162, 122];
+  const corFundoBox = [247, 241, 228];
+  const corBorda = [220, 207, 184];
+  const corTexto = [79, 94, 74];
+  const corTextoClaro = [248, 244, 236];
+
+  let y = 20;
+
+  function desenharCabecalho(
+    subtitulo = "Relatório de sessão"
+  ) {
+    pdf.setFillColor(
+      corPrincipal[0],
+      corPrincipal[1],
+      corPrincipal[2]
+    );
+    pdf.roundedRect(
+      margin,
+      y,
+      contentWidth,
+      24,
+      4,
+      4,
+      "F"
+    );
+
+    pdf.setTextColor(
+      corTextoClaro[0],
+      corTextoClaro[1],
+      corTextoClaro[2]
+    );
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(18);
+    pdf.text("Terapia em Dia", margin + 8, y + 9);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.text(
+      "com Ádria Freitas",
+      margin + 8,
+      y + 15
+    );
+
+    pdf.setFont("helvetica", "italic");
+    pdf.setFontSize(9);
+    pdf.text(
+      subtitulo,
+      pageWidth - margin - 8,
+      y + 15,
+      { align: "right" }
+    );
+
+    y += 32;
+  }
+
+  function desenharBlocoInfo() {
+    pdf.setFillColor(
+      corFundoBox[0],
+      corFundoBox[1],
+      corFundoBox[2]
+    );
+    pdf.setDrawColor(
+      corBorda[0],
+      corBorda[1],
+      corBorda[2]
+    );
+    pdf.roundedRect(
+      margin,
+      y,
+      contentWidth,
+      32,
+      4,
+      4,
+      "FD"
+    );
+
+    pdf.setTextColor(
+      corSecundaria[0],
+      corSecundaria[1],
+      corSecundaria[2]
+    );
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(9);
+
+    pdf.text("CLIENTE", margin + 8, y + 8);
+    pdf.text("SESSÃO", margin + 8, y + 18);
+    pdf.text("DATA", margin + 8, y + 28);
+
+    pdf.setTextColor(
+      corTexto[0],
+      corTexto[1],
+      corTexto[2]
+    );
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(11);
+
+    pdf.text(
+      nomeCliente || "-",
+      margin + 34,
+      y + 8
+    );
+    pdf.text(
+      titulo || "-",
+      margin + 34,
+      y + 18
+    );
+    pdf.text(
+      new Date(dataSessao).toLocaleDateString(
+        "pt-BR"
+      ),
+      margin + 34,
+      y + 28
+    );
+
+    y += 40;
+  }
+
+  function desenharTituloSecao(texto: string) {
+    pdf.setTextColor(
+      corPrincipal[0],
+      corPrincipal[1],
+      corPrincipal[2]
+    );
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(13);
+    pdf.text(texto, margin, y);
+    y += 8;
+  }
+
+  function desenharRodape() {
+    pdf.setDrawColor(
+      corBorda[0],
+      corBorda[1],
+      corBorda[2]
+    );
+    pdf.line(
+      margin,
+      pageHeight - 18,
+      pageWidth - margin,
+      pageHeight - 18
+    );
+
+    pdf.setTextColor(
+      corSecundaria[0],
+      corSecundaria[1],
+      corSecundaria[2]
+    );
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(9);
+    pdf.text(
+      "Ádria Freitas • Terapia em Dia",
+      margin,
+      pageHeight - 12
+    );
+
+    pdf.text(
+      `Página ${pdf.getNumberOfPages()}`,
+      pageWidth - margin,
+      pageHeight - 12,
+      { align: "right" }
+    );
+  }
+
+  desenharCabecalho();
+  desenharBlocoInfo();
+  desenharTituloSecao("Síntese da sessão");
+
+  pdf.setFillColor(255, 255, 255);
+  pdf.setDrawColor(
+    corBorda[0],
+    corBorda[1],
+    corBorda[2]
+  );
+  pdf.roundedRect(
+    margin,
+    y,
+    contentWidth,
+    0,
+    4,
+    4,
+    "S"
+  );
+
+  const texto = pdf.splitTextToSize(
+    relatorio || "Relatório não informado.",
+    contentWidth - 12
+  );
+
+  pdf.setTextColor(
+    corTexto[0],
+    corTexto[1],
+    corTexto[2]
+  );
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(11);
+
+  const lineHeight = 6.5;
+  let boxTop = y;
+  y += 8;
+
+  for (const linha of texto) {
+    if (y > pageHeight - 28) {
+      pdf.roundedRect(
+        margin,
+        boxTop,
+        contentWidth,
+        y - boxTop,
+        4,
+        4,
+        "S"
+      );
+      desenharRodape();
+
+      pdf.addPage();
+      y = 20;
+      desenharCabecalho(
+        "Continuação do relatório"
+      );
+      desenharTituloSecao(
+        "Síntese da sessão"
+      );
+
+      boxTop = y;
+      y += 8;
+    }
+
+    pdf.text(linha, margin + 6, y);
+    y += lineHeight;
+  }
+
+  pdf.roundedRect(
+    margin,
+    boxTop,
+    contentWidth,
+    y - boxTop + 4,
+    4,
+    4,
+    "S"
+  );
+
+  y += 12;
+
+  if (y > pageHeight - 35) {
+    desenharRodape();
+    pdf.addPage();
+    y = 20;
+  }
+
+  pdf.setTextColor(
+    corPrincipal[0],
+    corPrincipal[1],
+    corPrincipal[2]
+  );
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(11);
+  pdf.text(
+    "Acompanhamento terapêutico",
+    margin,
+    y
+  );
+
+  y += 8;
+
+  pdf.setTextColor(
+    corTexto[0],
+    corTexto[1],
+    corTexto[2]
+  );
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(10);
+  pdf.text(
+    "Este relatório faz parte do processo terapêutico individual da cliente.",
+    margin,
+    y
+  );
+
+  desenharRodape();
+
+  const nomeArquivo = `relatorio-${titulo
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")}.pdf`;
+
+  pdf.save(nomeArquivo);
+}
+
   const pdf = new jsPDF();
 
   pdf.setFontSize(18);
   pdf.text("Terapia em Dia", 20, 20);
 
-  pdf.setFontSize(12);
-  pdf.text(`Cliente: ${nomeCliente}`, 20, 32);
-  pdf.text(`Sessão: ${titulo}`, 20, 40);
-  pdf.text(
-    `Data: ${new Date(
-      dataSessao
-    ).toLocaleDateString("pt-BR")}`,
-    20,
-    48
-  );
-
-  const linhas = pdf.splitTextToSize(
-    relatorio,
-    170
-  );
-
-  pdf.text(linhas, 20, 62);
-
-  pdf.save(
-    `relatorio-${titulo
-      .toLowerCase()
-      .replace(/\s+/g, "-")}.pdf`
-  );
-}
+  
 export default function TerapiaPortalPage() {
   const params = useParams();
   const token = String(
