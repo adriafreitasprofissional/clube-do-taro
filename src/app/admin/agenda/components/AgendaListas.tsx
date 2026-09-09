@@ -70,13 +70,13 @@ function CardAtendimento({
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {futuro && item.status !== "cancelado" && (
+        {item.status !== "cancelado" && (
           <button
             type="button"
             onClick={() => onAtender(item)}
             className="rounded-lg bg-purple-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-purple-600"
           >
-            Atender
+          {futuro ? "Atender" : "Abrir sessão"}
           </button>
         )}
 
