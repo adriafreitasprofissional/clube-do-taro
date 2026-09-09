@@ -1,6 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
 
-export function proxy(request: NextRequest) {
+export function proxy(
+  request: NextRequest
+) {
   const host = (
     request.headers.get("host") || ""
   )
@@ -8,17 +13,22 @@ export function proxy(request: NextRequest) {
     .toLowerCase();
 
   const dominioTerapia =
-    host === "adriafreitasterapeuta.com.br" ||
-    host === "www.adriafreitasterapeuta.com.br";
+    host ===
+      "adriafreitasterapeuta.com.br" ||
+    host ===
+      "www.adriafreitasterapeuta.com.br";
 
   if (
     dominioTerapia &&
     request.nextUrl.pathname === "/"
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/terapia";
+    const url =
+      request.nextUrl.clone();
 
-    return NextResponse.redirect(url);
+    url.pathname =
+      "/terapia-vitrine";
+
+    return NextResponse.rewrite(url);
   }
 
   return NextResponse.next();
