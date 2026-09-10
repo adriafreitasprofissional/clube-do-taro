@@ -11,8 +11,6 @@ import {
 import { supabase } from "@/lib/supabase";
 import type { AgendaAtendimento } from "../../components/agenda-types";
 
-import MiniPalestrasSessao from "./MiniPalestrasSessao";
-
 const campo =
   "w-full rounded-xl border border-purple-500/30 bg-[#1d0023] p-4 text-white placeholder:text-purple-300/60 outline-none focus:border-yellow-300/50";
 
@@ -34,8 +32,18 @@ export default function AtendimentoPage() {
 
     const [sessionTitle, setSessionTitle] =
   useState("");
-const [recordingUrl, setRecordingUrl] =
-  useState("");
+type ContentLink = {
+  title: string;
+  url: string;
+};
+
+const [contentLinks, setContentLinks] =
+  useState<ContentLink[]>([
+    {
+      title: "",
+      url: "",
+    },
+  ]);
 const [clientReport, setClientReport] =
   useState("");
 const [publishedToClient, setPublishedToClient] =
@@ -107,9 +115,28 @@ const [publishedToClient, setPublishedToClient] =
      setSessionTitle(
   atendimento.session_title || ""
 );
-setRecordingUrl(
-  atendimento.recording_url || ""
-);
+const linksSalvos =
+  Array.isArray(atendimento.content_links)
+    ? atendimento.content_links
+    : [];
+
+if (linksSalvos.length > 0) {
+  setContentLinks(linksSalvos);
+} else if (atendimento.recording_url) {
+  setContentLinks([
+    {
+      title: "Conteúdo da sessão",
+      url: atendimento.recording_url,
+    },
+  ]);
+} else {
+  setContentLinks([
+    {
+      title: "",
+      url: "",
+    },
+  ]);
+}
 setClientReport(
   atendimento.client_report || ""
 );
@@ -162,7 +189,12 @@ setPublishedToClient(
             evolution_summary: evolution,
             client_activity: activity,
             session_title: sessionTitle,
-recording_url: recordingUrl,
+content_links: contentLinks
+  .map((link) => ({
+    title: link.title.trim(),
+    url: link.url.trim(),
+  }))
+  .filter((link) => link.url),
 client_report: clientReport,
 published_to_client: publishedToClient,
             ...(finalizar
@@ -200,7 +232,49 @@ published_to_client: publishedToClient,
       setSalvando(false);
     }
   }
+function adicionarLink() {
+  setContentLinks((anterior) => [
+    ...anterior,
+    {
+      title: "",
+      url: "",
+    },
+  ]);
+}
 
+function atualizarLink(
+  index: number,
+  campo: "title" | "url",
+  valor: string
+) {
+  setContentLinks((anterior) =>
+    anterior.map((link, i) =>
+      i === index
+        ? {
+            ...link,
+            [campo]: valor,
+          }
+        : link
+    )
+  );
+}
+
+function removerLink(index: number) {
+  setContentLinks((anterior) => {
+    if (anterior.length === 1) {
+      return [
+        {
+          title: "",
+          url: "",
+        },
+      ];
+    }
+
+    return anterior.filter(
+      (_, i) => i !== index
+    );
+  });
+}
   if (carregando) {
     return (
       <div className="rounded-2xl border border-purple-500/30 bg-[#28002f] p-6 text-purple-300">
@@ -355,21 +429,17 @@ published_to_client: publishedToClient,
           />
         </section>
       </div>
-
-      <section className="rounded-2xl border border-purple-500/30 bg-[#28002f] p-5">
-        <h2 className="text-lg font-semibold text-yellow-300">
-          Atividade para a cliente
-        </h2>
-      <section className="rounded-2xl border border-purple-500/30 bg-[#28002f] p-5">
+<section className="rounded-2xl border border-purple-500/30 bg-[#28002f] p-5">
   <h2 className="text-lg font-semibold text-yellow-300">
     Conteúdo para o portal da cliente
   </h2>
 
   <p className="mt-1 text-xs text-purple-300">
-    Preencha o que a cliente poderá acessar em Minha Jornada.
+    Relatório, vídeos e materiais que poderão aparecer em Minha Jornada.
   </p>
 
-  <div className="mt-5 space-y-4">
+  <div className="mt-5 space-y-5">
+    {/* TÍTULO */}
     <div>
       <label className="mb-2 block text-sm text-purple-300">
         Título da sessão
@@ -380,26 +450,94 @@ published_to_client: publishedToClient,
         onChange={(e) =>
           setSessionTitle(e.target.value)
         }
-        placeholder="Ex.: Apresentação e alinhamento inicial"
+        placeholder="Ex.: Memórias da infância"
         className={campo}
       />
     </div>
 
+    {/* LINKS */}
     <div>
-      <label className="mb-2 block text-sm text-purple-300">
-        Link da gravação
-      </label>
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <label className="block text-sm font-semibold text-purple-200">
+            Links e conteúdos da sessão
+          </label>
 
-      <input
-        value={recordingUrl}
-        onChange={(e) =>
-          setRecordingUrl(e.target.value)
-        }
-        placeholder="https://drive.google.com/..."
-        className={campo}
-      />
+          <p className="mt-1 text-xs text-purple-300/60">
+            Adicione gravações, mini palestras, vídeos ou outros materiais.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={adicionarLink}
+          className="rounded-xl border border-[#aebe79]/40 bg-[#aebe79]/10 px-4 py-2 text-xs font-semibold text-[#cbd69d] transition hover:bg-[#aebe79]/20"
+        >
+          + Adicionar outro link
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {contentLinks.map((link, index) => (
+          <div
+            key={index}
+            className="rounded-xl border border-purple-500/25 bg-[#1d0023] p-4"
+          >
+            <div className="grid gap-3 md:grid-cols-[1fr_1.5fr_auto] md:items-end">
+              <div>
+                <label className="mb-2 block text-xs text-purple-300">
+                  Nome do conteúdo
+                </label>
+
+                <input
+                  value={link.title}
+                  onChange={(e) =>
+                    atualizarLink(
+                      index,
+                      "title",
+                      e.target.value
+                    )
+                  }
+                  placeholder="Ex.: Memórias da infância"
+                  className={campo}
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-xs text-purple-300">
+                  Link
+                </label>
+
+                <input
+                  value={link.url}
+                  onChange={(e) =>
+                    atualizarLink(
+                      index,
+                      "url",
+                      e.target.value
+                    )
+                  }
+                  placeholder="https://drive.google.com/..."
+                  className={campo}
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  removerLink(index)
+                }
+                className="rounded-xl border border-red-400/30 px-4 py-3 text-xs font-semibold text-red-300 transition hover:bg-red-400/10"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
 
+    {/* RELATÓRIO */}
     <div>
       <label className="mb-2 block text-sm text-purple-300">
         Relatório para a cliente
@@ -416,12 +554,15 @@ published_to_client: publishedToClient,
       />
     </div>
 
+    {/* PUBLICAÇÃO */}
     <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-purple-500/30 bg-[#1d0023] p-4">
       <input
         type="checkbox"
         checked={publishedToClient}
         onChange={(e) =>
-          setPublishedToClient(e.target.checked)
+          setPublishedToClient(
+            e.target.checked
+          )
         }
         className="h-4 w-4"
       />
@@ -438,25 +579,28 @@ published_to_client: publishedToClient,
     </label>
   </div>
 </section>
-        <p className="mt-1 text-xs text-purple-300">
-          Depois conectaremos este campo ao portal da cliente.
-        </p>
 
-        <textarea
-          value={activity}
-          onChange={(e) =>
-            setActivity(e.target.value)
-          }
-          rows={5}
-          placeholder="Atividade, orientação ou tarefa para o próximo encontro..."
-          className={`${campo} mt-4`}
-        />
-      </section>
-          <MiniPalestrasSessao
-        clientId={item.client_id}
-        appointmentId={item.id}
-        sessionDate={item.scheduled_at.slice(0, 10)}
-      />
+<section className="rounded-2xl border border-purple-500/30 bg-[#28002f] p-5">
+  <h2 className="text-lg font-semibold text-yellow-300">
+    Orientação / atividade para a cliente
+  </h2>
+
+  <p className="mt-1 text-xs text-purple-300">
+    Recado, exercício ou orientação para realizar até o próximo encontro.
+  </p>
+
+  <textarea
+    value={activity}
+    onChange={(e) =>
+      setActivity(e.target.value)
+    }
+    rows={5}
+    placeholder="Escreva uma orientação, atividade ou recado para a cliente..."
+    className={`${campo} mt-4`}
+  />
+</section>
+      
+          
       <div className="flex flex-col gap-3 border-t border-purple-500/20 pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"

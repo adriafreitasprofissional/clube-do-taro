@@ -23,6 +23,10 @@ client_activity?: string | null;
 
 session_title?: string | null;
 recording_url?: string | null;
+content_links?: {
+  title: string;
+  url: string;
+}[];
 client_report?: string | null;
 
 published_to_client?: boolean;

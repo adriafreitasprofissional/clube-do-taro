@@ -99,6 +99,7 @@ client_activity,
 session_title,
 recording_url,
 client_report,
+content_links,
 
 published_to_client,
 completed_at,
@@ -157,6 +158,12 @@ session_title:
   item.session_title,
 recording_url:
   item.recording_url,
+
+content_links:
+  Array.isArray(item.content_links)
+    ? item.content_links
+    : [],
+
 client_report:
   item.client_report,
 
@@ -552,7 +559,24 @@ if (body.recording_url !== undefined) {
       body.recording_url || ""
     ).trim() || null;
 }
-
+if (body.content_links !== undefined) {
+  atualizacoes.content_links =
+    Array.isArray(body.content_links)
+      ? body.content_links
+          .map((item: any) => ({
+            title: String(
+              item?.title || ""
+            ).trim(),
+            url: String(
+              item?.url || ""
+            ).trim(),
+          }))
+          .filter(
+            (item: any) =>
+              item.title || item.url
+          )
+      : [];
+}
 if (body.client_report !== undefined) {
   atualizacoes.client_report =
     String(
