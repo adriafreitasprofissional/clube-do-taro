@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { AgendaAtendimento } from "./agenda-types";
 
 type Props = {
@@ -14,9 +14,13 @@ type Props = {
   onAtender: (item: AgendaAtendimento) => void;
 };
 
-const POR_PAGINA = 4;
+type GrupoPaciente = {
+  id: string;
+  nome: string;
+  atendimentos: AgendaAtendimento[];
+};
 
-function formatar(item: AgendaAtendimento) {
+function formatarData(item: AgendaAtendimento) {
   const data = new Date(item.scheduled_at);
 
   return data.toLocaleString("pt-BR", {
@@ -25,6 +29,54 @@ function formatar(item: AgendaAtendimento) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function statusNormalizado(status?: string | null) {
+  return (status || "")
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function atendimentoConcluido(item: AgendaAtendimento) {
+  const status = statusNormalizado(item.status);
+
+  return (
+    Boolean(item.completed_at) ||
+    status === "realizado" ||
+    status === "concluido" ||
+    status === "finalizado"
+  );
+}
+
+function agruparPorPaciente(
+  itens: AgendaAtendimento[]
+): GrupoPaciente[] {
+  const grupos = new Map<string, GrupoPaciente>();
+
+  itens.forEach((item) => {
+    const chave =
+      item.client_id ||
+      item.client_name.toLowerCase().trim();
+
+    const existente = grupos.get(chave);
+
+    if (existente) {
+      existente.atendimentos.push(item);
+      return;
+    }
+
+    grupos.set(chave, {
+      id: chave,
+      nome: item.client_name || "Paciente",
+      atendimentos: [item],
+    });
+  });
+
+  return Array.from(grupos.values()).sort((a, b) =>
+    a.nome.localeCompare(b.nome, "pt-BR")
+  );
 }
 
 function CardAtendimento({
@@ -45,29 +97,28 @@ function CardAtendimento({
   onAtender: (item: AgendaAtendimento) => void;
 }) {
   return (
-    <div className="rounded-xl border border-purple-500/30 bg-[#1d0023] p-4">
+    <div className="rounded-xl border border-purple-500/25 bg-[#1d0023] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-semibold text-white">
-            {item.client_name}
-          </p>
-          <p className="mt-1 text-sm text-purple-300">
+          <p className="text-sm font-semibold text-white">
             {item.service_type}
+          </p>
+
+          <p className="mt-1 text-xs text-purple-300/80">
+            {item.professional} · {item.duration_minutes} min
           </p>
         </div>
 
         <span className="shrink-0 text-sm font-semibold text-yellow-300">
-          {formatar(item)}
+          {formatarData(item)}
         </span>
       </div>
 
-      <p className="mt-2 text-xs text-purple-300/80">
-        {item.professional} ·{" "}
-        {item.duration_minutes} min ·{" "}
-        <span className="capitalize">
+      <div className="mt-2">
+        <span className="rounded-full border border-purple-400/20 bg-purple-400/10 px-2.5 py-1 text-[10px] font-semibold capitalize text-purple-200">
           {item.status}
         </span>
-      </p>
+      </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {item.status !== "cancelado" && (
@@ -76,7 +127,7 @@ function CardAtendimento({
             onClick={() => onAtender(item)}
             className="rounded-lg bg-purple-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-purple-600"
           >
-          {futuro ? "Atender" : "Abrir sessão"}
+            {futuro ? "Atender" : "Abrir sessão"}
           </button>
         )}
 
@@ -120,42 +171,88 @@ function CardAtendimento({
   );
 }
 
-function Paginacao({
-  pagina,
-  totalPaginas,
-  anterior,
-  proximo,
+function GrupoAccordion({
+  grupo,
+  aberto,
+  onToggle,
+  tipo,
+  onEditar,
+  onRemarcar,
+  onCancelar,
+  onExcluir,
+  onAtender,
 }: {
-  pagina: number;
-  totalPaginas: number;
-  anterior: () => void;
-  proximo: () => void;
+  grupo: GrupoPaciente;
+  aberto: boolean;
+  onToggle: () => void;
+  tipo: "proximos" | "concluidos";
+
+  onEditar: (item: AgendaAtendimento) => void;
+  onRemarcar: (item: AgendaAtendimento) => void;
+  onCancelar: (item: AgendaAtendimento) => void;
+  onExcluir: (item: AgendaAtendimento) => void;
+  onAtender: (item: AgendaAtendimento) => void;
 }) {
-  if (totalPaginas <= 1) return null;
+  const primeiro = grupo.atendimentos[0];
+
+  const textoQuantidade =
+    tipo === "proximos"
+      ? grupo.atendimentos.length === 1
+        ? "1 agendado"
+        : `${grupo.atendimentos.length} agendados`
+      : grupo.atendimentos.length === 1
+        ? "1 concluído"
+        : `${grupo.atendimentos.length} concluídos`;
+
+  const textoData =
+    tipo === "proximos"
+      ? `Próximo: ${formatarData(primeiro)}`
+      : `Último: ${formatarData(primeiro)}`;
 
   return (
-    <div className="mt-4 flex items-center justify-between border-t border-purple-500/20 pt-4">
+    <div className="overflow-hidden rounded-2xl border border-purple-500/30 bg-[#1d0023]">
       <button
         type="button"
-        onClick={anterior}
-        disabled={pagina <= 0}
-        className="rounded-lg px-3 py-2 text-lg text-purple-200 transition hover:bg-white/5 disabled:opacity-30"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left transition hover:bg-white/[0.03]"
       >
-        ‹
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-white">
+              {grupo.nome}
+            </span>
+
+            <span className="rounded-full bg-purple-500/15 px-2.5 py-1 text-[10px] font-semibold text-purple-200">
+              {textoQuantidade}
+            </span>
+          </div>
+
+          <p className="mt-1 text-xs text-purple-300/70">
+            {textoData}
+          </p>
+        </div>
+
+        <span className="shrink-0 text-xl text-yellow-300">
+          {aberto ? "⌄" : "›"}
+        </span>
       </button>
 
-      <span className="text-xs text-purple-300">
-        {pagina + 1} / {totalPaginas}
-      </span>
-
-      <button
-        type="button"
-        onClick={proximo}
-        disabled={pagina >= totalPaginas - 1}
-        className="rounded-lg px-3 py-2 text-lg text-purple-200 transition hover:bg-white/5 disabled:opacity-30"
-      >
-        ›
-      </button>
+      {aberto && (
+        <div className="space-y-3 border-t border-purple-500/20 p-3">
+          {grupo.atendimentos.map((item) => (
+            <CardAtendimento
+              key={item.id}
+              item={item}
+              futuro={tipo === "proximos"}
+              onEditar={onEditar}
+              onRemarcar={onRemarcar}
+              onCancelar={onCancelar}
+              onExcluir={onExcluir}
+              onAtender={onAtender}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -169,106 +266,123 @@ export default function AgendaListas({
   onExcluir,
   onAtender,
 }: Props) {
-  const [paginaProximos, setPaginaProximos] =
-    useState(0);
+  const [abertosProximos, setAbertosProximos] =
+    useState<Set<string>>(new Set());
 
-  const [paginaRecentes, setPaginaRecentes] =
-    useState(0);
+  const [abertosConcluidos, setAbertosConcluidos] =
+    useState<Set<string>>(new Set());
 
   const agora = new Date();
 
-  const proximos = useMemo(
-    () =>
-      [...atendimentos]
-        .filter(
-          (item) =>
-            item.status !== "cancelado" &&
-            new Date(item.scheduled_at) >= agora
-        )
-        .sort(
-          (a, b) =>
-            new Date(a.scheduled_at).getTime() -
-            new Date(b.scheduled_at).getTime()
-        ),
-    [atendimentos]
-  );
+  const proximos = useMemo(() => {
+    return [...atendimentos]
+      .filter((item) => {
+        const status = statusNormalizado(item.status);
 
-  const recentes = useMemo(
-    () =>
-      [...atendimentos]
-        .filter(
-          (item) =>
-            new Date(item.scheduled_at) < agora ||
-            item.status === "cancelado"
-        )
-        .sort(
-          (a, b) =>
-            new Date(b.scheduled_at).getTime() -
-            new Date(a.scheduled_at).getTime()
-        ),
-    [atendimentos]
-  );
-
-  const totalProximos = Math.max(
-    1,
-    Math.ceil(
-      proximos.length / POR_PAGINA
-    )
-  );
-
-  const totalRecentes = Math.max(
-    1,
-    Math.ceil(
-      recentes.length / POR_PAGINA
-    )
-  );
-
-  useEffect(() => {
-    if (paginaProximos >= totalProximos) {
-      setPaginaProximos(
-        Math.max(0, totalProximos - 1)
+        return (
+          status !== "cancelado" &&
+          !atendimentoConcluido(item) &&
+          new Date(item.scheduled_at) >= agora
+        );
+      })
+      .sort(
+        (a, b) =>
+          new Date(a.scheduled_at).getTime() -
+          new Date(b.scheduled_at).getTime()
       );
-    }
-  }, [paginaProximos, totalProximos]);
+  }, [atendimentos]);
 
-  useEffect(() => {
-    if (paginaRecentes >= totalRecentes) {
-      setPaginaRecentes(
-        Math.max(0, totalRecentes - 1)
+  const concluidos = useMemo(() => {
+    return [...atendimentos]
+      .filter((item) => atendimentoConcluido(item))
+      .sort(
+        (a, b) =>
+          new Date(b.scheduled_at).getTime() -
+          new Date(a.scheduled_at).getTime()
       );
+  }, [atendimentos]);
+
+  const gruposProximos = useMemo(
+    () => agruparPorPaciente(proximos),
+    [proximos]
+  );
+
+  const gruposConcluidos = useMemo(
+    () => agruparPorPaciente(concluidos),
+    [concluidos]
+  );
+
+  function toggle(
+    id: string,
+    tipo: "proximos" | "concluidos"
+  ) {
+    if (tipo === "proximos") {
+      setAbertosProximos((anterior) => {
+        const novo = new Set(anterior);
+
+        if (novo.has(id)) {
+          novo.delete(id);
+        } else {
+          novo.add(id);
+        }
+
+        return novo;
+      });
+
+      return;
     }
-  }, [paginaRecentes, totalRecentes]);
 
-  const proximosPagina = proximos.slice(
-    paginaProximos * POR_PAGINA,
-    paginaProximos * POR_PAGINA +
-      POR_PAGINA
-  );
+    setAbertosConcluidos((anterior) => {
+      const novo = new Set(anterior);
 
-  const recentesPagina = recentes.slice(
-    paginaRecentes * POR_PAGINA,
-    paginaRecentes * POR_PAGINA +
-      POR_PAGINA
-  );
+      if (novo.has(id)) {
+        novo.delete(id);
+      } else {
+        novo.add(id);
+      }
+
+      return novo;
+    });
+  }
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
-        <h2 className="text-lg font-semibold text-white">
-          Próximos atendimentos
-        </h2>
+      {/* PRÓXIMOS */}
+      <section className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-white">
+              Próximos atendimentos
+            </h2>
+
+            <p className="mt-1 text-xs text-purple-300/70">
+              Pacientes com sessões agendadas
+            </p>
+          </div>
+
+          <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-purple-200">
+            {gruposProximos.length}{" "}
+            {gruposProximos.length === 1
+              ? "paciente"
+              : "pacientes"}
+          </span>
+        </div>
 
         <div className="mt-4 space-y-3">
           {carregando ? (
             <p className="text-sm text-purple-300">
               Carregando...
             </p>
-          ) : proximosPagina.length > 0 ? (
-            proximosPagina.map((item) => (
-              <CardAtendimento
-                key={item.id}
-                item={item}
-                futuro
+          ) : gruposProximos.length > 0 ? (
+            gruposProximos.map((grupo) => (
+              <GrupoAccordion
+                key={grupo.id}
+                grupo={grupo}
+                aberto={abertosProximos.has(grupo.id)}
+                onToggle={() =>
+                  toggle(grupo.id, "proximos")
+                }
+                tipo="proximos"
                 onEditar={onEditar}
                 onRemarcar={onRemarcar}
                 onCancelar={onCancelar}
@@ -282,46 +396,44 @@ export default function AgendaListas({
             </p>
           )}
         </div>
+      </section>
 
-        <Paginacao
-          pagina={paginaProximos}
-          totalPaginas={
-            proximos.length === 0
-              ? 1
-              : totalProximos
-          }
-          anterior={() =>
-            setPaginaProximos((p) =>
-              Math.max(0, p - 1)
-            )
-          }
-          proximo={() =>
-            setPaginaProximos((p) =>
-              Math.min(
-                totalProximos - 1,
-                p + 1
-              )
-            )
-          }
-        />
-      </div>
+      {/* CONCLUÍDOS */}
+      <section className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-white">
+              Atendimentos concluídos
+            </h2>
 
-      <div className="rounded-2xl border border-purple-500/40 bg-[#28002f] p-5 shadow-lg shadow-black/20">
-        <h2 className="text-lg font-semibold text-white">
-          Atendimentos recentes
-        </h2>
+            <p className="mt-1 text-xs text-purple-300/70">
+              Histórico de sessões por paciente
+            </p>
+          </div>
+
+          <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-purple-200">
+            {gruposConcluidos.length}{" "}
+            {gruposConcluidos.length === 1
+              ? "paciente"
+              : "pacientes"}
+          </span>
+        </div>
 
         <div className="mt-4 space-y-3">
           {carregando ? (
             <p className="text-sm text-purple-300">
               Carregando...
             </p>
-          ) : recentesPagina.length > 0 ? (
-            recentesPagina.map((item) => (
-              <CardAtendimento
-                key={item.id}
-                item={item}
-                futuro={false}
+          ) : gruposConcluidos.length > 0 ? (
+            gruposConcluidos.map((grupo) => (
+              <GrupoAccordion
+                key={grupo.id}
+                grupo={grupo}
+                aberto={abertosConcluidos.has(grupo.id)}
+                onToggle={() =>
+                  toggle(grupo.id, "concluidos")
+                }
+                tipo="concluidos"
                 onEditar={onEditar}
                 onRemarcar={onRemarcar}
                 onCancelar={onCancelar}
@@ -331,33 +443,11 @@ export default function AgendaListas({
             ))
           ) : (
             <p className="text-sm text-purple-300">
-              Nenhum atendimento registrado.
+              Nenhum atendimento concluído.
             </p>
           )}
         </div>
-
-        <Paginacao
-          pagina={paginaRecentes}
-          totalPaginas={
-            recentes.length === 0
-              ? 1
-              : totalRecentes
-          }
-          anterior={() =>
-            setPaginaRecentes((p) =>
-              Math.max(0, p - 1)
-            )
-          }
-          proximo={() =>
-            setPaginaRecentes((p) =>
-              Math.min(
-                totalRecentes - 1,
-                p + 1
-              )
-            )
-          }
-        />
-      </div>
+      </section>
     </div>
   );
 }

@@ -399,195 +399,90 @@ export default function MiniPalestrasSessao({
     }
   }
 
-  return (
-    <section
-      className="
-        rounded-[26px]
-        border
-        border-[#dfe2d7]
-        bg-[#fffef9]
-        p-5
-        shadow-sm
-        md:p-6
-      "
-    >
-      <div className="mb-5">
-        <p
-          className="
-            text-xs
-            font-semibold
-            uppercase
-            tracking-[0.16em]
-            text-[#78806c]
-          "
-        >
-          Para entender melhor
+ return (
+  <section className="rounded-2xl border border-purple-500/30 bg-[#28002f] p-5 shadow-lg shadow-black/20">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#b7c28b]">
+          Conteúdo complementar
         </p>
 
-        <h2
-          className="
-            mt-1
-            text-xl
-            font-semibold
-            text-[#37422f]
-          "
-        >
-          Mini palestras desta sessão
+        <h2 className="mt-1 text-lg font-semibold text-white">
+          Mini palestras
         </h2>
 
-        <p
-          className="
-            mt-2
-            max-w-2xl
-            text-sm
-            leading-6
-            text-[#73796b]
-          "
-        >
-          Indique conteúdos curtos
-          para ajudar o paciente a
-          compreender os assuntos
-          trabalhados durante o
-          atendimento.
+        <p className="mt-1 text-sm text-purple-200/60">
+          Indique um conteúdo somente quando fizer sentido para esta sessão.
         </p>
       </div>
 
-      {erro && (
-        <div
-          className="
-            mb-4
-            rounded-2xl
-            bg-red-50
-            px-4
-            py-3
-            text-sm
-            text-red-700
-          "
-        >
-          {erro}
-        </div>
-      )}
+      <div className="rounded-full border border-[#aebe79]/30 bg-[#aebe79]/10 px-3 py-1 text-xs font-semibold text-[#cbd69d]">
+        {indicacoesSessao.length} indicada
+        {indicacoesSessao.length === 1 ? "" : "s"}
+      </div>
+    </div>
 
-      {sucesso && (
-        <div
-          className="
-            mb-4
-            rounded-2xl
-            bg-[#eef3e9]
-            px-4
-            py-3
-            text-sm
-            text-[#4c5d40]
-          "
-        >
-          {sucesso}
-        </div>
-      )}
+    {erro && (
+      <div className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+        {erro}
+      </div>
+    )}
 
-      {carregando ? (
-        <p
-          className="
-            py-5
-            text-sm
-            text-[#7b8173]
-          "
-        >
-          Carregando conteúdos...
-        </p>
-      ) : (
-        <>
-          <div
-            className="
-              rounded-2xl
-              bg-[#f3f4ed]
-              p-4
-            "
-          >
-            <label
-              className="
-                mb-2
-                block
-                text-sm
-                font-semibold
-                text-[#4c5842]
-              "
-            >
-              Escolha uma mini palestra
+    {sucesso && (
+      <div className="mt-4 rounded-xl border border-[#aebe79]/30 bg-[#aebe79]/10 px-4 py-3 text-sm text-[#dce5c0]">
+        {sucesso}
+      </div>
+    )}
+
+    {carregando ? (
+      <p className="mt-4 text-sm text-purple-200/60">
+        Carregando conteúdos...
+      </p>
+    ) : (
+      <>
+        <details className="mt-5 overflow-hidden rounded-2xl border border-purple-500/25 bg-[#1d0023]">
+          <summary className="cursor-pointer list-none px-4 py-4 text-sm font-semibold text-[#cbd69d]">
+            + Indicar mini palestra para esta sessão
+          </summary>
+
+          <div className="border-t border-purple-500/20 p-4">
+            <label className="mb-2 block text-sm font-semibold text-purple-100">
+              Mini palestra
             </label>
 
             <select
               value={lectureId}
               onChange={(event) =>
-                setLectureId(
-                  event.target.value
-                )
+                setLectureId(event.target.value)
               }
-              className="
-                w-full
-                rounded-2xl
-                border
-                border-[#d8ddcf]
-                bg-white
-                px-4
-                py-3
-                text-sm
-                text-[#36402f]
-                outline-none
-                focus:border-[#7b8968]
-              "
+              className="w-full rounded-xl border border-purple-500/30 bg-[#16001d] px-4 py-3 text-sm text-white outline-none focus:border-[#aebe79]"
             >
               <option value="">
                 Selecione um conteúdo
               </option>
 
-              {palestrasDisponiveis.map(
-                (palestra) => (
-                  <option
-                    key={palestra.id}
-                    value={palestra.id}
-                  >
-                    {palestra.title}
-                    {palestra.duration_minutes
-                      ? ` — ${palestra.duration_minutes} min`
-                      : ""}
-                  </option>
-                )
-              )}
+              {palestrasDisponiveis.map((palestra) => (
+                <option
+                  key={palestra.id}
+                  value={palestra.id}
+                >
+                  {palestra.title}
+                  {palestra.duration_minutes
+                    ? ` — ${palestra.duration_minutes} min`
+                    : ""}
+                </option>
+              ))}
             </select>
 
-            {palestrasDisponiveis.length ===
-              0 && (
-              <p
-                className="
-                  mt-2
-                  text-xs
-                  text-[#858b7e]
-                "
-              >
-                Todas as palestras
-                disponíveis já foram
-                indicadas nesta sessão.
+            {palestrasDisponiveis.length === 0 && (
+              <p className="mt-2 text-xs text-purple-200/50">
+                Todas as palestras disponíveis já foram indicadas nesta sessão.
               </p>
             )}
 
-            <label
-              className="
-                mb-2
-                mt-4
-                block
-                text-sm
-                font-semibold
-                text-[#4c5842]
-              "
-            >
-              Recado para o paciente
-              <span
-                className="
-                  ml-1
-                  font-normal
-                  text-[#8b9185]
-                "
-              >
+            <label className="mb-2 mt-4 block text-sm font-semibold text-purple-100">
+              Recado para o paciente{" "}
+              <span className="font-normal text-purple-200/45">
                 (opcional)
               </span>
             </label>
@@ -595,295 +490,122 @@ export default function MiniPalestrasSessao({
             <textarea
               value={observacao}
               onChange={(event) =>
-                setObservacao(
-                  event.target.value
-                )
+                setObservacao(event.target.value)
               }
               rows={3}
-              placeholder="Ex.: Assista quando estiver tranquila. Este vídeo explica um pouco melhor o assunto que conversamos hoje."
-              className="
-                w-full
-                resize-none
-                rounded-2xl
-                border
-                border-[#d8ddcf]
-                bg-white
-                px-4
-                py-3
-                text-sm
-                text-[#36402f]
-                outline-none
-                placeholder:text-[#a1a69c]
-                focus:border-[#7b8968]
-              "
+              placeholder="Ex.: Assista quando estiver tranquila. Este vídeo complementa o tema trabalhado hoje."
+              className="w-full resize-none rounded-xl border border-purple-500/30 bg-[#16001d] px-4 py-3 text-sm text-white outline-none placeholder:text-purple-200/30 focus:border-[#aebe79]"
             />
 
-            <div
-              className="
-                mt-4
-                flex
-                justify-end
-              "
-            >
+            <div className="mt-4 flex justify-end">
               <button
                 type="button"
-                onClick={
-                  indicarPalestra
-                }
-                disabled={
-                  salvando ||
-                  !lectureId
-                }
-                className="
-                  rounded-2xl
-                  bg-[#596947]
-                  px-5
-                  py-3
-                  text-sm
-                  font-semibold
-                  text-white
-                  transition
-                  hover:bg-[#465538]
-                  disabled:cursor-not-allowed
-                  disabled:opacity-50
-                "
+                onClick={indicarPalestra}
+                disabled={salvando || !lectureId}
+                className="rounded-xl bg-[#aebe79] px-5 py-3 text-sm font-bold text-[#243018] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {salvando
                   ? "Indicando..."
-                  : "+ Indicar ao paciente"}
+                  : "Indicar ao paciente"}
               </button>
             </div>
           </div>
+        </details>
 
-          <div className="mt-6">
-            <h3
-              className="
-                text-sm
-                font-semibold
-                text-[#46523d]
-              "
-            >
+        {indicacoesSessao.length > 0 && (
+          <div className="mt-5">
+            <h3 className="text-sm font-semibold text-white">
               Indicadas nesta sessão
             </h3>
 
-            {indicacoesSessao.length ===
-            0 ? (
-              <p
-                className="
-                  mt-2
-                  rounded-2xl
-                  border
-                  border-dashed
-                  border-[#d9ddd2]
-                  px-4
-                  py-4
-                  text-sm
-                  text-[#858b7e]
-                "
-              >
-                Nenhuma mini palestra
-                indicada nesta sessão.
-              </p>
-            ) : (
-              <div
-                className="
-                  mt-3
-                  space-y-3
-                "
-              >
-                {indicacoesSessao.map(
-                  (item) => {
-                    const palestra =
-                      item
-                        .therapy_lectures;
+            <div className="mt-3 space-y-2">
+              {indicacoesSessao.map((item) => {
+                const palestra =
+                  item.therapy_lectures;
 
-                    return (
-                      <div
-                        key={item.id}
-                        className="
-                          rounded-2xl
-                          border
-                          border-[#dfe3d8]
-                          bg-white
-                          p-4
-                        "
-                      >
-                        <div
-                          className="
-                            flex
-                            flex-col
-                            gap-3
-                            sm:flex-row
-                            sm:items-start
-                            sm:justify-between
-                          "
-                        >
-                          <div>
-                            <p
-                              className="
-                                font-semibold
-                                text-[#37422f]
-                              "
-                            >
-                              {palestra?.title ||
-                                "Mini palestra"}
-                            </p>
+                return (
+                  <div
+                    key={item.id}
+                    className="rounded-xl border border-purple-500/25 bg-[#1d0023] p-4"
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="font-semibold text-white">
+                          {palestra?.title ||
+                            "Mini palestra"}
+                        </p>
 
-                            <div
-                              className="
-                                mt-1
-                                flex
-                                flex-wrap
-                                gap-2
-                                text-xs
-                                text-[#818778]
-                              "
-                            >
-                              {palestra?.category && (
-                                <span>
-                                  {
-                                    palestra.category
-                                  }
-                                </span>
-                              )}
+                        <div className="mt-1 flex flex-wrap gap-2 text-xs text-purple-200/55">
+                          {palestra?.category && (
+                            <span>
+                              {palestra.category}
+                            </span>
+                          )}
 
-                              {palestra?.duration_minutes && (
-                                <span>
-                                  •{" "}
-                                  {
-                                    palestra.duration_minutes
-                                  }{" "}
-                                  min
-                                </span>
-                              )}
-                            </div>
-
-                            {item.therapist_note && (
-                              <p
-                                className="
-                                  mt-3
-                                  text-sm
-                                  leading-6
-                                  text-[#697060]
-                                "
-                              >
-                                {
-                                  item.therapist_note
-                                }
-                              </p>
-                            )}
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              removerIndicacao(
-                                item
-                              )
-                            }
-                            className="
-                              shrink-0
-                              rounded-xl
-                              border
-                              border-[#e3d8d8]
-                              px-3
-                              py-2
-                              text-xs
-                              font-medium
-                              text-[#8b5b5b]
-                            "
-                          >
-                            Remover
-                          </button>
+                          {palestra?.duration_minutes && (
+                            <span>
+                              • {palestra.duration_minutes} min
+                            </span>
+                          )}
                         </div>
+
+                        {item.therapist_note && (
+                          <p className="mt-3 text-sm leading-6 text-purple-100/65">
+                            {item.therapist_note}
+                          </p>
+                        )}
                       </div>
-                    );
-                  }
-                )}
-              </div>
-            )}
-          </div>
 
-          {historico.length > 0 && (
-            <details
-              className="
-                mt-6
-                rounded-2xl
-                border
-                border-[#e0e2da]
-                bg-[#fafaf6]
-              "
-            >
-              <summary
-                className="
-                  cursor-pointer
-                  px-4
-                  py-4
-                  text-sm
-                  font-semibold
-                  text-[#59634f]
-                "
-              >
-                Histórico de mini palestras
-                do paciente (
-                {historico.length})
-              </summary>
-
-              <div
-                className="
-                  space-y-3
-                  border-t
-                  border-[#e4e6de]
-                  p-4
-                "
-              >
-                {historico.map(
-                  (item) => (
-                    <div
-                      key={item.id}
-                      className="
-                        rounded-xl
-                        bg-white
-                        px-4
-                        py-3
-                      "
-                    >
-                      <p
-                        className="
-                          text-sm
-                          font-semibold
-                          text-[#46523d]
-                        "
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removerIndicacao(item)
+                        }
+                        className="shrink-0 rounded-lg border border-red-400/25 px-3 py-2 text-xs font-medium text-red-300 transition hover:bg-red-400/10"
                       >
-                        {item
-                          .therapy_lectures
-                          ?.title ||
-                          "Mini palestra"}
-                      </p>
-
-                      <p
-                        className="
-                          mt-1
-                          text-xs
-                          text-[#8a9083]
-                        "
-                      >
-                        {item.session_date
-                          ? `Sessão de ${formatarData(
-                              item.session_date
-                            )}`
-                          : `Indicada em ${formatarData(
-                              item.assigned_at
-                            )}`}
-                      </p>
+                        Remover
+                      </button>
                     </div>
-                  )
-                )}
-              </div>
-            </details>
-          )}
-        </>
-      )}
-    </section>
-  );
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {historico.length > 0 && (
+          <details className="mt-5 overflow-hidden rounded-xl border border-purple-500/20 bg-[#1d0023]">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-purple-200/70">
+              Histórico de mini palestras ({historico.length})
+            </summary>
+
+            <div className="space-y-2 border-t border-purple-500/20 p-3">
+              {historico.map((item) => (
+                <div
+                  key={item.id}
+                  className="rounded-lg bg-[#16001d] px-4 py-3"
+                >
+                  <p className="text-sm font-semibold text-purple-100">
+                    {item.therapy_lectures?.title ||
+                      "Mini palestra"}
+                  </p>
+
+                  <p className="mt-1 text-xs text-purple-200/45">
+                    {item.session_date
+                      ? `Sessão de ${formatarData(
+                          item.session_date
+                        )}`
+                      : `Indicada em ${formatarData(
+                          item.assigned_at
+                        )}`}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+      </>
+    )}
+  </section>
+);
 }
