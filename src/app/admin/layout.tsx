@@ -123,7 +123,9 @@ export default function AdminLayout({
     useState(false);
 
   const paginaCentral =
-    pathname === "/admin";
+  pathname === "/admin" ||
+  pathname.startsWith("/admin/terapia") ||
+  pathname.startsWith("/admin/gestao-cursos");
 
   async function sair() {
     await supabase.auth.signOut();
