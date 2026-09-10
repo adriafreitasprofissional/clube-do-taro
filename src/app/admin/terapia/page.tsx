@@ -18,13 +18,13 @@ const modulos: Modulo[] = [
   destaque: "ATIVO",
 },
   {
-    titulo: "Agenda",
-    descricao:
-      "Consultas, horários, bloqueios, remarcações e próximos atendimentos.",
-    icone: "📅",
-    href: "/admin/terapia/agenda",
-    destaque: "EM AJUSTE",
-  },
+  titulo: "Agenda",
+  descricao:
+    "Consultas, horários, bloqueios, remarcações e próximos atendimentos.",
+  icone: "📅",
+  href: "/admin/terapia/agenda",
+  destaque: "ATIVO",
+},
   {
     titulo: "Atendimentos",
     descricao:
