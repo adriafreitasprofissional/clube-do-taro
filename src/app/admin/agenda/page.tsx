@@ -11,7 +11,8 @@ import { supabase } from "@/lib/supabase";
 
 import AgendaResumo from "./components/AgendaResumo";
 import AgendaCalendario from "./components/AgendaCalendario";
-import AgendaListas from "./components/AgendaListas";
+
+
 import NovoAtendimentoModal from "./components/NovoAtendimentoModal";
 import EditarAtendimentoModal from "./components/EditarAtendimentoModal";
 
@@ -288,15 +289,7 @@ export default function AgendaPage() {
           onEditar={abrirEditar}
         />
 
-        <AgendaListas
-          atendimentos={atendimentos}
-          carregando={carregando}
-          onEditar={abrirEditar}
-          onRemarcar={abrirRemarcar}
-          onCancelar={cancelar}
-          onExcluir={excluir}
-          onAtender={atender}
-        />
+       
       </div>
 
       <NovoAtendimentoModal

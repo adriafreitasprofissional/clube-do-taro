@@ -42,12 +42,13 @@ const modulos: Modulo[] = [
     destaque: "ATIVO",
   },
   {
-    titulo: "Quiz e Atividades",
-    descricao:
-      "Crie atividades personalizadas a partir das anotações das sessões.",
-    icone: "🧩",
-    destaque: "NOVO",
-  },
+  titulo: "Quiz e Atividades",
+  descricao:
+    "Crie atividades personalizadas a partir das anotações das sessões.",
+  icone: "🧩",
+  href: "/admin/terapia/quizzes",
+  destaque: "ATIVO",
+},
   {
     titulo: "Mini Palestras",
     descricao:
