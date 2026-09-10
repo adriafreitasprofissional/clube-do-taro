@@ -28,7 +28,7 @@ const negocios: Negocio[] = [
     descricao:
       "Assinantes, direcionamentos, atendimentos, mentorias, conteúdos e gestão do Clube.",
     icone: "🔮",
-    href: "/admin/assinantes",
+   href: "/admin/clube",
     status: "ATIVO",
   },
   {

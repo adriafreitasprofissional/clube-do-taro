@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 type Visibilidade =
@@ -455,6 +456,46 @@ export default function MiniPalestrasPage() {
           max-w-7xl
         "
       >
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+  <Link
+    href="/admin/terapia"
+    className="
+      inline-flex
+      items-center
+      rounded-xl
+      border
+      border-[#cbd4c0]
+      bg-white
+      px-4
+      py-2.5
+      text-sm
+      font-semibold
+      text-[#4f5e4a]
+      shadow-sm
+      transition
+      hover:bg-[#eef1e8]
+    "
+  >
+    ← Terapia em Dia
+  </Link>
+
+  <Link
+    href="/admin"
+    className="
+      inline-flex
+      items-center
+      px-3
+      py-2.5
+      text-sm
+      font-semibold
+      text-[#66785a]
+      transition
+      hover:text-[#3f4c32]
+    "
+  >
+    Central de Negócios
+  </Link>
+</div>
         <header
           className="
             mb-8
