@@ -31,13 +31,15 @@ const negocios: Negocio[] = [
    href: "/admin/clube",
     status: "ATIVO",
   },
-  {
-    nome: "Cursos",
-    descricao:
-      "Alunos, cursos, liberações, conteúdos, mentorias e acompanhamento.",
-    icone: "🎓",
-    status: "CENTRAL EM AJUSTE",
-  },
+    {
+
+  nome: "Cursos",
+  descricao:
+    "Alunos, cursos, liberações, conteúdos, mentorias e acompanhamento.",
+  icone: "🎓",
+  href: "/admin/gestao-cursos",
+  status: "ATIVO",
+},
   {
     nome: "Biblioteca Ádria Freitas",
     descricao:

@@ -6,7 +6,12 @@ export default function GestaoCursosPage() {
   return (
     <main className="min-h-screen bg-[#08020d] px-5 py-8 text-white md:px-10">
       <div className="mx-auto max-w-6xl">
-
+<Link
+  href="/admin"
+  className="mb-6 inline-flex items-center rounded-xl border border-purple-400/30 bg-white/5 px-4 py-2.5 text-sm font-semibold text-purple-200 transition hover:bg-white/10"
+>
+  ← Central de Negócios
+</Link>
         {/* CABEÇALHO */}
         <div className="mb-10">
           <p className="text-xs uppercase tracking-[0.3em] text-purple-300">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Link } from "lucide-react";
+import Link from "next/link";
 
 type Cliente = {
   id: string;
@@ -336,7 +336,40 @@ if (recadosResponse.data) {
         margin: "0 auto",
         paddingBottom: "60px",
       }}
+  
     >
+<div
+  style={{
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+    marginBottom: "24px",
+  }}
+>
+  <Link
+    href="/admin/gestao-cursos"
+    style={{
+      color: "#E7C96F",
+      textDecoration: "none",
+      fontSize: "13px",
+      fontWeight: 700,
+    }}
+  >
+    ← Gestão de Cursos
+  </Link>
+
+  <Link
+    href="/admin"
+    style={{
+      color: "rgba(255,255,255,.65)",
+      textDecoration: "none",
+      fontSize: "13px",
+      fontWeight: 600,
+    }}
+  >
+    Central de Negócios
+  </Link>
+</div>
       {/* CABEÇALHO */}
       <header style={{ marginBottom: "32px" }}>
         <div
