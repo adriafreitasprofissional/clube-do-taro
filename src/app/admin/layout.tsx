@@ -9,50 +9,101 @@ const menuGroups = [
   {
     title: "GESTÃO",
     items: [
-      
-      { href: "/admin/assinantes", icon: "👥", label: "Assinantes" },
-      { href: "/admin/financeiro", icon: "💳", label: "Financeiro" },
-      { href: "/admin/atendimento", icon: "🌹", label: "Atendimento" },
-{ href: "/admin/recados", icon: "📢", label: "Recados" },
-{ href: "/admin/agenda", icon: "📅", label: "Agenda" },
-{ href: "/admin/assiduidade", icon: "📊", label: "Assiduidade" },
-{
-  href: "/admin/mentorias",
-  icon: "🎥",
-  label: "Mentorias Gravadas",
-},
+      {
+        href: "/admin/assinantes",
+        icon: "👥",
+        label: "Assinantes",
+      },
+      {
+        href: "/admin/financeiro",
+        icon: "💳",
+        label: "Financeiro",
+      },
+      {
+        href: "/admin/atendimento",
+        icon: "🌹",
+        label: "Atendimento",
+      },
+      {
+        href: "/admin/recados",
+        icon: "📢",
+        label: "Recados",
+      },
+      {
+        href: "/admin/agenda",
+        icon: "📅",
+        label: "Agenda",
+      },
+      {
+        href: "/admin/assiduidade",
+        icon: "📊",
+        label: "Assiduidade",
+      },
+      {
+        href: "/admin/mentorias",
+        icon: "🎥",
+        label: "Mentorias Gravadas",
+      },
     ],
   },
   {
     title: "RELACIONAMENTO",
     items: [
-      { href: "/admin/beneficios", icon: "🎁", label: "Benefícios" },
-      { href: "/admin/indicacoes", icon: "🤝", label: "Indicações" },
-      { href: "/admin/sorteios", icon: "🍀", label: "Sorteios" },
-      { href: "/admin/convites", icon: "🌞", label: "Convites" },
-      { href: "/admin/aniversarios", icon: "🎂", label: "Aniversários" },
+      {
+        href: "/admin/beneficios",
+        icon: "🎁",
+        label: "Benefícios",
+      },
+      {
+        href: "/admin/indicacoes",
+        icon: "🤝",
+        label: "Indicações",
+      },
+      {
+        href: "/admin/sorteios",
+        icon: "🍀",
+        label: "Sorteios",
+      },
+      {
+        href: "/admin/convites",
+        icon: "🌞",
+        label: "Convites",
+      },
+      {
+        href: "/admin/aniversarios",
+        icon: "🎂",
+        label: "Aniversários",
+      },
     ],
   },
   {
-  title: "CONTEÚDO",
-  items: [
-    { href: "/admin/cursos", icon: "📚", label: "Cursos" },
-    {
-      href: "/admin/liberacao-cursos",
-      icon: "🎁",
-      label: "Liberação de Cursos",
-    },
-    {
-      href: "/admin/biblioteca",
-      icon: "📖",
-      label: "Biblioteca Ádria Freitas",
-    },
-  ],
-},
+    title: "CONTEÚDO",
+    items: [
+      {
+        href: "/admin/cursos",
+        icon: "📚",
+        label: "Cursos",
+      },
+      {
+        href: "/admin/liberacao-cursos",
+        icon: "🎁",
+        label: "Liberação de Cursos",
+      },
+      {
+        href: "/admin/biblioteca",
+        icon: "📖",
+        label: "Biblioteca Ádria Freitas",
+      },
+    ],
+  },
   {
     title: "SISTEMA",
     items: [
-      { href: "/admin/maps/novo", icon: "✨", label: "Mapas" },
+      {
+        href: "/admin/maps/novo",
+        icon: "✨",
+        label: "Mapas",
+      },
       {
         href: "/admin/configuracoes",
         icon: "⚙️",
@@ -68,7 +119,11 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [menuAberto, setMenuAberto] = useState(false);
+  const [menuAberto, setMenuAberto] =
+    useState(false);
+
+  const paginaCentral =
+    pathname === "/admin";
 
   async function sair() {
     await supabase.auth.signOut();
@@ -79,6 +134,50 @@ export default function AdminLayout({
     setMenuAberto(false);
   }
 
+  /*
+   * PÁGINA CENTRAL
+   * /admin
+   *
+   * Não mostra o menu lateral do Clube.
+   * A Central de Negócios ocupa a tela toda.
+   */
+  if (paginaCentral) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background:
+            "radial-gradient(circle at top right, rgba(103,24,130,.22), transparent 35%), #120018",
+          color: "#fff",
+        }}
+      >
+        <main
+          style={{
+            width: "100%",
+            minHeight: "100vh",
+            padding: "34px 38px",
+          }}
+          className="admin-central-main"
+        >
+          {children}
+        </main>
+
+        <style jsx global>{`
+          @media (max-width: 768px) {
+            .admin-central-main {
+              padding: 22px 16px !important;
+            }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  /*
+   * DEMAIS PÁGINAS DO ADM
+   *
+   * Mantém o menu que já existia.
+   */
   return (
     <div
       style={{
@@ -99,7 +198,8 @@ export default function AdminLayout({
           justifyContent: "space-between",
           padding: "0 16px",
           background: "#22002d",
-          borderBottom: "1px solid rgba(231,201,111,.18)",
+          borderBottom:
+            "1px solid rgba(231,201,111,.18)",
         }}
         className="admin-mobile-header"
       >
@@ -117,10 +217,14 @@ export default function AdminLayout({
         </Link>
 
         <button
-          onClick={() => setMenuAberto(true)}
+          onClick={() =>
+            setMenuAberto(true)
+          }
           style={{
-            border: "1px solid rgba(231,201,111,.35)",
-            background: "rgba(231,201,111,.08)",
+            border:
+              "1px solid rgba(231,201,111,.35)",
+            background:
+              "rgba(231,201,111,.08)",
             color: "#E7C96F",
             borderRadius: "10px",
             padding: "9px 13px",
@@ -133,14 +237,17 @@ export default function AdminLayout({
         </button>
       </header>
 
-      {/* FUNDO DO MENU MOBILE */}
+      {/* FUNDO MENU MOBILE */}
       {menuAberto && (
         <div
-          onClick={() => setMenuAberto(false)}
+          onClick={() =>
+            setMenuAberto(false)
+          }
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,.55)",
+            background:
+              "rgba(0,0,0,.55)",
             zIndex: 90,
           }}
           className="admin-mobile-overlay"
@@ -155,7 +262,8 @@ export default function AdminLayout({
           padding: "22px 16px",
           background:
             "linear-gradient(180deg,#22002d 0%,#130019 100%)",
-          borderRight: "1px solid rgba(231,201,111,.18)",
+          borderRight:
+            "1px solid rgba(231,201,111,.18)",
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
@@ -168,16 +276,18 @@ export default function AdminLayout({
           transform: menuAberto
             ? "translateX(0)"
             : "translateX(-100%)",
-          transition: "transform .25s ease",
+          transition:
+            "transform .25s ease",
         }}
         className="admin-sidebar"
       >
-        {/* CABEÇALHO DO MENU */}
+        {/* CABEÇALHO */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent:
+              "space-between",
             marginBottom: "28px",
           }}
         >
@@ -195,7 +305,9 @@ export default function AdminLayout({
           </Link>
 
           <button
-            onClick={() => setMenuAberto(false)}
+            onClick={() =>
+              setMenuAberto(false)
+            }
             style={{
               display: "none",
               background: "transparent",
@@ -244,49 +356,58 @@ export default function AdminLayout({
                   gap: "4px",
                 }}
               >
-                {group.items.map((item) => {
-                  const active =
-                    item.href === "/admin"
-                      ? pathname === "/admin"
-                      : pathname.startsWith(item.href);
+                {group.items.map(
+                  (item) => {
+                    const active =
+                      pathname.startsWith(
+                        item.href
+                      );
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={navegar}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        padding: "11px 14px",
-                        borderRadius: "12px",
-                        textDecoration: "none",
-                        color: active
-                          ? "#1a0921"
-                          : "#fff",
-                        background: active
-                          ? "#E7C96F"
-                          : "transparent",
-                        fontWeight: active
-                          ? 700
-                          : 500,
-                      }}
-                    >
-                      <span
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={navegar}
                         style={{
-                          width: "20px",
-                          textAlign: "center",
-                          flexShrink: 0,
+                          display: "flex",
+                          alignItems:
+                            "center",
+                          gap: "10px",
+                          padding:
+                            "11px 14px",
+                          borderRadius:
+                            "12px",
+                          textDecoration:
+                            "none",
+                          color: active
+                            ? "#1a0921"
+                            : "#fff",
+                          background: active
+                            ? "#E7C96F"
+                            : "transparent",
+                          fontWeight: active
+                            ? 700
+                            : 500,
                         }}
                       >
-                        {item.icon}
-                      </span>
+                        <span
+                          style={{
+                            width: "20px",
+                            textAlign:
+                              "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {item.icon}
+                        </span>
 
-                      <span>{item.label}</span>
-                    </Link>
-                  );
-                })}
+                        <span>
+                          {item.label}
+                        </span>
+                      </Link>
+                    );
+                  }
+                )}
               </div>
             </div>
           ))}
@@ -332,10 +453,14 @@ export default function AdminLayout({
           }
 
           .admin-sidebar {
-            width: min(290px, 86vw) !important;
+            width: min(
+              290px,
+              86vw
+            ) !important;
           }
 
-          .admin-sidebar .admin-mobile-close {
+          .admin-sidebar
+            .admin-mobile-close {
             display: block !important;
           }
 
@@ -347,7 +472,9 @@ export default function AdminLayout({
 
         @media (min-width: 769px) {
           .admin-sidebar {
-            transform: translateX(0) !important;
+            transform: translateX(
+              0
+            ) !important;
           }
         }
       `}</style>
