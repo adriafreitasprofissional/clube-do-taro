@@ -10,17 +10,19 @@ type Modulo = {
 
 const modulos: Modulo[] = [
   {
-    titulo: "Pacientes",
-    descricao:
-      "Cadastro, histórico, acesso ao portal e acompanhamento das pacientes.",
-    icone: "👩‍🦳",
-    destaque: "EM AJUSTE",
-  },
+  titulo: "Pacientes",
+  descricao:
+    "Cadastro, histórico, acesso ao portal e acompanhamento das pacientes.",
+  icone: "/icons/paciente.png",
+  href: "/admin/terapia/pacientes",
+  destaque: "ATIVO",
+},
   {
     titulo: "Agenda",
     descricao:
       "Consultas, horários, bloqueios, remarcações e próximos atendimentos.",
     icone: "📅",
+    href: "/admin/terapia/agenda",
     destaque: "EM AJUSTE",
   },
   {
@@ -28,6 +30,7 @@ const modulos: Modulo[] = [
     descricao:
       "Sessões realizadas, registros terapêuticos, evolução e relatórios.",
     icone: "🌿",
+    href: "/admin/terapia/atendimentos",
     destaque: "EM AJUSTE",
   },
   {
@@ -283,7 +286,19 @@ export default function TerapiaAdminPage() {
                     fontSize: "22px",
                   }}
                 >
-                  {modulo.icone}
+                {modulo.icone.startsWith("/") ? (
+  <img
+    src={modulo.icone}
+    alt=""
+    style={{
+      width: "28px",
+      height: "28px",
+      objectFit: "contain",
+    }}
+  />
+) : (
+  modulo.icone
+)}
                 </div>
 
                 {modulo.destaque && (
