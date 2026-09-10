@@ -1,77 +1,57 @@
 import Link from "next/link";
 
-type Modulo = {
-  titulo: string;
+type Negocio = {
+  nome: string;
   descricao: string;
   icone: string;
   href?: string;
-  destaque?: string;
+  status?: string;
+  destaque?: boolean;
 };
 
-const modulos: Modulo[] = [
+const negocios: Negocio[] = [
   {
-    titulo: "Pacientes",
+    nome: "Terapia em Dia",
     descricao:
-      "Cadastro, histórico, acesso ao portal e acompanhamento das pacientes.",
-    icone: "👩‍🦳",
-    destaque: "GESTÃO",
-  },
-  {
-    titulo: "Agenda",
-    descricao:
-      "Consultas, horários, bloqueios, remarcações e próximos atendimentos.",
-    icone: "📅",
-    href: "/admin/agenda",
-    destaque: "ATIVO",
-  },
-  {
-    titulo: "Atendimentos",
-    descricao:
-      "Sessões realizadas, registros terapêuticos, evolução e relatórios.",
+      "Pacientes, agenda, atendimentos, anamneses, atividades, quizzes, mini palestras e acompanhamento.",
     icone: "🌿",
-    href: "/admin/agenda",
-    destaque: "ATIVO",
+    href: "/admin/terapia",
+    status: "ATIVO",
+    destaque: true,
   },
   {
-    titulo: "Anamneses",
+    nome: "Clube do Tarô",
     descricao:
-      "Formulários, histórico das respostas e informações iniciais da paciente.",
-    icone: "📝",
-    destaque: "ATIVO",
+      "Assinantes, direcionamentos, atendimentos, mentorias, conteúdos e gestão do Clube.",
+    icone: "🔮",
+    href: "/admin/assinantes",
+    status: "ATIVO",
   },
   {
-    titulo: "Quiz e Atividades",
+    nome: "Cursos",
     descricao:
-      "Crie atividades personalizadas a partir das anotações das sessões.",
-    icone: "🧩",
-    destaque: "NOVO",
+      "Alunos, cursos, liberações, conteúdos, mentorias e acompanhamento.",
+    icone: "🎓",
+    href: "/admin/gestao-cursos",
+    status: "ATIVO",
   },
   {
-    titulo: "Mini Palestras",
+    nome: "Biblioteca Ádria Freitas",
     descricao:
-      "Biblioteca de vídeos educativos e conteúdos indicados após as sessões.",
-    icone: "🎥",
-    href: "/admin/terapia/palestras",
-    destaque: "ATIVO",
+      "Livros, publicações, conteúdos digitais e materiais da autora.",
+    icone: "📚",
+    status: "EM ORGANIZAÇÃO",
   },
   {
-    titulo: "Financeiro",
+    nome: "Lojas",
     descricao:
-      "Pacotes, sessões, recebimentos, vencimentos e histórico financeiro.",
-    icone: "💳",
-    href: "/admin/financeiro",
-    destaque: "GESTÃO",
-  },
-  {
-    titulo: "Evolução",
-    descricao:
-      "Acompanhamento de segurança, confiança, conforto e percepção de mudança.",
-    icone: "📈",
-    destaque: "EM BREVE",
+      "Loja Mística e Loja Artística: produtos, parceiros, grimórios, esculturas, artes e encomendas.",
+    icone: "🛍️",
+    status: "EM PREPARAÇÃO",
   },
 ];
 
-export default function TerapiaAdminPage() {
+export default function AdminPage() {
   return (
     <div
       style={{
@@ -80,140 +60,10 @@ export default function TerapiaAdminPage() {
         margin: "0 auto",
       }}
     >
-      {/* TOPO */}
+      {/* CABEÇALHO */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: "20px",
-          flexWrap: "wrap",
-          marginBottom: "34px",
-        }}
-      >
-        <div>
-          <Link
-            href="/admin"
-            style={{
-              display: "inline-block",
-              marginBottom: "16px",
-              color: "#d8c88b",
-              textDecoration: "none",
-              fontSize: "13px",
-              fontWeight: 700,
-            }}
-          >
-            ← Central de Negócios
-          </Link>
-
-          <p
-            style={{
-              margin: 0,
-              color: "#b7c28b",
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "2.3px",
-              textTransform: "uppercase",
-            }}
-          >
-            Você está em
-          </p>
-
-          <h1
-            style={{
-              margin: "9px 0 7px",
-              color: "#fff",
-              fontSize: "clamp(30px, 5vw, 44px)",
-              lineHeight: 1.1,
-            }}
-          >
-            Terapia em Dia
-          </h1>
-
-          <p
-            style={{
-              margin: 0,
-              maxWidth: "680px",
-              color: "rgba(255,255,255,.62)",
-              fontSize: "15px",
-              lineHeight: 1.7,
-            }}
-          >
-            Gestão dos atendimentos terapêuticos,
-            pacientes, atividades e acompanhamento
-            do processo.
-          </p>
-        </div>
-
-        <div
-          style={{
-            padding: "10px 14px",
-            borderRadius: "999px",
-            border: "1px solid rgba(183,194,139,.3)",
-            background: "rgba(92,108,61,.18)",
-            color: "#cbd6a2",
-            fontSize: "12px",
-            fontWeight: 700,
-          }}
-        >
-          🌿 Ambiente Terapia
-        </div>
-      </div>
-
-      {/* RESUMO */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: "12px",
-          marginBottom: "32px",
-        }}
-      >
-        {[
-          ["Pacientes ativas", "—"],
-          ["Próximos atendimentos", "—"],
-          ["Atividades pendentes", "—"],
-          ["Respostas recebidas", "—"],
-        ].map(([label, valor]) => (
-          <div
-            key={label}
-            style={{
-              padding: "18px",
-              borderRadius: "17px",
-              border:
-                "1px solid rgba(183,194,139,.16)",
-              background:
-                "linear-gradient(145deg, rgba(69,79,46,.26), rgba(28,32,21,.6))",
-            }}
-          >
-            <div
-              style={{
-                color: "rgba(255,255,255,.55)",
-                fontSize: "12px",
-                marginBottom: "8px",
-              }}
-            >
-              {label}
-            </div>
-
-            <div
-              style={{
-                color: "#fff",
-                fontSize: "25px",
-                fontWeight: 800,
-              }}
-            >
-              {valor}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* MÓDULOS */}
-      <div
-        style={{
-          marginBottom: "15px",
+          marginBottom: "38px",
         }}
       >
         <p
@@ -222,48 +72,62 @@ export default function TerapiaAdminPage() {
             color: "#b7c28b",
             fontSize: "11px",
             fontWeight: 800,
-            letterSpacing: "2px",
+            letterSpacing: "2.5px",
             textTransform: "uppercase",
           }}
         >
-          Gestão terapêutica
+          Administração Geral
         </p>
 
-        <h2
+        <h1
           style={{
-            color: "#fff",
-            margin: "7px 0 0",
-            fontSize: "22px",
+            margin: "10px 0 8px",
+            color: "#ffffff",
+            fontSize: "clamp(32px, 5vw, 46px)",
+            lineHeight: 1.1,
           }}
         >
-          Ferramentas do Terapia em Dia
-        </h2>
+          Central de Negócios
+        </h1>
+
+        <p
+          style={{
+            margin: 0,
+            maxWidth: "720px",
+            color: "rgba(255,255,255,.62)",
+            fontSize: "16px",
+            lineHeight: 1.7,
+          }}
+        >
+          Escolha o ambiente que deseja administrar.
+        </p>
       </div>
 
+      {/* CARDS */}
       <section
         style={{
           display: "grid",
           gridTemplateColumns:
-            "repeat(auto-fit, minmax(250px, 1fr))",
-          gap: "15px",
+            "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "18px",
         }}
       >
-        {modulos.map((modulo) => {
+        {negocios.map((negocio) => {
           const card = (
             <div
               style={{
-                minHeight: "190px",
                 height: "100%",
-                borderRadius: "20px",
-                padding: "21px",
-                border:
-                  "1px solid rgba(183,194,139,.18)",
-                background:
-                  modulo.titulo === "Quiz e Atividades"
-                    ? "linear-gradient(145deg, rgba(89,105,56,.75), rgba(38,45,27,.96))"
-                    : "linear-gradient(145deg, rgba(61,70,42,.4), rgba(27,31,20,.88))",
+                minHeight: "215px",
+                padding: "24px",
+                borderRadius: "22px",
+                border: negocio.destaque
+                  ? "1px solid rgba(183,194,139,.46)"
+                  : "1px solid rgba(183,194,139,.18)",
+                background: negocio.destaque
+                  ? "linear-gradient(145deg, rgba(89,105,56,.80), rgba(37,43,26,.97))"
+                  : "linear-gradient(145deg, rgba(61,70,42,.42), rgba(27,31,20,.90))",
                 boxShadow:
-                  "0 15px 35px rgba(0,0,0,.16)",
+                  "0 18px 40px rgba(0,0,0,.18)",
                 display: "flex",
                 flexDirection: "column",
               }}
@@ -278,85 +142,82 @@ export default function TerapiaAdminPage() {
               >
                 <div
                   style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "14px",
-                    background:
-                      "rgba(255,255,255,.07)",
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "15px",
+                    background: "rgba(255,255,255,.07)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "22px",
+                    fontSize: "24px",
                   }}
                 >
-                  {modulo.icone}
+                  {negocio.icone}
                 </div>
 
-                {modulo.destaque && (
+                {negocio.status && (
                   <span
                     style={{
-                      padding: "5px 8px",
+                      padding: "6px 9px",
                       borderRadius: "999px",
-                      background:
-                        modulo.destaque === "NOVO"
-                          ? "#aebe79"
-                          : "rgba(255,255,255,.07)",
-                      color:
-                        modulo.destaque === "NOVO"
-                          ? "#243018"
-                          : "rgba(255,255,255,.6)",
+                      background: negocio.destaque
+                        ? "#b8c68a"
+                        : "rgba(255,255,255,.07)",
+                      color: negocio.destaque
+                        ? "#263019"
+                        : "rgba(255,255,255,.58)",
                       fontSize: "9px",
                       fontWeight: 800,
                       letterSpacing: "1px",
                     }}
                   >
-                    {modulo.destaque}
+                    {negocio.status}
                   </span>
                 )}
               </div>
 
-              <h3
+              <h2
                 style={{
-                  margin: "17px 0 7px",
+                  margin: "22px 0 8px",
                   color: "#fff",
-                  fontSize: "18px",
+                  fontSize: "21px",
                 }}
               >
-                {modulo.titulo}
-              </h3>
+                {negocio.nome}
+              </h2>
 
               <p
                 style={{
                   margin: 0,
-                  color: "rgba(255,255,255,.58)",
-                  fontSize: "13px",
-                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,.60)",
+                  fontSize: "14px",
+                  lineHeight: 1.65,
                   flex: 1,
                 }}
               >
-                {modulo.descricao}
+                {negocio.descricao}
               </p>
 
               <div
                 style={{
-                  marginTop: "16px",
-                  color: modulo.href
+                  marginTop: "20px",
+                  color: negocio.href
                     ? "#cbd69d"
-                    : "rgba(255,255,255,.35)",
-                  fontSize: "12px",
+                    : "rgba(255,255,255,.34)",
+                  fontSize: "13px",
                   fontWeight: 700,
                 }}
               >
-                {modulo.href
-                  ? "Abrir ferramenta →"
-                  : "Configuração em andamento"}
+                {negocio.href
+                  ? "Entrar no ambiente →"
+                  : "Em preparação"}
               </div>
             </div>
           );
 
-          if (!modulo.href) {
+          if (!negocio.href) {
             return (
-              <div key={modulo.titulo}>
+              <div key={negocio.nome}>
                 {card}
               </div>
             );
@@ -364,8 +225,8 @@ export default function TerapiaAdminPage() {
 
           return (
             <Link
-              key={modulo.titulo}
-              href={modulo.href}
+              key={negocio.nome}
+              href={negocio.href}
               style={{
                 textDecoration: "none",
               }}
