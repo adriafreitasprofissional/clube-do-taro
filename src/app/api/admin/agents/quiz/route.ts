@@ -21,9 +21,6 @@ type TipoPergunta =
 const TIPOS_PERMITIDOS: TipoPergunta[] = [
   "single_choice",
   "multiple_choice",
-  "short_text",
-  "long_text",
-  "scale",
 ];
 
 function bearerToken(
@@ -232,12 +229,21 @@ REGRAS:
 - Em contexto terapêutico, não pressione a pessoa a recordar acontecimentos.
 - Não sugira memórias que a pessoa não relatou.
 - Não faça perguntas que presumam abuso, trauma ou acontecimentos.
-- Evite repetição.
-- Varie os tipos de pergunta quando fizer sentido.
-- Para escolha única ou múltipla, gere entre 2 e 5 opções.
-- Não acrescente a opção "No momento não consigo responder isso".
+- - Evite repetição.
+- As respostas devem ser simples, rápidas e feitas por clique.
+- Use somente escolha única ou múltipla escolha.
+- Não use escalas numéricas de 0 a 10.
+- Não gere campos de texto curto ou texto longo.
+- Prefira respostas objetivas como:
+  Sim / Não
+  Gostei / Não gostei
+  Concordo / Não concordo
+  Sempre / Às vezes / Nunca
+  Muito / Pouco / Nada
+  ou outras alternativas diretas adequadas à pergunta.
+- Gere entre 2 e 5 opções de resposta.
+- Não acrescente "Prefiro não responder".
 - O sistema acrescentará essa opção automaticamente.
-- Escalas devem normalmente usar de 0 a 10.
 - Retorne SOMENTE JSON válido.
 - Não use Markdown.
 - Não escreva explicações fora do JSON.

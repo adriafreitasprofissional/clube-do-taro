@@ -30,7 +30,7 @@ type PerguntaQuiz = {
 };
 
 const TEXTO_SEGURANCA =
-  "No momento não consigo responder isso — e tudo bem.";
+  "Prefiro não responder";
 
 function bearerToken(request: NextRequest) {
   const authorization =
@@ -185,8 +185,8 @@ function normalizarPerguntas(
                 opcao
                   .toLowerCase()
                   .includes(
-                    "não consigo responder"
-                  )
+  "prefiro não responder"
+)
             );
 
           if (!jaTemOpcaoSegura) {

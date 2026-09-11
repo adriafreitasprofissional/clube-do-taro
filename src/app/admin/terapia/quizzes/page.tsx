@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -68,16 +68,16 @@ function novaPergunta(): Pergunta {
 
 function statusTexto(status: string) {
   if (status === "published") return "PUBLICADO";
-  if (status === "completed") return "CONCLUÃDO";
+  if (status === "completed") return "CONCLUÍDO";
   if (status === "draft") return "RASCUNHO";
   return status.toUpperCase();
 }
 
 function tipoQuizTexto(tipo: string) {
   if (tipo === "feedback") return "Feedback";
-  if (tipo === "reflection") return "ReflexÃ£o";
+  if (tipo === "reflection") return "Reflexão";
   if (tipo === "checkin") return "Check-in";
-  return "TerapÃªutico";
+  return "Terapêutico";
 }
 
 function formatarData(valor?: string | null) {
@@ -119,7 +119,7 @@ export default function QuizzesPage() {
     } = await supabase.auth.getSession();
 
     if (!session?.access_token) {
-      throw new Error("SessÃ£o administrativa expirada.");
+      throw new Error("Sessão administrativa expirada.");
     }
 
     return session.access_token;
@@ -154,14 +154,14 @@ export default function QuizzesPage() {
       if (!resPacientes.ok) {
         throw new Error(
           dadosPacientes?.error ||
-            "NÃ£o foi possÃ­vel carregar as pacientes."
+            "Não foi possível carregar as pacientes."
         );
       }
 
       if (!resQuizzes.ok) {
         throw new Error(
           dadosQuizzes?.error ||
-            "NÃ£o foi possÃ­vel carregar os quizzes."
+            "Não foi possível carregar os quizzes."
         );
       }
 
@@ -371,7 +371,7 @@ export default function QuizzesPage() {
 
     setErro(null);
     setMensagem(
-      `${novas.length} pergunta(s) adicionada(s) pela IA. Revise antes de publicar.`
+      "Perguntas adicionadas pela IA. Revise antes de publicar."
     );
   }
 
@@ -425,6 +425,7 @@ export default function QuizzesPage() {
       "Pergunta aprimorada pela IA."
     );
   }
+
   function prepararPerguntas() {
     return questions
       .filter((pergunta) => pergunta.prompt.trim())
@@ -478,7 +479,7 @@ export default function QuizzesPage() {
     }
 
     if (!title.trim()) {
-      setErro("Informe o tÃ­tulo do quiz.");
+      setErro("Informe o título do quiz.");
       return;
     }
 
@@ -519,7 +520,7 @@ export default function QuizzesPage() {
 
       if (!response.ok) {
         throw new Error(
-          data?.error || "NÃ£o foi possÃ­vel salvar o quiz."
+          data?.error || "Não foi possível salvar o quiz."
         );
       }
 
@@ -561,9 +562,14 @@ export default function QuizzesPage() {
             options: Array.isArray(pergunta.options)
               ? pergunta.options.filter(
                   (opcao) =>
-                    !opcao
-                      .toLowerCase()
-                      .includes("nÃ£o consigo responder")
+                    !(
+  opcao
+    .toLowerCase()
+    .includes("não consigo responder") ||
+  opcao
+    .toLowerCase()
+    .includes("prefiro não responder")
+)
                 )
               : [],
             min: Number(pergunta.min ?? 0),
@@ -614,7 +620,7 @@ export default function QuizzesPage() {
 
       if (!response.ok) {
         throw new Error(
-          data?.error || "NÃ£o foi possÃ­vel atualizar o quiz."
+          data?.error || "Não foi possível atualizar o quiz."
         );
       }
 
@@ -636,27 +642,27 @@ export default function QuizzesPage() {
 
   return (
     <div className="mx-auto max-w-7xl">
-      {/* NAVEGAÃ‡ÃƒO */}
+      {/* NAVEGAÇÃO */}
       <div className="mb-8 flex flex-wrap gap-4">
         <Link
           href="/admin/terapia"
           className="text-sm font-bold text-[#cbd69d]"
         >
-          â† Terapia em Dia
+          ← Terapia em Dia
         </Link>
 
         <Link
           href="/admin"
           className="text-sm font-bold text-white/50 transition hover:text-white"
         >
-          Central de NegÃ³cios
+          Central de Negócios
         </Link>
       </div>
 
       {/* TOPO */}
       <div className="mb-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#b7c28b]">
-          GestÃ£o terapÃªutica
+          Gestão terapêutica
         </p>
 
         <h1 className="mt-2 text-3xl font-semibold text-white">
@@ -665,8 +671,8 @@ export default function QuizzesPage() {
 
         <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
           Crie atividades personalizadas para apoiar o processo
-          terapÃªutico entre as sessÃµes. Todas as perguntas permitem
-          que a paciente pule, pare ou escolha nÃ£o responder.
+          terapêutico entre as sessões. Todas as perguntas permitem
+          que a paciente pule, pare ou escolha não responder.
         </p>
       </div>
 
@@ -682,7 +688,7 @@ export default function QuizzesPage() {
         </div>
       )}
 
-      {/* FORMULÃRIO */}
+      {/* FORMULÁRIO */}
       <section className="rounded-3xl border border-[#b7c28b]/20 bg-[linear-gradient(145deg,rgba(61,70,42,.40),rgba(27,31,20,.88))] p-5 md:p-7">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
@@ -703,7 +709,7 @@ export default function QuizzesPage() {
               onClick={limparFormulario}
               className="rounded-xl border border-white/15 px-4 py-2 text-xs font-bold text-white/60 transition hover:bg-white/5"
             >
-              Cancelar ediÃ§Ã£o
+              Cancelar edição
             </button>
           )}
         </div>
@@ -732,60 +738,60 @@ export default function QuizzesPage() {
               className={inputClass}
             >
               <option value="therapeutic">
-                TerapÃªutico
+                Terapêutico
               </option>
               <option value="reflection">
-                ReflexÃ£o
+                Reflexão
               </option>
               <option value="checkin">
                 Check-in
               </option>
               <option value="feedback">
-                Feedback da sessÃ£o
+                Feedback da sessão
               </option>
             </select>
           </Campo>
 
-          <Campo label="TÃ­tulo">
+          <Campo label="Título">
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex.: Mapa das Primeiras MemÃ³rias"
+              placeholder="Ex.: Mapa das Primeiras Memórias"
               className={inputClass}
             />
           </Campo>
 
-          <Campo label="SubtÃ­tulo">
+          <Campo label="Subtítulo">
             <input
               type="text"
               value={subtitle}
               onChange={(e) => setSubtitle(e.target.value)}
-              placeholder="Uma breve explicaÃ§Ã£o para a paciente"
+              placeholder="Uma breve explicação para a paciente"
               className={inputClass}
             />
           </Campo>
         </div>
 
         <div className="mt-5">
-          <Campo label="Texto-base ou anotaÃ§Ãµes da sessÃ£o">
+          <Campo label="Texto-base ou anotações da sessão">
             <textarea
               value={sourceNotes}
               onChange={(e) => setSourceNotes(e.target.value)}
               rows={5}
-              placeholder="Cole aqui suas anotaÃ§Ãµes para registrar o contexto usado na criaÃ§Ã£o da atividade."
+              placeholder="Cole aqui suas anotações para registrar o contexto usado na criação da atividade."
               className={inputClass}
             />
           </Campo>
         </div>
 
         <div className="mt-5">
-          <Campo label="OrientaÃ§Ã£o para a paciente">
+          <Campo label="Orientação para a paciente">
             <textarea
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               rows={4}
-              placeholder="Se deixar vazio, o sistema usarÃ¡ a orientaÃ§Ã£o segura padrÃ£o."
+              placeholder="Se deixar vazio, o sistema usará a orientação segura padrão."
               className={inputClass}
             />
           </Campo>
@@ -810,7 +816,7 @@ export default function QuizzesPage() {
               </h3>
 
               <p className="mt-1 text-xs text-white/45">
-                VocÃª pode editar, mudar a ordem e escolher o tipo de
+                Você pode editar, mudar a ordem e escolher o tipo de
                 resposta.
               </p>
             </div>
@@ -835,14 +841,26 @@ export default function QuizzesPage() {
                     Pergunta {index + 1}
                   </span>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <ImproveQuestionButton
+                      question={pergunta.prompt}
+                      quizType={quizType}
+                      onImproved={(gerada) =>
+                        aplicarMelhoriaIA(
+                          pergunta.id,
+                          gerada
+                        )
+                      }
+                      onError={setErro}
+                    />
+
                     <button
                       type="button"
                       onClick={() => moverPergunta(index, -1)}
                       disabled={index === 0}
                       className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/55 disabled:opacity-25"
                     >
-                      â†‘
+                      ↑
                     </button>
 
                     <button
@@ -851,7 +869,7 @@ export default function QuizzesPage() {
                       disabled={index === questions.length - 1}
                       className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/55 disabled:opacity-25"
                     >
-                      â†“
+                      ↓
                     </button>
 
                     <button
@@ -895,10 +913,10 @@ export default function QuizzesPage() {
                       className={inputClass}
                     >
                       <option value="single_choice">
-                        Escolha Ãºnica
+                        Escolha única
                       </option>
                       <option value="multiple_choice">
-                        MÃºltiplas escolhas
+                        Múltiplas escolhas
                       </option>
                       <option value="short_text">
                         Texto curto
@@ -925,7 +943,7 @@ export default function QuizzesPage() {
                           e.target.value
                         )
                       }
-                      placeholder="Uma orientaÃ§Ã£o leve para ajudar a paciente a compreender a pergunta"
+                      placeholder="Uma orientação leve para ajudar a paciente a compreender a pergunta"
                       className={inputClass}
                     />
                   </Campo>
@@ -935,7 +953,7 @@ export default function QuizzesPage() {
                   pergunta.type === "multiple_choice") && (
                   <div className="mt-5">
                     <p className="mb-3 text-xs font-semibold text-white/60">
-                      OpÃ§Ãµes de resposta
+                      Opções de resposta
                     </p>
 
                     <div className="space-y-2">
@@ -954,7 +972,7 @@ export default function QuizzesPage() {
                                 e.target.value
                               )
                             }
-                            placeholder={`OpÃ§Ã£o ${optionIndex + 1}`}
+                            placeholder={`Opção ${optionIndex + 1}`}
                             className={inputClass}
                           />
 
@@ -968,7 +986,7 @@ export default function QuizzesPage() {
                             }
                             className="rounded-xl border border-red-400/20 px-3 text-red-300"
                           >
-                            Ã—
+                            ×
                           </button>
                         </div>
                       ))}
@@ -979,20 +997,20 @@ export default function QuizzesPage() {
                       onClick={() => adicionarOpcao(pergunta.id)}
                       className="mt-3 text-xs font-bold text-[#cbd69d]"
                     >
-                      + Adicionar opÃ§Ã£o
+                      + Adicionar opção
                     </button>
 
                     <p className="mt-3 text-[11px] leading-5 text-white/35">
-                      O sistema acrescentarÃ¡ automaticamente a opÃ§Ã£o
-                      segura â€œNo momento nÃ£o consigo responder isso â€”
-                      e tudo bem.â€
+                      O sistema acrescentará automaticamente:
+                      “Prefiro não responder”.
+                      A pessoa também poderá pular a pergunta ou parar por aqui.
                     </p>
                   </div>
                 )}
 
                 {pergunta.type === "scale" && (
                   <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Campo label="MÃ­nimo">
+                    <Campo label="Mínimo">
                       <input
                         type="number"
                         value={pergunta.min}
@@ -1007,7 +1025,7 @@ export default function QuizzesPage() {
                       />
                     </Campo>
 
-                    <Campo label="MÃ¡ximo">
+                    <Campo label="Máximo">
                       <input
                         type="number"
                         value={pergunta.max}
@@ -1022,7 +1040,7 @@ export default function QuizzesPage() {
                       />
                     </Campo>
 
-                    <Campo label="Nome do mÃ­nimo">
+                    <Campo label="Nome do mínimo">
                       <input
                         type="text"
                         value={pergunta.min_label}
@@ -1033,12 +1051,12 @@ export default function QuizzesPage() {
                             e.target.value
                           )
                         }
-                        placeholder="Ex.: Nada confortÃ¡vel"
+                        placeholder="Ex.: Nada confortável"
                         className={inputClass}
                       />
                     </Campo>
 
-                    <Campo label="Nome do mÃ¡ximo">
+                    <Campo label="Nome do máximo">
                       <input
                         type="text"
                         value={pergunta.max_label}
@@ -1049,7 +1067,7 @@ export default function QuizzesPage() {
                             e.target.value
                           )
                         }
-                        placeholder="Ex.: Muito confortÃ¡vel"
+                        placeholder="Ex.: Muito confortável"
                         className={inputClass}
                       />
                     </Campo>
@@ -1060,7 +1078,7 @@ export default function QuizzesPage() {
           </div>
         </div>
 
-        {/* BOTÃ•ES */}
+        {/* BOTÕES */}
         <div className="mt-7 flex flex-wrap gap-3 border-t border-[#b7c28b]/15 pt-6">
           <button
             type="button"
@@ -1082,11 +1100,11 @@ export default function QuizzesPage() {
         </div>
       </section>
 
-      {/* HISTÃ“RICO */}
+      {/* HISTÓRICO */}
       <section className="mt-10">
         <div className="mb-4">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#b7c28b]">
-            HistÃ³rico
+            Histórico
           </p>
 
           <h2 className="mt-2 text-xl font-semibold text-white">
@@ -1124,7 +1142,7 @@ export default function QuizzesPage() {
                     <p className="mt-2 text-sm text-[#cbd69d]">
                       {nomePaciente.get(quiz.client_id) ||
                         "Paciente"}{" "}
-                      Â· {tipoQuizTexto(quiz.quiz_type)}
+                      · {tipoQuizTexto(quiz.quiz_type)}
                     </p>
 
                     <p className="mt-1 text-xs text-white/40">
