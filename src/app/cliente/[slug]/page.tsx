@@ -168,7 +168,12 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
             >
               ✨ Meus Direcionamentos
             </Link>
-
+           <Link
+  href={`/cliente/${slug}/jornada`}
+  className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-4 py-3 text-sm font-bold text-yellow-300 transition hover:bg-yellow-500/10"
+>
+  🌙 Jornada dos Guardiões
+</Link>
             <a
              href={`${LINK_SORTEIOS}?slug=${slug}`}
               
@@ -276,7 +281,29 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
                   Abrir direcionamentos →
                 </p>
               </Link>
+             <Link
+  href={`/cliente/${slug}/jornada`}
+  className="group relative overflow-hidden rounded-2xl border border-yellow-400/40 bg-gradient-to-br from-purple-950 via-[#19172f] to-[#241333] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-300"
+>
+  <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-yellow-400/10 blur-3xl" />
 
+  <p className="relative text-3xl">
+    🌙
+  </p>
+
+  <h3 className="relative mt-4 text-xl font-extrabold text-yellow-300">
+    Jornada dos Guardiões
+  </h3>
+
+  <p className="relative mt-3 text-sm leading-6 text-purple-100">
+    Conquiste estrelas, desbloqueie medalhas
+    e avance em sua jornada dentro do Clube.
+  </p>
+
+  <p className="relative mt-5 text-sm font-bold text-yellow-300">
+    Iniciar minha jornada →
+  </p>
+</Link>
               <Link
 
 
