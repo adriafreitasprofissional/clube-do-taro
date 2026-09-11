@@ -198,13 +198,12 @@ export default function JornadaDosGuardioesPage() {
                 ✦
               </span>
 
-              <h1 className="text-3xl font-extrabold tracking-tight text-[#f3df9e] sm:text-4xl md:text-5xl">
-                Jornada dos Guardiões
-              </h1>
-
-              <span className="text-2xl text-[#f2d47a] drop-shadow-[0_0_14px_rgba(242,212,122,0.25)]">
-                ✦
-              </span>
+              <h1 className="text-3xl font-semibold tracking-[0.01em] text-[#ecd79a] sm:text-4xl md:text-[3.2rem]">
+  Jornada dos Guardiões
+</h1>
+             <span className="text-xl text-[#dcbf74] opacity-90">
+  ✦
+</span>
             </div>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#ded1ee] sm:text-base">

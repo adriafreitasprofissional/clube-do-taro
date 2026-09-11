@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 type Cliente = {
   id: string;
   nome: string | null;
+nome_referencia: string | null;
   slug: string;
   plano: string | null;
   tipo_assinatura: string | null;
@@ -56,7 +57,7 @@ const [historicoRecadosAberto, setHistoricoRecadosAberto] =
     async function buscarCliente() {
       const { data, error } = await supabase
         .from("club_clients")
-        .select("id, nome, slug, plano, tipo_assinatura, status, genero")
+       .select("id, nome, nome_referencia, slug, plano, tipo_assinatura, status, genero")
         .eq("slug", slug)
         .maybeSingle();
 
@@ -122,8 +123,8 @@ setCarregando(false);
 
   const plano = String(cliente.plano || "bronze").toLowerCase();
   const primeiroNome =
+  cliente.nome_referencia ||
   (cliente.nome || slug).split(" ")[0];
-
 const generoNormalizado = String(cliente.genero || "")
   .trim()
   .toLowerCase();
