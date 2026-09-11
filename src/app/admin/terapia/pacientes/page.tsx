@@ -247,7 +247,12 @@ export default function PacientesPage() {
                 >
                   Ver anamnese
                 </Link>
-
+               <Link
+  href={`/admin/terapia/pacientes/${paciente.id}`}
+  className="rounded-xl bg-[#b8c68a] px-4 py-2 text-xs font-bold text-[#263019]"
+>
+  Abrir paciente
+</Link>
                 {proximo && (
                   <Link
                     href={`/admin/agenda/${proximo.id}/atendimento`}

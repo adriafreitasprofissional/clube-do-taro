@@ -251,9 +251,6 @@ REGRAS:
 Tipos permitidos:
 single_choice
 multiple_choice
-short_text
-long_text
-scale
 `;
 }
 
