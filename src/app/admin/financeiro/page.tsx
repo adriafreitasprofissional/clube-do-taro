@@ -198,12 +198,29 @@ export default function FinanceiroAdminPage() {
     cortesia: false,
   });
 
+  const [secoesAbertas, setSecoesAbertas] = useState({
+    assinantes: false,
+    clientes: false,
+    profissionais: false,
+  });
+
+  function alternarSecao(
+    secao: "assinantes" | "clientes" | "profissionais"
+  ) {
+    setSecoesAbertas((atual) => ({
+      ...atual,
+      [secao]: !atual[secao],
+    }));
+  }
+
   async function carregarClientes() {
     setCarregando(true);
 
     const { data, error } = await supabase
       .from("club_clients")
       .select("*")
+      .eq("produto", "Clube do Tarô")
+      .ilike("status", "ativo")
       .order("nome", { ascending: true });
 
     if (error) {
@@ -243,7 +260,7 @@ export default function FinanceiroAdminPage() {
     clientes.forEach((cliente) => {
       if (
         cliente.tipo_assinatura === "mensal" &&
-        cliente.status === "ativo"
+        String(cliente.status || "").toLowerCase() === "ativo"
       ) {
         const valorMensal =
           cliente.valor_mensal_personalizado ||
@@ -541,17 +558,21 @@ if (carregando) {
     ← Voltar à página anterior
   </button>
 
-  <p className="text-sm text-purple-300">
-    Administração do Clube do Tarô
-  
+  <p className="text-sm text-[#aebc8d]">
+    Central de Negócios
   </p>
 
         <h1 className="mt-1 text-3xl font-extrabold text-yellow-400">
-          💳 Financeiro das Assinantes
+          💳 Financeiro Geral
         </h1>
 
-        <p className="mt-2 text-sm text-purple-200">
-          Controle de vencimentos, pagamentos, renovações e cortesias.
+        <p className="mt-2 text-sm text-[#c6cfb2]">
+          Clube do Tarô, clientes de produtos e serviços e profissionais assinantes.
+        </p>
+
+        <p className="mt-3 text-xs text-[#8f9c79]">
+          O resumo abaixo mostra, neste momento, os valores do Clube do Tarô.
+          Os demais valores serão somados conforme cada financeiro for conectado.
         </p>
 
         <div className="mt-7 grid gap-4 md:grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -586,6 +607,29 @@ if (carregando) {
           </div>
         </div>
 
+        <div className="mt-8 space-y-4">
+          <section className="overflow-hidden rounded-2xl border border-[#687750]/50 bg-[#10140e]">
+            <button
+              type="button"
+              onClick={() => alternarSecao("assinantes")}
+              className="flex w-full items-center justify-between gap-4 bg-[#182014] px-5 py-5 text-left transition hover:bg-[#20291a]"
+            >
+              <div>
+                <p className="text-lg font-extrabold text-[#e8efcf]">
+                  Financeiro dos Assinantes
+                </p>
+                <p className="mt-1 text-xs text-[#aebc8d]">
+                  Clube do Tarô · {clientes.length} assinante(s) ativo(s)
+                </p>
+              </div>
+
+              <span className="text-2xl text-[#d7e09e]">
+                {secoesAbertas.assinantes ? "⌃" : "⌄"}
+              </span>
+            </button>
+
+            {secoesAbertas.assinantes && (
+              <div className="border-t border-[#687750]/30 px-4 pb-5 sm:px-5">
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           <input
             value={busca}
@@ -746,6 +790,91 @@ if (carregando) {
               </section>
             );
           })}
+        </div>
+
+              </div>
+            )}
+          </section>
+
+          <section className="overflow-hidden rounded-2xl border border-[#687750]/50 bg-[#10140e]">
+            <button
+              type="button"
+              onClick={() => alternarSecao("clientes")}
+              className="flex w-full items-center justify-between gap-4 bg-[#182014] px-5 py-5 text-left transition hover:bg-[#20291a]"
+            >
+              <div>
+                <p className="text-lg font-extrabold text-[#e8efcf]">
+                  Financeiro de Clientes
+                </p>
+                <p className="mt-1 text-xs text-[#aebc8d]">
+                  Mapas, cursos, terapias, mentorias, livros, loja e outros produtos
+                </p>
+              </div>
+
+              <span className="text-2xl text-[#d7e09e]">
+                {secoesAbertas.clientes ? "⌃" : "⌄"}
+              </span>
+            </button>
+
+            {secoesAbertas.clientes && (
+              <div className="border-t border-[#687750]/30 p-5">
+                <div className="rounded-2xl border border-[#687750]/35 bg-[#0c100b] p-5">
+                  <p className="font-bold text-[#e8efcf]">
+                    Financeiro de produtos e serviços
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[#aebc8d]">
+                    Esta área vai receber as compras feitas por clientes que não
+                    necessariamente pertencem ao Clube do Tarô. A Rayssa, por
+                    exemplo, poderá permanecer como cliente de Mapa Numerológico
+                    sem aparecer nas cortesias do Clube.
+                  </p>
+                  <p className="mt-3 text-xs text-[#7f8c6b]">
+                    Os valores ainda não são somados ao resumo porque as vendas
+                    dos produtos precisam ser conectadas a esta central.
+                  </p>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section className="overflow-hidden rounded-2xl border border-[#687750]/50 bg-[#10140e]">
+            <button
+              type="button"
+              onClick={() => alternarSecao("profissionais")}
+              className="flex w-full items-center justify-between gap-4 bg-[#182014] px-5 py-5 text-left transition hover:bg-[#20291a]"
+            >
+              <div>
+                <p className="text-lg font-extrabold text-[#e8efcf]">
+                  Financeiro dos Profissionais Assinantes
+                </p>
+                <p className="mt-1 text-xs text-[#aebc8d]">
+                  Profissionais que assinarem os aplicativos e sistemas
+                </p>
+              </div>
+
+              <span className="text-2xl text-[#d7e09e]">
+                {secoesAbertas.profissionais ? "⌃" : "⌄"}
+              </span>
+            </button>
+
+            {secoesAbertas.profissionais && (
+              <div className="border-t border-[#687750]/30 p-5">
+                <div className="rounded-2xl border border-[#687750]/35 bg-[#0c100b] p-5">
+                  <p className="font-bold text-[#e8efcf]">
+                    Assinaturas dos profissionais
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[#aebc8d]">
+                    Aqui ficarão os planos, vencimentos, pagamentos e situação
+                    dos profissionais que assinarem os seus aplicativos.
+                  </p>
+                  <p className="mt-3 text-xs text-[#7f8c6b]">
+                    Esta área fica preparada agora e será ligada ao cadastro
+                    profissional quando os planos forem ativados.
+                  </p>
+                </div>
+              </div>
+            )}
+          </section>
         </div>
       </div>
 
