@@ -6,6 +6,7 @@ import { ClientCard } from "./ClientCard";
 
 interface Client {
   id: string;
+  slug?: string;
   nome: string;
   email: string;
   plano: string;
@@ -86,6 +87,7 @@ export function SearchClient({
         .from("club_clients")
         .select(`
           id,
+          slug,
           nome,
           email,
           plano,

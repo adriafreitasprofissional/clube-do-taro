@@ -1,5 +1,6 @@
 import { reduce } from "./reduce"
 import { kabbalah } from "./kabbalah"
+import { normalizeName } from "./normalizeName"
 
 const KARMIC_NUMBERS = [13, 14, 16, 19]
 
@@ -74,9 +75,7 @@ export function calculateKarmicDebts(
 
   // Expressão
   const cleanName =
-    name
-      .toUpperCase()
-      .replace(/[^A-Z]/g, "")
+  normalizeName(name)
 
   let expressionTotal = 0
 

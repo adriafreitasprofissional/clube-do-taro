@@ -2,6 +2,7 @@ import { SearchClient } from "./SearchClient";
 
 interface Client {
   id: string;
+  slug?: string;
   nome: string;
   email: string;
   plano: string;

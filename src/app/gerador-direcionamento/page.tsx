@@ -1,21 +1,21 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
-const PLANILHA_CONTEUDOS_CSV =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSr7qra9Jsh2IO6vDO_8vVxe-8lkf9zbFeuDPtw5Wny7zHUKIhVa7lIqqshLo_4JbRDUhWjv0sb_5y3/pub?gid=0&single=true&output=csv";
-
-type ConteudoPlanilha = {
+type ConteudoDirecionamento = {
+  id: string;
   slug: string;
   ano: string;
   mes: string;
   semana: string;
   tipo: string;
   titulo: string;
-  drive_file: string;
+  drive_file_id: string | null;
+  drive_file_url: string | null;
+  drive_folder_id: string | null;
   ativo: string;
 };
 
@@ -58,7 +58,7 @@ type InteracaoDirecionamento = {
 const NOMES_MESES = [
   "janeiro",
   "fevereiro",
-  "março",
+  "marÃ§o",
   "abril",
   "maio",
   "junho",
@@ -73,7 +73,7 @@ const NOMES_MESES = [
 const ORDEM_MESES = [
   "janeiro",
   "fevereiro",
-  "março",
+  "marÃ§o",
   "marco",
   "abril",
   "maio",
@@ -278,9 +278,9 @@ export default function PortalPremium() {
   ] = useState(0);
 
   const [
-    conteudosPlanilha,
-    setConteudosPlanilha,
-  ] = useState<ConteudoPlanilha[]>([]);
+    conteudosDirecionamento,
+    setConteudosDirecionamento,
+  ] = useState<ConteudoDirecionamento[]>([]);
 
   const [
     carregandoConteudos,
@@ -349,7 +349,7 @@ export default function PortalPremium() {
 
         if (!data) {
           throw new Error(
-            "Assinante não encontrada."
+            "Assinante nÃ£o encontrada."
           );
         }
 
@@ -457,7 +457,7 @@ export default function PortalPremium() {
 
           if (recadoError) {
             console.error(
-              "Erro ao carregar reformulação:",
+              "Erro ao carregar reformulaÃ§Ã£o:",
               recadoError
             );
           }
@@ -485,132 +485,67 @@ export default function PortalPremium() {
   }, [slug, referenciaAtual]);
 
   useEffect(() => {
-    async function carregarConteudosDaPlanilha() {
+    async function carregarConteudosDirecionamento() {
       try {
-        const resposta = await fetch(
-          PLANILHA_CONTEUDOS_CSV,
-          {
-            cache: "no-store",
-          }
-        );
+        setCarregandoConteudos(true);
 
-        if (!resposta.ok) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session?.access_token) {
           throw new Error(
-            "Não foi possível carregar a planilha de conteúdos."
+            "Sessão da assinante não encontrada."
           );
         }
 
-        const texto =
-          await resposta.text();
-
-        const linhas = texto
-          .split(/\r?\n/)
-          .map((linha) =>
-            linha.trim()
-          )
-          .filter(Boolean);
-
-        if (linhas.length === 0) {
-          setConteudosPlanilha([]);
+        if (!slug) {
+          setConteudosDirecionamento([]);
           return;
         }
 
-        const cabecalho =
-          lerCsv(linhas[0]).map(
-            (item) =>
-              item
-                .toLowerCase()
-                .trim()
+        const resposta = await fetch(
+          `/api/direcionamentos/conteudos?slug=${encodeURIComponent(
+            slug
+          )}`,
+          {
+            cache: "no-store",
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok) {
+          throw new Error(
+            resultado?.error ||
+              "Não foi possível carregar os direcionamentos."
           );
+        }
 
-        const conteudos =
-          linhas
-            .slice(1)
-            .map((linha) => {
-              const valores =
-                lerCsv(linha);
-
-              const item: Record<
-                string,
-                string
-              > = {};
-
-              cabecalho.forEach(
-                (
-                  coluna,
-                  indice
-                ) => {
-                  item[coluna] =
-                    valores[indice] ||
-                    "";
-                }
-              );
-
-              return {
-                slug: (
-                  item.slug || ""
-                )
-                  .toLowerCase()
-                  .trim(),
-
-                ano: (
-                  item.ano || ""
-                ).trim(),
-
-                mes: (
-                  item.mes || ""
-                )
-                  .toLowerCase()
-                  .trim(),
-
-                semana: (
-                  item.semana || ""
-                ).trim(),
-
-                tipo: (
-                  item.tipo || ""
-                )
-                  .toLowerCase()
-                  .trim(),
-
-                titulo: (
-                  item.titulo || ""
-                ).trim(),
-
-                drive_file: (
-                  item.drive_file ||
-                  ""
-                ).trim(),
-
-                ativo: (
-                  item.ativo || ""
-                )
-                  .toLowerCase()
-                  .trim(),
-              };
-            });
-
-        setConteudosPlanilha(
-          conteudos
+        setConteudosDirecionamento(
+          resultado.conteudos || []
         );
       } catch (err) {
         console.error(
-          "Erro ao carregar planilha:",
+          "Erro ao carregar direcionamentos:",
           err
         );
+
+        setConteudosDirecionamento([]);
       } finally {
-        setCarregandoConteudos(
-          false
-        );
+        setCarregandoConteudos(false);
       }
     }
 
-    carregarConteudosDaPlanilha();
-  }, []);
+    carregarConteudosDirecionamento();
+  }, [slug]);
 
   const anos = useMemo(() => {
     const anosConteudos =
-      conteudosPlanilha
+      conteudosDirecionamento
         .filter(
           (item) =>
             item.slug === slug &&
@@ -639,7 +574,7 @@ export default function PortalPremium() {
           Number(a)
       );
   }, [
-    conteudosPlanilha,
+    conteudosDirecionamento,
     direcionamentos,
     slug,
   ]);
@@ -648,7 +583,7 @@ export default function PortalPremium() {
     ano: string
   ) {
     const mesesConteudos =
-      conteudosPlanilha
+      conteudosDirecionamento
         .filter(
           (item) =>
             item.slug === slug &&
@@ -710,7 +645,7 @@ export default function PortalPremium() {
     ano: string,
     mes: string
   ) {
-    return conteudosPlanilha.filter(
+    return conteudosDirecionamento.filter(
       (item) =>
         item.slug === slug &&
         item.ano === ano &&
@@ -779,7 +714,7 @@ export default function PortalPremium() {
     }
 
     if (opcao === "duvida") {
-      return "Ainda tenho dúvidas";
+      return "Ainda tenho dÃºvidas";
     }
 
     if (opcao === "elogio") {
@@ -787,10 +722,10 @@ export default function PortalPremium() {
     }
 
     if (opcao === "sugestao") {
-      return "Sugestões";
+      return "SugestÃµes";
     }
 
-    return "Interação";
+    return "InteraÃ§Ã£o";
   }
 
   function interacoesDaSemana(
@@ -838,7 +773,7 @@ export default function PortalPremium() {
       if (!response.ok) {
         throw new Error(
           data.error ||
-            "Não foi possível carregar o acompanhamento."
+            "NÃ£o foi possÃ­vel carregar o acompanhamento."
         );
       }
 
@@ -849,7 +784,7 @@ export default function PortalPremium() {
       );
     } catch (erro) {
       console.error(
-        "Erro ao carregar interações dos direcionamentos:",
+        "Erro ao carregar interaÃ§Ãµes dos direcionamentos:",
         erro
       );
     }
@@ -880,14 +815,14 @@ export default function PortalPremium() {
 
     if (!opcao) {
       alert(
-        "Escolha uma opção sobre este direcionamento."
+        "Escolha uma opÃ§Ã£o sobre este direcionamento."
       );
       return;
     }
 
     if (!mensagem) {
       alert(
-        "Escreva sua percepção, dúvida, elogio ou sugestão."
+        "Escreva sua percepÃ§Ã£o, dÃºvida, elogio ou sugestÃ£o."
       );
       return;
     }
@@ -929,7 +864,7 @@ export default function PortalPremium() {
       if (!response.ok) {
         throw new Error(
           data.error ||
-            "Não foi possível enviar sua mensagem."
+            "NÃ£o foi possÃ­vel enviar sua mensagem."
         );
       }
 
@@ -953,7 +888,7 @@ export default function PortalPremium() {
       await carregarInteracoesDirecionamento();
 
       alert(
-        "Mensagem enviada para Ádria. 💜"
+        "Mensagem enviada para Ãdria. ðŸ’œ"
       );
     } catch (erro) {
       alert(
@@ -972,7 +907,7 @@ export default function PortalPremium() {
     semana: string,
     tipo: string
   ) {
-    return conteudosPlanilha.find(
+    return conteudosDirecionamento.find(
       (item) =>
         item.slug === slug &&
         item.ano === ano &&
@@ -996,17 +931,27 @@ export default function PortalPremium() {
   );
 
   if (!conteudo) {
-    alert("Áudio ainda não disponível.");
+    alert("Ãudio ainda nÃ£o disponÃ­vel.");
     return;
   }
 
+  const arquivoDrive =
+    conteudo.drive_file_id ||
+    conteudo.drive_file_url ||
+    "";
+
   const url = linkDrive(
-    conteudo.drive_file,
+    arquivoDrive,
     conteudo.tipo
   );
 
+  if (!url) {
+    alert("Arquivo de áudio não encontrado.");
+    return;
+  }
+
   if (!clienteId) {
-    alert("Não foi possível identificar a assinante.");
+    alert("NÃ£o foi possÃ­vel identificar a assinante.");
     return;
   }
 
@@ -1071,7 +1016,7 @@ export default function PortalPremium() {
   alert(
     `ERRO AO REGISTRAR ESCUTA:\n\n` +
     `Mensagem: ${erro?.message || "sem mensagem"}\n` +
-    `Código: ${erro?.code || "sem código"}\n` +
+    `CÃ³digo: ${erro?.code || "sem cÃ³digo"}\n` +
     `Detalhes: ${erro?.details || "sem detalhes"}\n` +
     `Dica: ${erro?.hint || "sem dica"}`
   );
@@ -1096,15 +1041,31 @@ export default function PortalPremium() {
 
     if (!conteudo) {
       alert(
-        "PDF ainda não disponível."
+        "PDF ainda nÃ£o disponÃ­vel."
       );
 
       return;
     }
 
+    const arquivoDrive =
+      conteudo.drive_file_id ||
+      conteudo.drive_file_url ||
+      "";
+
+    const url = linkDrive(
+      arquivoDrive,
+      conteudo.tipo
+    );
+
+    if (!url) {
+      alert("Arquivo PDF não encontrado.");
+      return;
+    }
+
     window.open(
-      conteudo.drive_file,
-      "_blank"
+      url,
+      "_blank",
+      "noopener,noreferrer"
     );
   }
 
@@ -1143,7 +1104,7 @@ export default function PortalPremium() {
                 color: "#f4d46a",
               }}
             >
-              🟡 Mensagem da Estella
+              ðŸŸ¡ Mensagem da Estella
             </strong>
 
             <div
@@ -1159,7 +1120,7 @@ export default function PortalPremium() {
           </div>
         )}
 
-      {item.status === "Respondida em áudio" && (
+      {item.status === "Respondida em Ã¡udio" && (
         <>
           <p
             style={{
@@ -1168,7 +1129,7 @@ export default function PortalPremium() {
               fontSize: 17,
             }}
           >
-            ✅ Sua pergunta foi respondida.
+            âœ… Sua pergunta foi respondida.
           </p>
 
           <p
@@ -1179,7 +1140,7 @@ export default function PortalPremium() {
             }}
           >
             Esta pergunta foi respondida no
-            Direcionamento Exclusivo deste mês.
+            Direcionamento Exclusivo deste mÃªs.
           </p>
         </>
       )}
@@ -1193,7 +1154,7 @@ export default function PortalPremium() {
               fontSize: 17,
             }}
           >
-            💜 Sua pergunta foi aceita.
+            ðŸ’œ Sua pergunta foi aceita.
           </p>
 
           <p
@@ -1203,7 +1164,7 @@ export default function PortalPremium() {
               lineHeight: 1.7,
             }}
           >
-            Ela será respondida no próximo
+            Ela serÃ¡ respondida no prÃ³ximo
             direcionamento.
           </p>
         </>
@@ -1217,7 +1178,7 @@ export default function PortalPremium() {
               fontWeight: 700,
             }}
           >
-            💜 Sua pergunta foi recebida.
+            ðŸ’œ Sua pergunta foi recebida.
           </p>
 
           <p
@@ -1227,7 +1188,7 @@ export default function PortalPremium() {
               lineHeight: 1.7,
             }}
           >
-            Ela está aguardando análise.
+            Ela estÃ¡ aguardando anÃ¡lise.
           </p>
         </>
       )}
@@ -1242,7 +1203,7 @@ export default function PortalPremium() {
               fontSize: 17,
             }}
           >
-            🟡 Sua pergunta precisa ser reformulada.
+            ðŸŸ¡ Sua pergunta precisa ser reformulada.
           </p>
 
           <p
@@ -1253,7 +1214,7 @@ export default function PortalPremium() {
             }}
           >
             A Cigana Estella solicitou uma
-            reformulação antes de aceitar esta
+            reformulaÃ§Ã£o antes de aceitar esta
             pergunta.
           </p>
 
@@ -1282,7 +1243,7 @@ export default function PortalPremium() {
               fontSize: 15,
             }}
           >
-            ✍️ Reformular minha pergunta
+            âœï¸ Reformular minha pergunta
           </button>
         </>
       )}
@@ -1312,7 +1273,7 @@ export default function PortalPremium() {
             lineHeight: 1.7,
           }}
         >
-          “{item.pergunta}”
+          â€œ{item.pergunta}â€
         </div>
       </div>
 
@@ -1323,7 +1284,7 @@ export default function PortalPremium() {
           fontSize: 13,
         }}
       >
-        📅{" "}
+        ðŸ“…{" "}
         {new Date(
           item.created_at
         ).toLocaleDateString("pt-BR")}
@@ -1387,7 +1348,7 @@ export default function PortalPremium() {
             marginBottom: 30,
           }}
         >
-          ✨ Direcionamentos
+          âœ¨ Direcionamentos
         </h2>
 
         <h3
@@ -1426,7 +1387,7 @@ export default function PortalPremium() {
             marginTop: 10,
           }}
         >
-          💎 Plano {plano}
+          ðŸ’Ž Plano {plano}
         </div>
 
         <div
@@ -1448,7 +1409,7 @@ export default function PortalPremium() {
               marginBottom: 12,
             }}
           >
-            🔮 Direcionamento
+            ðŸ”® Direcionamento
             Exclusivo
           </div>
 
@@ -1460,7 +1421,7 @@ export default function PortalPremium() {
               marginBottom: 16,
             }}
           >
-            Receba uma orientação
+            Receba uma orientaÃ§Ã£o
             exclusiva da Cigana
             Estella.
           </p>
@@ -1473,7 +1434,7 @@ export default function PortalPremium() {
               marginBottom: 6,
             }}
           >
-            Você possui
+            VocÃª possui
           </div>
 
           <div
@@ -1499,12 +1460,12 @@ export default function PortalPremium() {
               marginBottom: 18,
             }}
           >
-            disponível
+            disponÃ­vel
             {perguntasRestantes !==
             1
               ? "is"
               : ""}{" "}
-            neste mês.
+            neste mÃªs.
           </div>
 
           {!reformulacao ? (
@@ -1553,7 +1514,7 @@ export default function PortalPremium() {
               {perguntasRestantes ===
               0
                 ? "Limite mensal atingido"
-                : "✨ Fazer minha pergunta"}
+                : "âœ¨ Fazer minha pergunta"}
             </button>
           ) : (
             <button
@@ -1585,7 +1546,7 @@ export default function PortalPremium() {
                 fontSize: 15,
               }}
             >
-              ✍️ Reformular minha
+              âœï¸ Reformular minha
               pergunta
             </button>
           )}
@@ -1609,7 +1570,7 @@ export default function PortalPremium() {
                   marginBottom: 10,
                 }}
               >
-                🟡 Reformule sua
+                ðŸŸ¡ Reformule sua
                 pergunta
               </h3>
 
@@ -1625,9 +1586,9 @@ export default function PortalPremium() {
                 Direcionamento
                 Exclusivo seja o
                 mais preciso
-                possível, a Cigana
+                possÃ­vel, a Cigana
                 solicitou uma
-                reformulação.
+                reformulaÃ§Ã£o.
               </p>
 
               <div
@@ -1670,7 +1631,7 @@ export default function PortalPremium() {
               : "auto",
           }}
         >
-          ← Voltar ao Portal
+          â† Voltar ao Portal
         </button>
       </aside>
 
@@ -1694,7 +1655,7 @@ export default function PortalPremium() {
             marginBottom: 35,
           }}
         >
-          Que os oráculos
+          Que os orÃ¡culos
           iluminem seu caminho...
         </p>
 
@@ -1707,7 +1668,7 @@ export default function PortalPremium() {
                 marginBottom: 20,
               }}
             >
-              Carregando histórico...
+              Carregando histÃ³rico...
             </div>
           )}
 
@@ -1723,9 +1684,9 @@ export default function PortalPremium() {
               color: "#ddd",
             }}
           >
-            Ainda não há
+            Ainda nÃ£o hÃ¡
             direcionamentos
-            disponíveis.
+            disponÃ­veis.
           </div>
         ) : (
           anos.map((ano) => {
@@ -1793,8 +1754,8 @@ export default function PortalPremium() {
                   }}
                 >
                   {aberto
-                    ? "▼"
-                    : "▶"}{" "}
+                    ? "â–¼"
+                    : "â–¶"}{" "}
                   {ano}
                 </button>
 
@@ -1880,8 +1841,8 @@ export default function PortalPremium() {
                               }}
                             >
                               {abertoMes
-                                ? "▼"
-                                : "▶"}{" "}
+                                ? "â–¼"
+                                : "â–¶"}{" "}
                               {capitalizar(
                                 mes
                               )}
@@ -1936,13 +1897,13 @@ export default function PortalPremium() {
       }}
     >
       <span>
-        🔮 Mensagens da Estella
+        ðŸ”® Mensagens da Estella
       </span>
 
       <span>
         {mensagensAbertas[chaveMes]
-          ? "▲ Fechar"
-          : "▼ Ver histórico"}
+          ? "â–² Fechar"
+          : "â–¼ Ver histÃ³rico"}
       </span>
     </button>
 
@@ -1973,7 +1934,7 @@ export default function PortalPremium() {
                                           12,
                                       }}
                                     >
-                                      🎧
+                                      ðŸŽ§
                                       Direcionamentos
                                       da semana
                                     </h3>
@@ -2038,11 +1999,11 @@ export default function PortalPremium() {
                                                   18,
                                               }}
                                             >
-                                              ✦{" "}
+                                              âœ¦{" "}
                                               {
                                                 semana
                                               }
-                                              ª
+                                              Âª
                                               Semana
                                             </h4>
 
@@ -2080,7 +2041,7 @@ export default function PortalPremium() {
                                                     "pointer",
                                                 }}
                                               >
-                                                🎧
+                                                ðŸŽ§
                                                 Ouvir
                                                 Direcionamento
                                               </button>
@@ -2110,7 +2071,7 @@ export default function PortalPremium() {
                                                     700,
                                                 }}
                                               >
-                                                📄
+                                                ðŸ“„
                                                 Baixar
                                                 PDF
                                               </button>
@@ -2153,7 +2114,7 @@ export default function PortalPremium() {
                                                     700,
                                                 }}
                                               >
-                                                ✏️ O que
+                                                âœï¸ O que
                                                 achou do
                                                 direcionamento?
                                               </button>
@@ -2239,7 +2200,7 @@ export default function PortalPremium() {
                                                   <option value="">
                                                     Escolha
                                                     uma
-                                                    opção...
+                                                    opÃ§Ã£o...
                                                   </option>
 
                                                   <option value="muito_bom">
@@ -2250,7 +2211,7 @@ export default function PortalPremium() {
                                                   <option value="duvida">
                                                     Ainda
                                                     tenho
-                                                    dúvidas
+                                                    dÃºvidas
                                                   </option>
 
                                                   <option value="elogio">
@@ -2258,7 +2219,7 @@ export default function PortalPremium() {
                                                   </option>
 
                                                   <option value="sugestao">
-                                                    Sugestões
+                                                    SugestÃµes
                                                   </option>
                                                 </select>
 
@@ -2282,7 +2243,7 @@ export default function PortalPremium() {
                                                         "none",
                                                     }}
                                                   >
-                                                    ✏️
+                                                    âœï¸
                                                   </span>
 
                                                   <textarea
@@ -2310,7 +2271,7 @@ export default function PortalPremium() {
                                                     rows={
                                                       3
                                                     }
-                                                    placeholder="Escreva aqui sua percepção, dúvida, elogio ou sugestão..."
+                                                    placeholder="Escreva aqui sua percepÃ§Ã£o, dÃºvida, elogio ou sugestÃ£o..."
                                                     style={{
                                                       width:
                                                         "100%",
@@ -2379,7 +2340,7 @@ export default function PortalPremium() {
                                                   {enviandoDirecionamento ===
                                                   chave
                                                     ? "Enviando..."
-                                                    : "Enviar para Ádria"}
+                                                    : "Enviar para Ãdria"}
                                                 </button>
                                               </div>
                                             )}
@@ -2427,8 +2388,8 @@ export default function PortalPremium() {
                                                   }}
                                                 >
                                                   {historicoAberto
-                                                    ? "▲ Fechar histórico"
-                                                    : `▼ Seu acompanhamento deste direcionamento (${historicoSemana.length})`}
+                                                    ? "â–² Fechar histÃ³rico"
+                                                    : `â–¼ Seu acompanhamento deste direcionamento (${historicoSemana.length})`}
                                                 </button>
 
                                                 {historicoAberto && (
@@ -2532,10 +2493,10 @@ export default function PortalPremium() {
                                                                     6,
                                                                 }}
                                                               >
-                                                                🌹
+                                                                ðŸŒ¹
                                                                 Resposta
                                                                 da
-                                                                Ádria
+                                                                Ãdria
                                                               </div>
 
                                                               <div
@@ -2578,10 +2539,10 @@ export default function PortalPremium() {
                                       }}
                                     >
                                       Ainda
-                                      não há
-                                      conteúdo
+                                      nÃ£o hÃ¡
+                                      conteÃºdo
                                       neste
-                                      mês.
+                                      mÃªs.
                                     </div>
                                   )
                                 )}
@@ -2636,7 +2597,7 @@ export default function PortalPremium() {
                 marginBottom: 20,
               }}
             >
-              🎧 Direcionamento
+              ðŸŽ§ Direcionamento
               da Semana
             </h2>
 
@@ -2724,7 +2685,7 @@ export default function PortalPremium() {
                 marginBottom: 20,
               }}
             >
-              🔮 Direcionamento
+              ðŸ”® Direcionamento
               Exclusivo
             </h2>
 
@@ -2734,7 +2695,7 @@ export default function PortalPremium() {
                 marginBottom: 18,
               }}
             >
-              Escolha a área da
+              Escolha a Ã¡rea da
               sua pergunta.
             </p>
 
@@ -2763,28 +2724,28 @@ export default function PortalPremium() {
               </option>
 
               <option>
-                ❤️ Amor
+                â¤ï¸ Amor
               </option>
 
               <option>
-                💰 Trabalho
+                ðŸ’° Trabalho
               </option>
 
               <option>
-                🌿 Saúde
+                ðŸŒ¿ SaÃºde
               </option>
 
               <option>
-                ✨ Espiritualidade
+                âœ¨ Espiritualidade
               </option>
 
               <option>
-                👨‍👩‍👧
+                ðŸ‘¨â€ðŸ‘©â€ðŸ‘§
                 Relacionamentos
               </option>
 
               <option>
-                🧠 Emocional
+                ðŸ§  Emocional
               </option>
             </select>
 
@@ -2800,10 +2761,10 @@ export default function PortalPremium() {
                   fontWeight: 600,
                 }}
               >
-                Sua situação
+                Sua situaÃ§Ã£o
                 precisa de uma
                 resposta antes da
-                próxima leitura
+                prÃ³xima leitura
                 semanal?
               </p>
 
@@ -2835,8 +2796,8 @@ export default function PortalPremium() {
                 />
 
                 Sim, preciso de
-                uma orientação
-                com urgência.
+                uma orientaÃ§Ã£o
+                com urgÃªncia.
               </label>
 
               <label
@@ -2865,7 +2826,7 @@ export default function PortalPremium() {
                   }
                 />
 
-                Não, posso
+                NÃ£o, posso
                 aguardar
                 normalmente.
               </label>
@@ -2952,7 +2913,7 @@ export default function PortalPremium() {
 
     if (mensagemError) {
       console.error(
-        "Erro ao registrar reformulação:",
+        "Erro ao registrar reformulaÃ§Ã£o:",
         mensagemError
       );
     }
@@ -2974,7 +2935,7 @@ export default function PortalPremium() {
                   }
 
                   alert(
-                    "Pergunta enviada com sucesso! 💜"
+                    "Pergunta enviada com sucesso! ðŸ’œ"
                   );
 
                   setCategoria("");
@@ -2997,7 +2958,7 @@ export default function PortalPremium() {
                     "pointer",
                 }}
               >
-                ✨ Enviar Pergunta
+                âœ¨ Enviar Pergunta
               </button>
 
               <button
@@ -3027,3 +2988,5 @@ export default function PortalPremium() {
     </main>
   );
 }
+
+

@@ -1,44 +1,31 @@
-import { reduce } from "./reduce"
+import { reduce } from "./reduce";
+import { kabbalah } from "./kabbalah";
+import { normalizeName } from "./normalizeName";
 
-function getVowelValue(letter: string): number {
-  switch (letter.toUpperCase()) {
-    case "A":
-    case "Á":
-    case "À":
-    case "Ã":
-    case "Â":
-      return 1
+const vowels = new Set([
+  "A",
+  "E",
+  "I",
+  "O",
+  "U",
+]);
 
-    case "E":
-    case "É":
-    case "Ê":
-      return 5
+export function calculateSoul(
+  fullName: string
+): number {
+  const clean =
+    normalizeName(fullName);
 
-    case "I":
-    case "Í":
-      return 9
+  let total = 0;
 
-    case "O":
-    case "Ó":
-    case "Õ":
-    case "Ô":
-      return 6
-
-    case "U":
-    case "Ú":
-      return 3
-
-    default:
-      return 0
-  }
-}
-
-export function calculateSoul(fullName: string): number {
-  let total = 0
-
-  for (const letter of fullName) {
-    total += getVowelValue(letter)
+  for (const letter of clean) {
+    if (vowels.has(letter)) {
+      total +=
+        kabbalah[
+          letter as keyof typeof kabbalah
+        ] || 0;
+    }
   }
 
-  return reduce(total)
+  return reduce(total);
 }

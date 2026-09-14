@@ -1,13 +1,21 @@
+export type TipoEnergiaEspiritual =
+  | "orixa"
+  | "ancestralidade"
+  | "linha_espiritual"
+  | "entidade";
+
 export interface Direcionamento {
   resumo: {
     numerologia: string;
-    orixa: string;
+    energiaEspiritual: string;
     carta: string;
     taro: string;
     foco: string;
   };
 
-  orixa: {
+  spiritualEnergy: {
+    type: TipoEnergiaEspiritual;
+    name: string;
     titulo: string;
     texto: string;
     ondeAjuda: string;
@@ -20,7 +28,8 @@ export interface Direcionamento {
   carta: {
     titulo: string;
     naipe: string;
-    elemento: string;
+    elementoLenormand: string;
+    elementoAdria: string;
     texto: string;
     naipeTexto: string;
     elementoTexto: string;
