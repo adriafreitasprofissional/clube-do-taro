@@ -3196,26 +3196,62 @@ export default function PortalPremium() {
                         );
                       }
                     }
-                  } else {
-                    const resultado =
-                      await supabase
-                        .from("exclusive_questions")
-                        .insert({
-                          cliente_id: clienteId,
-                          nome_cliente: nome,
-                          email_cliente: email || null,
-                          plano,
-                          categoria,
-                          pergunta: pergunta.trim(),
-                          status: "Nova pergunta",
-                          urgente,
-                          referencia_mes: referenciaAtual,
-                          ativo: true,
-                          processada: false,
-                        });
+                 } else {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
 
-                    envioError = resultado.error;
-                  }
+  if (
+    sessionError ||
+    !session?.access_token
+  ) {
+    alert(
+      "Sua sessão expirou. Entre novamente no aplicativo."
+    );
+
+    router.replace("/login");
+    return;
+  }
+
+  const response =
+    await fetch(
+      "/api/cliente/perguntas",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+          Authorization:
+            `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          cliente_id: clienteId,
+          nome_cliente: nome,
+          email_cliente:
+            email || null,
+          plano,
+          categoria,
+          pergunta:
+            pergunta.trim(),
+          urgente,
+          referencia_mes:
+            referenciaAtual,
+        }),
+      }
+    );
+
+  const resultado =
+    await response.json();
+
+  if (!response.ok) {
+    envioError = {
+      message:
+        resultado?.error ||
+        "Não foi possível enviar a pergunta.",
+    };
+  }
+}
 
                   if (
                     envioError

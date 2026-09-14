@@ -80,7 +80,7 @@ export async function POST(req: Request) {
           senha_inicial: senha,
           data_inicio: dataInicio,
           slug,
-          status: "Ativo",
+          status: "ativo",
           produto: "Clube do Tarô",
           acesso_app: true,
           direcionamento_exclusivo: true,
@@ -181,7 +181,22 @@ export async function POST(req: Request) {
         driveError
       );
     }
+// 6. Enviar e-mail para a assinante definir a própria senha
+const { error: emailError } =
+  await supabaseAdmin.auth.resetPasswordForEmail(
+    email,
+    {
+      redirectTo:
+        "https://www.magiaoriente.com.br/auth/reset-password",
+    }
+  );
 
+if (emailError) {
+  console.error(
+    "ERRO AO ENVIAR EMAIL DE ACESSO:",
+    emailError
+  );
+}
     // 6. Cadastro concluído
     return NextResponse.json({
       success: true,
