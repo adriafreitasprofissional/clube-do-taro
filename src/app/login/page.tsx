@@ -148,7 +148,8 @@ console.log(clienteData);
 
         <form onSubmit={login}>
           <input
-            type="email"
+           name="username"
+           autoComplete="username"
             placeholder="Seu e-mail"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -165,12 +166,17 @@ console.log(clienteData);
           />
 
           <div style={{ position: "relative" }}>
-            <input
-              type={mostrarSenha ? "text" : "password"}
-              placeholder="Sua senha"
-              value={senha}
-              onChange={(event) => setSenha(event.target.value)}
-              style={{
+            
+            <input 
+
+            type={mostrarSenha ? "text" : "password"}
+            name="password"
+            autoComplete="current-password"
+            placeholder="Sua senha"
+            value={senha}
+            onChange={(event) => setSenha(event.target.value)}
+            style={{
+              
                 width: "100%",
                 borderRadius: "16px",
                 border: "1px solid rgba(255,255,255,0.1)",
