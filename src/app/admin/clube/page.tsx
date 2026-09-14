@@ -77,6 +77,20 @@ export default function ClubeAdminPage() {
           }}
         >
           <Link
+  href="/gerador-direcionamento"
+  style={{
+    padding: "11px 16px",
+    borderRadius: "12px",
+    background: "#E7C96F",
+    color: "#2a1230",
+    textDecoration: "none",
+    fontSize: "13px",
+    fontWeight: 800,
+  }}
+>
+  ✨ Gerador de Direcionamento
+</Link>
+          <Link
             href="/admin/assinantes"
             style={{
               padding: "11px 16px",
