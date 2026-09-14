@@ -5,6 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
+const PLANILHA_CONTEUDOS_CSV =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSr7qra9Jsh2IO6vDO_8vVxe-8lkf9zbFeuDPtw5Wny7zHUKIhVa7lIqqshLo_4JbRDUhWjv0sb_5y3/pub?gid=0&single=true&output=csv";
+
 type ConteudoPlanilha = {
   slug: string;
   ano: string;
@@ -78,6 +81,29 @@ const ORDEM_MESES = [
   "novembro",
   "dezembro",
 ];
+
+function lerCsv(linha: string) {
+  const colunas: string[] = [];
+  let atual = "";
+  let dentroDeAspas = false;
+
+  for (let i = 0; i < linha.length; i++) {
+    const caractere = linha[i];
+
+    if (caractere === '"') {
+      dentroDeAspas = !dentroDeAspas;
+    } else if (caractere === "," && !dentroDeAspas) {
+      colunas.push(atual.trim().replace(/^"|"$/g, ""));
+      atual = "";
+    } else {
+      atual += caractere;
+    }
+  }
+
+  colunas.push(atual.trim().replace(/^"|"$/g, ""));
+
+  return colunas;
+}
 
 function linkDrive(valor: string, tipo: string) {
   if (!valor) return "";
@@ -506,80 +532,119 @@ export default function PortalPremium() {
   }, [slug, referenciaAtual]);
 
   useEffect(() => {
-    async function carregarConteudosDoSupabase() {
-      setCarregandoConteudos(true);
-
+    async function carregarConteudosDaPlanilha() {
       try {
-        const {
-          data,
-          error: conteudosError,
-        } = await supabase
-          .from("club_directional_assets")
-          .select(
-            "slug,ano,mes,semana,tipo,titulo,drive_file_id,drive_file_url,ativo"
-          )
-          .eq("slug", slug)
-          .eq("ativo", true);
+        const resposta = await fetch(
+          PLANILHA_CONTEUDOS_CSV,
+          {
+            cache: "no-store",
+          }
+        );
 
-        if (conteudosError) {
+        if (!resposta.ok) {
           throw new Error(
-            conteudosError.message
+            "Não foi possível carregar a planilha de conteúdos."
           );
         }
 
-        const conteudos: ConteudoPlanilha[] =
-          (data || []).map((item: any) => ({
-            slug: String(
-              item.slug || ""
-            )
-              .toLowerCase()
-              .trim(),
+        const texto =
+          await resposta.text();
 
-            ano: String(
-              item.ano || ""
-            ).trim(),
+        const linhas = texto
+          .split(/\r?\n/)
+          .map((linha) =>
+            linha.trim()
+          )
+          .filter(Boolean);
 
-            mes: String(
-              item.mes || ""
-            )
-              .toLowerCase()
-              .trim(),
+        if (linhas.length === 0) {
+          setConteudosPlanilha([]);
+          return;
+        }
 
-            semana: String(
-              item.semana || ""
-            ).trim(),
+        const cabecalho =
+          lerCsv(linhas[0]).map(
+            (item) =>
+              item
+                .toLowerCase()
+                .trim()
+          );
 
-            tipo: String(
-              item.tipo || ""
-            )
-              .toLowerCase()
-              .trim(),
+        const conteudos =
+          linhas
+            .slice(1)
+            .map((linha) => {
+              const valores =
+                lerCsv(linha);
 
-            titulo: String(
-              item.titulo || ""
-            ).trim(),
+              const item: Record<
+                string,
+                string
+              > = {};
 
-            drive_file: String(
-              item.drive_file_id ||
-                item.drive_file_url ||
-                ""
-            ).trim(),
+              cabecalho.forEach(
+                (
+                  coluna,
+                  indice
+                ) => {
+                  item[coluna] =
+                    valores[indice] ||
+                    "";
+                }
+              );
 
-            ativo: item.ativo
-              ? "sim"
-              : "nao",
-          }));
+              return {
+                slug: (
+                  item.slug || ""
+                )
+                  .toLowerCase()
+                  .trim(),
+
+                ano: (
+                  item.ano || ""
+                ).trim(),
+
+                mes: (
+                  item.mes || ""
+                )
+                  .toLowerCase()
+                  .trim(),
+
+                semana: (
+                  item.semana || ""
+                ).trim(),
+
+                tipo: (
+                  item.tipo || ""
+                )
+                  .toLowerCase()
+                  .trim(),
+
+                titulo: (
+                  item.titulo || ""
+                ).trim(),
+
+                drive_file: (
+                  item.drive_file ||
+                  ""
+                ).trim(),
+
+                ativo: (
+                  item.ativo || ""
+                )
+                  .toLowerCase()
+                  .trim(),
+              };
+            });
 
         setConteudosPlanilha(
           conteudos
         );
       } catch (err) {
         console.error(
-          "Erro ao carregar direcionamentos:",
+          "Erro ao carregar planilha:",
           err
         );
-
-        setConteudosPlanilha([]);
       } finally {
         setCarregandoConteudos(
           false
@@ -587,10 +652,8 @@ export default function PortalPremium() {
       }
     }
 
-    if (slug) {
-      carregarConteudosDoSupabase();
-    }
-  }, [slug]);
+    carregarConteudosDaPlanilha();
+  }, []);
 
   const anos = useMemo(() => {
     const anosConteudos =
