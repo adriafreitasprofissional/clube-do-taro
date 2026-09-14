@@ -285,7 +285,7 @@ function renderPdf(
   setText(doc, theme.titleText);
   doc.setFont("times", "bold");
   doc.setFontSize(26);
-  doc.text(sanitizeText(leitura.nome), W / 2, y, { align: "center" });
+  doc.text(sanitizeText(slugArquivo || leitura.nome), W / 2, y, { align: "center" });
   y += 7;
 
   setText(doc, theme.mutedText);
