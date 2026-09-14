@@ -3154,50 +3154,68 @@ export default function PortalPremium() {
                     return;
                   }
 
-                  let envioError =
-                    null;
+                  let envioError = null;
 
                   if (
-  direcionamentoExclusivo &&
-  direcionamentoExclusivo.status ===
-    "Aguardando resposta da assinante"
-) {
-  const resultado =
-    await supabase
-      .from("exclusive_questions")
-      .update({
-        categoria,
-        pergunta: pergunta.trim(),
-        urgente,
-        status: "Nova pergunta",
-      })
-      .eq(
-        "id",
-        direcionamentoExclusivo.id
-      );
+                    direcionamentoExclusivo &&
+                    direcionamentoExclusivo.status ===
+                      "Aguardando resposta da assinante"
+                  ) {
+                    const resultado =
+                      await supabase
+                        .from("exclusive_questions")
+                        .update({
+                          categoria,
+                          pergunta: pergunta.trim(),
+                          urgente,
+                          status: "Nova pergunta",
+                        })
+                        .eq(
+                          "id",
+                          direcionamentoExclusivo.id
+                        );
 
-  envioError = resultado.error;
+                    envioError = resultado.error;
 
-  if (!envioError) {
-    const { error: mensagemError } =
-      await supabase
-        .from("exclusive_messages")
-        .insert({
-          question_id:
-            direcionamentoExclusivo.id,
-          autor: "assinante",
-          mensagem:
-            pergunta.trim(),
-        });
+                    if (!envioError) {
+                      const { error: mensagemError } =
+                        await supabase
+                          .from("exclusive_messages")
+                          .insert({
+                            question_id:
+                              direcionamentoExclusivo.id,
+                            autor: "assinante",
+                            mensagem:
+                              pergunta.trim(),
+                          });
 
-    if (mensagemError) {
-      console.error(
-        "Erro ao registrar reformulação:",
-        mensagemError
-      );
-    }
-  }
-}
+                      if (mensagemError) {
+                        console.error(
+                          "Erro ao registrar reformulação:",
+                          mensagemError
+                        );
+                      }
+                    }
+                  } else {
+                    const resultado =
+                      await supabase
+                        .from("exclusive_questions")
+                        .insert({
+                          cliente_id: clienteId,
+                          nome_cliente: nome,
+                          email_cliente: email || null,
+                          plano,
+                          categoria,
+                          pergunta: pergunta.trim(),
+                          status: "Nova pergunta",
+                          urgente,
+                          referencia_mes: referenciaAtual,
+                          ativo: true,
+                          processada: false,
+                        });
+
+                    envioError = resultado.error;
+                  }
 
                   if (
                     envioError
