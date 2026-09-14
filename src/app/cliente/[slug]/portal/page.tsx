@@ -885,32 +885,36 @@ export default function PortalPremium() {
   setAudioAberto(true);
 }
 
+  
   function abrirPdf(
-    ano: string,
-    mes: string,
-    semana: string
-  ) {
-    const conteudo =
-      buscarConteudo(
-        ano,
-        mes,
-        semana,
-        "pdf_individual"
-      );
+  ano: string,
+  mes: string,
+  semana: string
+) {
+  const conteudo = buscarConteudo(
+    ano,
+    mes,
+    semana,
+    "pdf_individual"
+  );
 
-    if (!conteudo) {
-      alert(
-        "PDF ainda não disponível."
-      );
-
-      return;
-    }
-
-    window.open(
-      conteudo.drive_file,
-      "_blank"
-    );
+  if (!conteudo) {
+    alert("PDF ainda não disponível.");
+    return;
   }
+
+  const url = linkDrive(
+    conteudo.drive_file,
+    conteudo.tipo
+  );
+
+  if (!url) {
+    alert("Não foi possível localizar o PDF no Drive.");
+    return;
+  }
+
+  window.open(url, "_blank");
+}
 
   async function carregarHistoricoDirecionamento(
     ano: string,
