@@ -56,6 +56,8 @@ export default function ClubeAdminPage() {
             }}
           >
             Clube do Tarô
+
+            
           </h1>
 
           <p
@@ -77,7 +79,7 @@ export default function ClubeAdminPage() {
           }}
         >
           <Link
-  href="/gerador-direcionamento"
+  href="/admin/gerador-direcionamento"
   style={{
     padding: "11px 16px",
     borderRadius: "12px",
