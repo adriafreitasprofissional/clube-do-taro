@@ -31,6 +31,14 @@ const negocios: Negocio[] = [
    href: "/admin/clube",
     status: "ATIVO",
   },
+  {
+  nome: "Gerador de Direcionamentos",
+  descricao:
+    "Criação dos direcionamentos semanais, PDF e áudio das assinantes.",
+  icone: "✨",
+  href: "/admin/gerador-direcionamento",
+  status: "ATIVO",
+},
     {
 
   nome: "Cursos",
