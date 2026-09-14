@@ -328,7 +328,7 @@ link.download = nomeArquivo;
       </section>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <button type="button" onClick={() => gerarPdfMistico(leitura)} className="rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-400 px-5 py-4 font-bold text-[#151221]">GERAR PDF</button>
+        <button type="button" onClick={() => gerarPdfMistico(leitura, props.slug)} className="rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-400 px-5 py-4 font-bold text-[#151221]">GERAR PDF</button>
         <button
           type="button"
           onClick={gerarAudioElevenLabs}

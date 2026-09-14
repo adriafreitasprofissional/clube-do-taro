@@ -241,7 +241,12 @@ function drawGlyph(doc: jsPDF, cx: number, cy: number, accent: RGB, t: Theme) {
 /* ============================================================================
  * PDF principal (parametrizado por tema)
  * ========================================================================== */
-function renderPdf(leitura: Leitura, theme: Theme, filenameSuffix: string) {
+function renderPdf(
+  leitura: Leitura,
+  theme: Theme,
+  filenameSuffix: string,
+  slugArquivo?: string
+) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
@@ -756,20 +761,51 @@ function renderPdf(leitura: Leitura, theme: Theme, filenameSuffix: string) {
     doc.text("Direcionamento Sagrado  -  Clube do Tarô", W / 2, H - 3.5, { align: "center" });
   }
 
-  const slug = sanitizeText(leitura.nome).replace(/\s+/g, "-").toLowerCase();
+  const slug =
+    String(slugArquivo || "")
+      .trim()
+      .toLowerCase() ||
+    sanitizeText(leitura.nome)
+      .replace(/\s+/g, "-")
+      .toLowerCase();
+
   doc.save(`direcionamento-${slug}-${filenameSuffix}.pdf`);
 }
 
 /* ============================================================================
  * Exports
  * ========================================================================== */
-export function gerarPdfMistico(leitura: Leitura) {
-  renderPdf(leitura, MysticTheme, "mistico");
+export function gerarPdfMistico(
+  leitura: Leitura,
+  slugArquivo?: string
+) {
+  renderPdf(
+    leitura,
+    MysticTheme,
+    "mistico",
+    slugArquivo
+  );
 }
-export function gerarPdfImpressao(leitura: Leitura) {
-  renderPdf(leitura, PrintTheme, "impressao");
+
+export function gerarPdfImpressao(
+  leitura: Leitura,
+  slugArquivo?: string
+) {
+  renderPdf(
+    leitura,
+    PrintTheme,
+    "impressao",
+    slugArquivo
+  );
 }
+
 /** Compat: mantém a função antiga apontando para a versão de impressão. */
-export function gerarPdfLeitura(leitura: Leitura) {
-  gerarPdfImpressao(leitura);
+export function gerarPdfLeitura(
+  leitura: Leitura,
+  slugArquivo?: string
+) {
+  gerarPdfImpressao(
+    leitura,
+    slugArquivo
+  );
 }
