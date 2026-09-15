@@ -253,6 +253,13 @@ export default function PacientesPage() {
 >
   Abrir paciente
 </Link>
+
+<Link
+  href={`/terapia/acesso/preview-${paciente.id}`}
+  className="rounded-xl border border-purple-300/40 bg-purple-400/10 px-4 py-2 text-xs font-bold text-purple-100"
+>
+  Ver como paciente
+</Link>
                 {proximo && (
                   <Link
                     href={`/admin/agenda/${proximo.id}/atendimento`}
