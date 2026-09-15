@@ -432,12 +432,29 @@ function baixarRelatorioPDF(
   
 export default function TerapiaPortalPage() {
   const params = useParams();
+
   const token = String(
     params?.token || ""
   );
-const router = useRouter();
+
+  const router = useRouter();
+
+  const modoPreview =
+    token.startsWith("preview-");
+
+  const previewClientId =
+    modoPreview
+      ? token.replace(/^preview-/, "")
+      : "";
 
 async function sair() {
+  if (modoPreview) {
+    router.replace(
+      "/terapia/admin/clientes"
+    );
+    return;
+  }
+
   await supabase.auth.signOut();
 
   window.localStorage.removeItem(
@@ -456,19 +473,54 @@ async function sair() {
     useState<string | null>(null);
 
   useEffect(() => {
-    if (!token) return;
+  if (!token) return;
 
+  if (!modoPreview) {
     window.localStorage.setItem(
       "terapia_em_dia_access_token",
       token
     );
+  }
 
-    async function carregar() {
-      setCarregando(true);
-      setErro(null);
+  async function carregar() {
+    setCarregando(true);
+    setErro(null);
 
-      try {
-        const response = await fetch(
+    try {
+      let response: Response;
+
+      if (modoPreview) {
+        if (!previewClientId) {
+          throw new Error(
+            "Paciente não informada."
+          );
+        }
+
+        const {
+          data: { session },
+        } =
+          await supabase.auth.getSession();
+
+        if (!session?.access_token) {
+          throw new Error(
+            "Sua sessão administrativa expirou."
+          );
+        }
+
+        response = await fetch(
+          `/api/terapia/admin/client-preview?clientId=${encodeURIComponent(
+            previewClientId
+          )}`,
+          {
+            cache: "no-store",
+            headers: {
+              Authorization:
+                `Bearer ${session.access_token}`,
+            },
+          }
+        );
+      } else {
+        response = await fetch(
           `/api/terapia/portal?token=${encodeURIComponent(
             token
           )}`,
@@ -476,31 +528,36 @@ async function sair() {
             cache: "no-store",
           }
         );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data?.error ||
-              "Não foi possível abrir seu espaço."
-          );
-        }
-
-        setDados(data);
-      } catch (error) {
-        setErro(
-          error instanceof Error
-            ? error.message
-            : "Não foi possível abrir seu espaço."
-        );
-      } finally {
-        setCarregando(false);
       }
-    }
 
-    carregar();
-  }, [token]);
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Não foi possível abrir seu espaço."
+        );
+      }
+
+      setDados(data);
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível abrir seu espaço."
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  carregar();
+}, [
+  token,
+  modoPreview,
+  previewClientId,
+]);
 
   if (carregando) {
     return (
@@ -535,8 +592,45 @@ async function sair() {
         )
       : null;
 
+   const hrefAnamnese =
+  modoPreview
+    ? `/terapia/admin/anamneses/${dados.cliente.id}`
+    : `/terapia/acesso/${token}/anamnese`;
+
   return (
-    <main className="min-h-screen bg-[#F8F4EC] text-[#4F5E4A]">
+  <main className="min-h-screen bg-[#F8F4EC] text-[#4F5E4A]">
+    {modoPreview && (
+      <div className="border-b border-[#DCCFB8] bg-[#5E7357] px-5 py-3 text-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.18em]">
+              Visualização do ADM
+            </p>
+
+            <p className="mt-1 text-sm">
+              Você está vendo o portal como{" "}
+              <strong>
+                {dados.cliente.nome}
+              </strong>
+              .
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              router.replace(
+                "/terapia/admin/clientes"
+              )
+            }
+            className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-[#5E7357]"
+          >
+            Voltar ao ADM
+          </button>
+        </div>
+      </div>
+    )}
+    
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col md:flex-row">
         <aside className="border-b border-[#DCCFB8] bg-[#F7F1E4] p-6 md:w-72 md:border-b-0 md:border-r">
           <div className="md:sticky md:top-6">
@@ -580,7 +674,7 @@ async function sair() {
               </Link>
 
               <Link
-                href={`/terapia/acesso/${token}/anamnese`}
+                href={hrefAnamnese}
                 className="rounded-xl px-4 py-3 text-sm font-semibold text-[#5E7357] transition hover:bg-[#EFE5D3]"
               >
                 Minha Anamnese
@@ -826,7 +920,7 @@ async function sair() {
             <div className="mt-8 grid gap-5 md:grid-cols-2"></div>
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               <Link
-                href={`/terapia/acesso/${token}/anamnese`}
+                href={hrefAnamnese}
                 className={`rounded-3xl border p-6 shadow-lg transition hover:-translate-y-1 ${
                   dados.anamnese.preenchida
                     ? "border-emerald-200 bg-emerald-50"

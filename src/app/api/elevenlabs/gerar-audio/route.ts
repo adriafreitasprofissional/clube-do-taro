@@ -229,43 +229,76 @@ export async function POST(req: Request) {
       );
     }
 
-    const agora =
-      new Date().toISOString();
+     const agora =
+  new Date().toISOString();
 
-    const driveFileUrl =
-      `https://drive.google.com/file/d/${arquivoDrive.id}/view`;
+const driveFileUrl =
+  `https://drive.google.com/file/d/${arquivoDrive.id}/view`;
 
-    const {
-      error: assetError,
-    } = await supabaseAdmin
-      .from(
-        "club_directional_assets"
-      )
-      .upsert(
-        {
-          client_id: cliente.id,
-          slug,
-          ano: pasta.ano,
-          mes: pasta.mes,
-          semana: String(semana),
-          tipo: "audio_individual",
-          titulo:
-            `${semana}ª Semana — Áudio`,
-          drive_file_id:
-            arquivoDrive.id,
-          drive_file_url:
-            driveFileUrl,
-          drive_folder_id:
-            pasta.clientFolderId,
-          ativo: true,
-          released_at: agora,
-          updated_at: agora,
-        },
-        {
-          onConflict:
-            "client_id,ano,mes,semana,tipo",
-        }
-      );
+// Verifica se este áudio já existia.
+// Se já estava publicado, permanece publicado.
+// Se for novo, nasce como rascunho.
+const {
+  data: assetExistente,
+  error: assetExistenteError,
+} = await supabaseAdmin
+  .from("club_directional_assets")
+  .select("ativo,released_at")
+  .eq("client_id", cliente.id)
+  .eq("ano", pasta.ano)
+  .eq("mes", pasta.mes)
+  .eq("semana", String(semana))
+  .eq("tipo", "audio_individual")
+  .maybeSingle();
+
+if (assetExistenteError) {
+  throw assetExistenteError;
+}
+
+const ativo =
+  assetExistente
+    ? Boolean(assetExistente.ativo)
+    : false;
+
+const releasedAt =
+  assetExistente?.released_at || null;
+
+const {
+  error: assetError,
+} = await supabaseAdmin
+  .from(
+    "club_directional_assets"
+  )
+  .upsert(
+    {
+      client_id: cliente.id,
+      slug,
+      ano: pasta.ano,
+      mes: pasta.mes,
+      semana: String(semana),
+      tipo: "audio_individual",
+      titulo:
+        `${semana}ª Semana — Áudio`,
+      drive_file_id:
+        arquivoDrive.id,
+      drive_file_url:
+        driveFileUrl,
+      drive_folder_id:
+        pasta.clientFolderId,
+
+      // NOVO conteúdo fica oculto
+      ativo,
+
+      // Só possui data se já estava liberado
+      released_at: releasedAt,
+
+      updated_at: agora,
+    },
+    {
+      onConflict:
+        "client_id,ano,mes,semana,tipo",
+    }
+  );
 
     if (assetError) {
       throw assetError;

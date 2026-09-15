@@ -37,12 +37,21 @@ export default function ClientesPage() {
               {cliente.nome_completo}
             </p>
 
-            <Link
-              href={`/terapia/admin/anamneses/${cliente.id}`}
-              className="mt-5 inline-flex rounded-xl border border-[#9FB093] px-3 py-2 text-xs font-bold text-[#5E7357]"
-            >
-              Ver anamnese
-            </Link>
+            <div className="mt-5 flex flex-wrap gap-2">
+  <Link
+    href={`/terapia/admin/anamneses/${cliente.id}`}
+    className="inline-flex rounded-xl border border-[#9FB093] px-3 py-2 text-xs font-bold text-[#5E7357]"
+  >
+    Ver anamnese
+  </Link>
+
+  <Link
+    href={`/terapia/acesso/preview-${cliente.id}`}
+    className="inline-flex rounded-xl bg-[#5E7357] px-3 py-2 text-xs font-bold text-white shadow transition hover:bg-[#4F5E4A]"
+  >
+    Ver como paciente
+  </Link>
+</div>
           </div>
         ))}
 

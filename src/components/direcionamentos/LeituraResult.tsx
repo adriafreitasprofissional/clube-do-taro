@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { Leitura } from "@/lib/direcionamento-engine";
 import { cartasCiganas, focos, orixas, tarot } from "@/lib/direcionamento-engine";
 import { EditableField } from "@/components/direcionamentos/EditableField";
-import { gerarPdfMistico } from "@/lib/direcionamento-pdf";
+import { gerarPdfMisticoBlob } from "@/lib/direcionamento-pdf";
 
 type EditValue = string | string[];
 
@@ -33,8 +33,10 @@ export function LeituraResult(props: Props) {
   const [gerandoRoteiro, setGerandoRoteiro] = useState(false);
   const [gerandoAudio, setGerandoAudio] = useState(false);
 const [rascunhoAudioCarregado, setRascunhoAudioCarregado] = useState(false);
+const [salvandoPdf, setSalvandoPdf] = useState(false);
 
 const chaveRascunhoAudio =
+
   `clube-taro-audio:${props.slug}:${props.dataInicio}:${props.dataFim}`;
 
   useEffect(() => {
@@ -111,6 +113,94 @@ useEffect(() => {
     await navigator.clipboard.writeText(roteiroAudio);
     alert("Roteiro copiado.");
   }
+async function gerarPdfESalvar() {
+  try {
+    setSalvandoPdf(true);
+
+    const {
+      blob,
+      nomeArquivo,
+    } = gerarPdfMisticoBlob(
+      leitura,
+      props.slug
+    );
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      "arquivo",
+      blob,
+      nomeArquivo
+    );
+
+    formData.append(
+      "slug",
+      props.slug
+    );
+
+    formData.append(
+      "dataInicio",
+      props.dataInicio
+    );
+
+    const response =
+      await fetch(
+        "/api/direcionamentos/salvar-pdf",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error ||
+          "Não foi possível salvar o PDF."
+      );
+    }
+
+    // Baixa a mesma cópia no computador
+    const url =
+      URL.createObjectURL(blob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+    link.download =
+      nomeArquivo;
+
+    document.body.appendChild(
+      link
+    );
+
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+
+    alert(
+      "PDF salvo no Drive como rascunho e baixado no computador."
+    );
+  } catch (error) {
+    console.error(
+      "Erro ao gerar PDF:",
+      error
+    );
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : "Erro ao gerar PDF."
+    );
+  } finally {
+    setSalvandoPdf(false);
+  }
+}
 
   async function gerarAudioElevenLabs() {
     if (!roteiroAudio.trim()) {
@@ -326,20 +416,33 @@ link.download = nomeArquivo;
           </div>
         )}
       </section>
+     
+     <div className="grid gap-3 sm:grid-cols-2">
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button type="button" onClick={() => gerarPdfMistico(leitura, props.slug)} className="rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-400 px-5 py-4 font-bold text-[#151221]">GERAR PDF</button>
-        <button
-          type="button"
-          onClick={gerarAudioElevenLabs}
-          disabled={!roteiroAudio.trim() || gerandoAudio}
-          className="rounded-2xl border border-purple-400/40 bg-purple-500/10 px-5 py-4 font-bold text-purple-100 transition hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {gerandoAudio
-            ? "GERANDO ÁUDIO..."
-            : "GERAR ÁUDIO — ELEVENLABS"}
-        </button>
-      </div>
+  <button
+    type="button"
+    onClick={gerarPdfESalvar}
+    disabled={salvandoPdf}
+    className="rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-400 px-5 py-4 font-bold text-[#151221] disabled:cursor-not-allowed disabled:opacity-60"
+  >
+    {salvandoPdf
+      ? "SALVANDO PDF..."
+      : "GERAR PDF"}
+  </button>
+
+  <button
+    type="button"
+    onClick={gerarAudioElevenLabs}
+    disabled={!roteiroAudio.trim() || gerandoAudio}
+    className="rounded-2xl border border-purple-400/40 bg-purple-500/10 px-5 py-4 font-bold text-purple-100 transition hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+  >
+    {gerandoAudio
+      ? "GERANDO ÁUDIO..."
+      : "GERAR ÁUDIO — ELEVENLABS"}
+  </button>
+  
+</div>
+     
     </div>
   );
 }

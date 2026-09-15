@@ -245,7 +245,8 @@ function renderPdf(
   leitura: Leitura,
   theme: Theme,
   filenameSuffix: string,
-  slugArquivo?: string
+  slugArquivo?: string,
+  salvarAutomaticamente = true
 ) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const W = doc.internal.pageSize.getWidth();
@@ -769,12 +770,25 @@ function renderPdf(
       .replace(/\s+/g, "-")
       .toLowerCase();
 
-  doc.save(`direcionamento-${slug}-${filenameSuffix}.pdf`);
+  const nomeArquivo =
+  `direcionamento-${slug}-${filenameSuffix}.pdf`;
+
+const blob = doc.output("blob");
+
+if (salvarAutomaticamente) {
+  doc.save(nomeArquivo);
+}
+
+return {
+  blob,
+  nomeArquivo,
+};
 }
 
 /* ============================================================================
  * Exports
  * ========================================================================== */
+
 export function gerarPdfMistico(
   leitura: Leitura,
   slugArquivo?: string
@@ -784,6 +798,19 @@ export function gerarPdfMistico(
     MysticTheme,
     "mistico",
     slugArquivo
+  );
+}
+
+export function gerarPdfMisticoBlob(
+  leitura: Leitura,
+  slugArquivo?: string
+) {
+  return renderPdf(
+    leitura,
+    MysticTheme,
+    "mistico",
+    slugArquivo,
+    false
   );
 }
 
