@@ -472,6 +472,9 @@ async function sair() {
   const [erro, setErro] =
     useState<string | null>(null);
 
+  const [mesJornadaAberto, setMesJornadaAberto] =
+    useState<string | null>(null);
+
   useEffect(() => {
   if (!token) return;
 
@@ -1138,6 +1141,8 @@ async function sair() {
     })()}
   </div>
 )}
+
+</div>
               
 
               <div className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg">
