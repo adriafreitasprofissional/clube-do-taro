@@ -959,93 +959,185 @@ async function sair() {
   </div>
 
   <h2 className="mt-4 text-xl font-extrabold">
-    Minha Jornada
-  </h2>
+  Minha Jornada
+</h2>
 
-  <p className="mt-2 text-sm leading-6 text-[#6C8465]">
-    Aqui ficam organizadas suas sessões,
-    gravações, relatórios e orientações.
-  </p>
+<p className="mt-2 text-sm leading-6 text-[#6C8465]">
+  Aqui ficam organizadas suas sessões,
+  gravações, relatórios e orientações.
+</p>
 
-  {dados.jornada.length === 0 ? (
-    <div className="mt-5 rounded-2xl bg-[#F7F1E4] p-5 text-sm text-[#6C8465]">
-      Sua jornada será registrada aqui durante
-      o acompanhamento.
-    </div>
-  ) : (
-    <div className="mt-6 space-y-4">
-      {dados.jornada.map((sessao) => {
-        const titulo =
-          sessao.session_title ||
-          sessao.service_type ||
-          "Sessão";
+{dados.jornada.length === 0 ? (
+  <div className="mt-5 rounded-2xl bg-[#F7F1E4] p-5 text-sm text-[#6C8465]">
+    Sua jornada será registrada aqui durante
+    o acompanhamento.
+  </div>
+) : (
+  <div className="mt-6 space-y-4">
+    {(() => {
+      const jornadaOrdenada = [...dados.jornada].sort(
+        (a, b) =>
+          new Date(b.scheduled_at).getTime() -
+          new Date(a.scheduled_at).getTime()
+      );
+
+      const gruposPorMes = jornadaOrdenada.reduce<
+        Record<string, typeof dados.jornada>
+      >((grupos, sessao) => {
+        const data = new Date(sessao.scheduled_at);
+
+        const chaveMes = `${data.getFullYear()}-${String(
+          data.getMonth() + 1
+        ).padStart(2, "0")}`;
+
+        if (!grupos[chaveMes]) {
+          grupos[chaveMes] = [];
+        }
+
+        grupos[chaveMes].push(sessao);
+
+        return grupos;
+      }, {});
+
+      const agora = new Date();
+
+      const chaveMesAtual = `${agora.getFullYear()}-${String(
+        agora.getMonth() + 1
+      ).padStart(2, "0")}`;
+
+      const chavesDosMeses = Object.keys(gruposPorMes);
+
+      const mesInicial = gruposPorMes[chaveMesAtual]
+        ? chaveMesAtual
+        : chavesDosMeses[0];
+
+      return chavesDosMeses.map((chaveMes) => {
+        const sessoes = gruposPorMes[chaveMes];
+
+        const [ano, mes] = chaveMes.split("-").map(Number);
+
+        const nomeMes = new Date(
+          ano,
+          mes - 1,
+          1
+        ).toLocaleDateString("pt-BR", {
+          month: "long",
+          year: "numeric",
+        });
+
+        const aberto =
+          mesJornadaAberto === null
+            ? chaveMes === mesInicial
+            : mesJornadaAberto === chaveMes;
 
         return (
           <div
-            key={sessao.id}
-            className="rounded-2xl border border-[#DCCFB8] bg-[#FDFBF7] p-5"
+            key={chaveMes}
+            className="overflow-hidden rounded-2xl border border-[#DCCFB8] bg-[#FDFBF7]"
           >
-            <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
-              {new Date(
-                sessao.scheduled_at
-              ).toLocaleDateString("pt-BR")}
-            </p>
+            <button
+              type="button"
+              onClick={() =>
+                setMesJornadaAberto(
+                  aberto ? "" : chaveMes
+                )
+              }
+              aria-expanded={aberto}
+              className="flex w-full items-center justify-between gap-4 bg-[#F3EEE4] px-5 py-5 text-left transition hover:bg-[#EDE5D7]"
+            >
+              <span className="text-lg font-extrabold capitalize text-[#4F5E4A]">
+                {nomeMes}
+              </span>
 
-            <h3 className="mt-2 text-lg font-extrabold text-[#4F5E4A]">
-              {titulo}
-            </h3>
+              <span
+                className={`text-3xl font-light leading-none text-[#8AA27A] transition-transform ${
+                  aberto ? "rotate-90" : ""
+                }`}
+                aria-hidden="true"
+              >
+                ›
+              </span>
+            </button>
 
-            <p className="mt-1 text-sm text-[#6C8465]">
-              {sessao.service_type}
-            </p>
+            {aberto && (
+              <div className="space-y-4 p-4">
+                {sessoes.map((sessao) => {
+                  const titulo =
+                    sessao.session_title ||
+                    sessao.service_type ||
+                    "Sessão";
 
-            {sessao.client_activity && (
-              <div className="mt-4 rounded-xl bg-[#F3EEE4] p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
-                  Orientação
-                </p>
+                  return (
+                    <div
+                      key={sessao.id}
+                      className="rounded-2xl border border-[#DCCFB8] bg-white p-5"
+                    >
+                      <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
+                        {new Date(
+                          sessao.scheduled_at
+                        ).toLocaleDateString("pt-BR")}
+                      </p>
 
-                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#5E7357]">
-                  {sessao.client_activity}
-                </p>
+                      <h3 className="mt-2 text-lg font-extrabold text-[#4F5E4A]">
+                        {titulo}
+                      </h3>
+
+                      <p className="mt-1 text-sm text-[#6C8465]">
+                        {sessao.service_type}
+                      </p>
+
+                      {sessao.client_activity && (
+                        <div className="mt-4 rounded-xl bg-[#F3EEE4] p-4">
+                          <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
+                            Orientação
+                          </p>
+
+                          <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#5E7357]">
+                            {sessao.client_activity}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="mt-5 flex flex-wrap gap-3">
+                        {sessao.recording_url && (
+                          <a
+                            href={sessao.recording_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex rounded-xl bg-[#8AA27A] px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-[#769566]"
+                          >
+                            ▶ Assistir gravação
+                          </a>
+                        )}
+
+                        {sessao.client_report && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              baixarRelatorioPDF(
+                                dados.cliente.nome,
+                                titulo,
+                                sessao.scheduled_at,
+                                sessao.client_report || ""
+                              )
+                            }
+                            className="inline-flex rounded-xl border border-[#8AA27A] bg-white px-4 py-3 text-sm font-bold text-[#5E7357] shadow transition hover:bg-[#F7F1E4]"
+                          >
+                            📄 Baixar relatório
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
-
-            <div className="mt-5 flex flex-wrap gap-3">
-              {sessao.recording_url && (
-                <a
-                  href={sessao.recording_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex rounded-xl bg-[#8AA27A] px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-[#769566]"
-                >
-                  ▶ Assistir gravação
-                </a>
-              )}
-
-              {sessao.client_report && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    baixarRelatorioPDF(
-                      dados.cliente.nome,
-                      titulo,
-                      sessao.scheduled_at,
-                      sessao.client_report || ""
-                    )
-                  }
-                  className="inline-flex rounded-xl border border-[#8AA27A] bg-white px-4 py-3 text-sm font-bold text-[#5E7357] shadow transition hover:bg-[#F7F1E4]"
-                >
-                  📄 Baixar relatório
-                </button>
-              )}
-            </div>
           </div>
         );
-      })}
-    </div>
-  )}
-</div>
+      });
+    })()}
+  </div>
+)}
               
 
               <div className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg">
