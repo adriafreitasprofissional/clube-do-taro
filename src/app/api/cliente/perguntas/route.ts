@@ -44,12 +44,55 @@ export async function POST(request: Request) {
       );
     }
 
-    if (user.id !== cliente_id) {
-      return NextResponse.json(
-        { error: "Este acesso não pertence a esta assinante." },
-        { status: 403 }
-      );
-    }
+   const {
+  data: cliente,
+  error: clienteError,
+} = await supabaseAdmin
+  .from("club_clients")
+  .select("id,email")
+  .eq("id", cliente_id)
+  .maybeSingle();
+
+if (clienteError) {
+  throw clienteError;
+}
+
+if (!cliente) {
+  return NextResponse.json(
+    { error: "Assinante não encontrada." },
+    { status: 404 }
+  );
+}
+
+const emailUsuario = String(
+  user.email || ""
+)
+  .toLowerCase()
+  .trim();
+
+const emailCliente = String(
+  cliente.email || ""
+)
+  .toLowerCase()
+  .trim();
+
+const ehPropriaAssinante =
+  user.id === cliente.id ||
+  (
+    emailUsuario &&
+    emailCliente &&
+    emailUsuario === emailCliente
+  );
+
+if (!ehPropriaAssinante) {
+  return NextResponse.json(
+    {
+      error:
+        "Este acesso não pertence a esta assinante.",
+    },
+    { status: 403 }
+  );
+}
 
     const { data, error } = await supabaseAdmin
       .from("exclusive_questions")
