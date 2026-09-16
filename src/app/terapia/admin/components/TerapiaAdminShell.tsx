@@ -1,21 +1,55 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import {
+  usePathname,
+  useRouter,
+} from "next/navigation";
+import {
+  useEffect,
+  useState,
+} from "react";
 import { supabase } from "@/lib/supabase";
 
 const itens = [
-  ["/terapia/admin", "Visão Geral", "⌂"],
-  ["/terapia/admin/clientes", "Clientes", "●"],
-  ["/terapia/admin/anamneses", "Anamneses", "✎"],
-  ["/terapia/admin/disponibilidade", "Disponibilidade", "◷"],
+  [
+    "/terapia/admin",
+    "Visão Geral",
+    "⌂",
+  ],
+  [
+    "/terapia/admin/clientes",
+    "Clientes",
+    "●",
+  ],
+  [
+    "/terapia/admin/anamneses",
+    "Anamneses",
+    "✎",
+  ],
+  [
+    "/terapia/admin/disponibilidade",
+    "Liberar agenda",
+    "◷",
+  ],
+  [
+    "/terapia/admin/agenda",
+    "Agenda",
+    "▣",
+  ],
+  [
+    "/terapia/admin/sessoes",
+    "Sessões",
+    "○",
+  ],
+  [
+    "/terapia/admin/financeiro",
+    "Financeiro",
+    "$",
+  ],
 ] as const;
 
 const futuros = [
-  "Agenda",
-  "Sessões",
-  "Financeiro",
   "Cursos",
   "Loja",
   "Benefícios",
@@ -26,17 +60,30 @@ export default function TerapiaAdminShell({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
+  const pathname =
+    usePathname();
+
+  const router =
+    useRouter();
 
   const login =
-    pathname === "/terapia/admin/login";
+    pathname ===
+    "/terapia/admin/login";
 
-  const [carregando, setCarregando] =
-    useState(!login);
+  const [
+    carregando,
+    setCarregando,
+  ] = useState(!login);
 
-  const [menuAberto, setMenuAberto] =
-    useState(false);
+  const [
+    menuAberto,
+    setMenuAberto,
+  ] = useState(false);
+
+  const [
+    perfil,
+    setPerfil,
+  ] = useState<any>(null);
 
   useEffect(() => {
     if (login) {
@@ -45,34 +92,50 @@ export default function TerapiaAdminShell({
     }
 
     async function validar() {
-      const { data: { session } } =
+      const {
+        data: {
+          session,
+        },
+      } =
         await supabase.auth.getSession();
 
-      if (!session?.access_token) {
+      if (
+        !session?.access_token
+      ) {
         router.replace(
           "/terapia/admin/login"
         );
         return;
       }
 
-      const response = await fetch(
-        "/api/terapia/admin/me",
-        {
-          cache: "no-store",
-          headers: {
-            Authorization:
-              `Bearer ${session.access_token}`,
-          },
-        }
-      );
+      const response =
+        await fetch(
+          "/api/terapia/admin/me",
+          {
+            cache:
+              "no-store",
+            headers: {
+              Authorization:
+                `Bearer ${session.access_token}`,
+            },
+          }
+        );
 
       if (!response.ok) {
         await supabase.auth.signOut();
+
         router.replace(
           "/terapia/admin/login"
         );
         return;
       }
+
+      const data =
+        await response.json();
+
+      setPerfil(
+        data.admin || null
+      );
 
       setCarregando(false);
     }
@@ -82,6 +145,7 @@ export default function TerapiaAdminShell({
 
   async function sair() {
     await supabase.auth.signOut();
+
     router.replace(
       "/terapia/admin/login"
     );
@@ -94,10 +158,15 @@ export default function TerapiaAdminShell({
   if (carregando) {
     return (
       <main className="min-h-screen bg-[#F8F4EC] p-8 text-center text-[#5E7357]">
-        Abrindo Terapia em Dia...
+        Abrindo Terapia em
+        Dia...
       </main>
     );
   }
+
+  const nomeProfissional =
+    perfil?.nome ||
+    "Profissional";
 
   return (
     <div className="min-h-screen bg-[#F8F4EC] text-[#4F5E4A]">
@@ -106,8 +175,9 @@ export default function TerapiaAdminShell({
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#8AA27A]">
             Terapia em Dia
           </p>
+
           <p className="text-sm font-extrabold text-[#5E7357]">
-            Ádria Freitas
+            {nomeProfissional}
           </p>
         </div>
 
@@ -134,7 +204,7 @@ export default function TerapiaAdminShell({
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[286px] border-r border-[#DCCFB8] bg-[#F7F1E4] p-5 transition-transform md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[286px] flex-col border-r border-[#DCCFB8] bg-[#F7F1E4] p-5 transition-transform md:translate-x-0 ${
           menuAberto
             ? "translate-x-0"
             : "-translate-x-full"
@@ -150,19 +220,25 @@ export default function TerapiaAdminShell({
           </p>
 
           <h1 className="mt-1 text-xl font-extrabold text-[#5E7357]">
-            Ádria Freitas
+            {nomeProfissional}
           </h1>
 
           <p className="mt-1 text-xs text-[#7A8D73]">
-            Administração Terapêutica
+            Administração
+            Terapêutica
           </p>
         </div>
 
-        <nav className="mt-8 grid gap-1">
+        <nav className="mt-8 grid flex-1 content-start gap-1 overflow-y-auto pb-4">
           {itens.map(
-            ([href, label, icon]) => {
+            ([
+              href,
+              label,
+              icon,
+            ]) => {
               const active =
-                href === "/terapia/admin"
+                href ===
+                "/terapia/admin"
                   ? pathname ===
                     "/terapia/admin"
                   : pathname.startsWith(
@@ -174,7 +250,9 @@ export default function TerapiaAdminShell({
                   key={href}
                   href={href}
                   onClick={() =>
-                    setMenuAberto(false)
+                    setMenuAberto(
+                      false
+                    )
                   }
                   className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
                     active
@@ -185,7 +263,10 @@ export default function TerapiaAdminShell({
                   <span className="w-5 text-center">
                     {icon}
                   </span>
-                  <span>{label}</span>
+
+                  <span>
+                    {label}
+                  </span>
                 </Link>
               );
             }
@@ -193,27 +274,49 @@ export default function TerapiaAdminShell({
 
           <div className="my-3 border-t border-[#DDD2C2]" />
 
-          {futuros.map((label) => (
-            <div
-              key={label}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-[#9AA493]"
-              title="Integração na próxima etapa"
-            >
-              <span className="w-5 text-center">
-                ·
-              </span>
-              <span>{label}</span>
-            </div>
-          ))}
+          {futuros.map(
+            (label) => (
+              <div
+                key={label}
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-[#9AA493]"
+                title="Em breve"
+              >
+                <span className="w-5 text-center">
+                  ·
+                </span>
+
+                <span>
+                  {label}
+                </span>
+              </div>
+            )
+          )}
         </nav>
 
-        <button
-          type="button"
-          onClick={sair}
-          className="absolute bottom-5 left-5 right-5 rounded-xl border border-[#C8B8A8] px-4 py-3 text-sm font-bold text-[#6C8465] transition hover:bg-[#E9E4D7]"
-        >
-          Sair
-        </button>
+        <div className="grid gap-2 border-t border-[#DDD2C2] pt-4">
+          {perfil?.central_access && (
+            <Link
+              href="/admin"
+              onClick={() =>
+                setMenuAberto(
+                  false
+                )
+              }
+              className="rounded-xl bg-[#5E7357] px-4 py-3 text-center text-sm font-bold text-white shadow"
+            >
+              ← Voltar à Central
+              de Negócios
+            </Link>
+          )}
+
+          <button
+            type="button"
+            onClick={sair}
+            className="rounded-xl border border-[#C8B8A8] px-4 py-3 text-sm font-bold text-[#6C8465] transition hover:bg-[#E9E4D7]"
+          >
+            Sair
+          </button>
+        </div>
       </aside>
 
       <main className="min-h-screen px-4 py-7 md:ml-[286px] md:px-8 md:py-9 xl:px-10">

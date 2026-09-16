@@ -1,25 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import Link from "next/link";
 import { adminFetch } from "./components/adminFetch";
 
 export default function TerapiaAdminPage() {
-  const [dados, setDados] = useState<any>(null);
-  const [erro, setErro] = useState<string | null>(null);
+  const [
+    dados,
+    setDados,
+  ] = useState<any>(
+    null
+  );
+
+  const [
+    erro,
+    setErro,
+  ] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
-    adminFetch("/api/terapia/admin/dashboard")
-      .then(async (response) => {
-        const data = await response.json();
+    adminFetch(
+      "/api/terapia/admin/dashboard"
+    )
+      .then(async (
+        response
+      ) => {
+        const data =
+          await response.json();
+
         if (!response.ok) {
-          throw new Error(data?.error || "Erro ao carregar painel.");
+          throw new Error(
+            data?.error ||
+              "Erro ao carregar painel."
+          );
         }
+
         setDados(data);
       })
       .catch((error) =>
         setErro(
-          error instanceof Error
+          error instanceof
+            Error
             ? error.message
             : "Erro ao carregar painel."
         )
@@ -35,14 +60,34 @@ export default function TerapiaAdminPage() {
   }
 
   if (!dados) {
-    return <div className="text-[#6C8465]">Carregando painel...</div>;
+    return (
+      <div className="text-[#6C8465]">
+        Carregando painel...
+      </div>
+    );
   }
 
   const cards = [
-    ["Clientes ativas", dados.resumo.clientes_ativas],
-    ["Sessões hoje", dados.resumo.sessoes_hoje],
-    ["Anamneses recebidas", dados.resumo.anamneses_recebidas],
-    ["Anamneses pendentes", dados.resumo.anamneses_pendentes],
+    [
+      "Pacientes ativas",
+      dados.resumo
+        .clientes_ativas,
+    ],
+    [
+      "Sessões hoje",
+      dados.resumo
+        .sessoes_hoje,
+    ],
+    [
+      "Anamneses recebidas",
+      dados.resumo
+        .anamneses_recebidas,
+    ],
+    [
+      "Anamneses pendentes",
+      dados.resumo
+        .anamneses_pendentes,
+    ],
   ];
 
   return (
@@ -58,58 +103,121 @@ export default function TerapiaAdminPage() {
           </h1>
 
           <p className="mt-2 text-sm leading-6 text-[#6C8465]">
-            Acompanhamentos, anamneses e disponibilidade em um só lugar.
+            Pacientes,
+            agenda, sessões e
+            acompanhamento em
+            um só lugar.
           </p>
         </div>
 
-        <Link
-          href="/terapia/admin/disponibilidade"
-          className="rounded-xl bg-[#5E7357] px-5 py-3 text-center text-sm font-bold text-[#F8F4EC] shadow"
-        >
-          Configurar disponibilidade
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/terapia/admin/clientes"
+            className="rounded-xl border border-[#9FB093] px-5 py-3 text-center text-sm font-bold text-[#5E7357]"
+          >
+            + Cadastrar paciente
+          </Link>
+
+          <Link
+            href="/terapia/admin/disponibilidade"
+            className="rounded-xl bg-[#5E7357] px-5 py-3 text-center text-sm font-bold text-[#F8F4EC] shadow"
+          >
+            Liberar agenda
+          </Link>
+        </div>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(([titulo, valor]) => (
-          <div
-            key={titulo}
-            className="rounded-3xl border border-[#DCCFB8] bg-[#F7F1E4] p-5 shadow-sm"
-          >
-            <p className="text-xs font-bold uppercase tracking-wide text-[#7A8D73]">
-              {titulo}
-            </p>
+        {cards.map(
+          ([
+            titulo,
+            valor,
+          ]) => (
+            <div
+              key={
+                titulo
+              }
+              className="rounded-3xl border border-[#DCCFB8] bg-[#F7F1E4] p-5 shadow-sm"
+            >
+              <p className="text-xs font-bold uppercase tracking-wide text-[#7A8D73]">
+                {
+                  titulo
+                }
+              </p>
 
-            <p className="mt-3 text-4xl font-black text-[#5E7357]">
-              {valor}
-            </p>
-          </div>
-        ))}
+              <p className="mt-3 text-4xl font-black text-[#5E7357]">
+                {
+                  valor
+                }
+              </p>
+            </div>
+          )
+        )}
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
         <section className="rounded-3xl border border-[#DCCFB8] bg-[#F7F1E4] p-6">
-          <h2 className="text-xl font-extrabold text-[#5E7357]">
-            Próximos atendimentos
-          </h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-extrabold text-[#5E7357]">
+              Próximos
+              atendimentos
+            </h2>
+
+            <Link
+              href="/terapia/admin/agenda"
+              className="text-sm font-bold text-[#6C8465]"
+            >
+              Ver agenda →
+            </Link>
+          </div>
 
           <div className="mt-5 grid gap-3">
-            {dados.proximos_atendimentos
-              .slice(0, 5)
-              .map((item: any) => (
-                <div
-                  key={item.id}
-                  className="rounded-2xl border border-[#E1D6C5] bg-white/70 p-4"
-                >
-                  <p className="font-extrabold text-[#5E7357]">
-                    {item.client_name}
-                  </p>
-                  <p className="mt-1 text-sm text-[#6C8465]">
-                    {item.service_type} ·{" "}
-                    {new Date(item.scheduled_at).toLocaleString("pt-BR")}
-                  </p>
-                </div>
-              ))}
+            {dados
+              .proximos_atendimentos
+              .slice(
+                0,
+                5
+              )
+              .map(
+                (
+                  item: any
+                ) => (
+                  <div
+                    key={
+                      item.id
+                    }
+                    className="rounded-2xl border border-[#E1D6C5] bg-white/70 p-4"
+                  >
+                    <p className="font-extrabold text-[#5E7357]">
+                      {
+                        item.client_name
+                      }
+                    </p>
+
+                    <p className="mt-1 text-sm text-[#6C8465]">
+                      {
+                        item.service_type
+                      }{" "}
+                      ·{" "}
+                      {new Date(
+                        item.scheduled_at
+                      ).toLocaleString(
+                        "pt-BR"
+                      )}
+                    </p>
+                  </div>
+                )
+              )}
+
+            {dados
+              .proximos_atendimentos
+              .length ===
+              0 && (
+              <p className="text-sm text-[#6C8465]">
+                Nenhum atendimento
+                futuro.
+              </p>
+            )}
           </div>
         </section>
 
@@ -128,35 +236,56 @@ export default function TerapiaAdminPage() {
           </div>
 
           <div className="mt-5 grid gap-3">
-            {dados.clientes.map((cliente: any) => {
-              const recebida =
-                cliente.anamnese?.status === "enviada" ||
-                cliente.anamnese?.status === "revisada";
+            {dados.clientes.map(
+              (
+                cliente: any
+              ) => {
+                const recebida =
+                  cliente
+                    .anamnese
+                    ?.status ===
+                    "enviada" ||
+                  cliente
+                    .anamnese
+                    ?.status ===
+                    "revisada";
 
-              return (
-                <div
-                  key={cliente.id}
-                  className="flex items-center justify-between rounded-2xl border border-[#E1D6C5] bg-white/70 p-4"
-                >
-                  <div>
-                    <p className="font-bold text-[#5E7357]">
-                      {cliente.nome}
-                    </p>
-                    <p className="mt-1 text-xs text-[#7A8D73]">
-                      {recebida ? "Anamnese recebida" : "Aguardando envio"}
-                    </p>
+                return (
+                  <div
+                    key={
+                      cliente.id
+                    }
+                    className="flex items-center justify-between rounded-2xl border border-[#E1D6C5] bg-white/70 p-4"
+                  >
+                    <div>
+                      <p className="font-bold text-[#5E7357]">
+                        {
+                          cliente.nome
+                        }
+                      </p>
+
+                      <p className="mt-1 text-xs text-[#7A8D73]">
+                        {recebida
+                          ? "Anamnese recebida"
+                          : "Aguardando envio"}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-bold ${
+                        recebida
+                          ? "bg-[#DCE8D6] text-[#4F6548]"
+                          : "bg-[#EFE5D3] text-[#806A55]"
+                      }`}
+                    >
+                      {recebida
+                        ? "Recebida"
+                        : "Pendente"}
+                    </span>
                   </div>
-
-                  <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-                    recebida
-                      ? "bg-[#DCE8D6] text-[#4F6548]"
-                      : "bg-[#EFE5D3] text-[#806A55]"
-                  }`}>
-                    {recebida ? "Recebida" : "Pendente"}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              }
+            )}
           </div>
         </section>
       </div>

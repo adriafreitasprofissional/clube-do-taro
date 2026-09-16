@@ -475,6 +475,21 @@ async function sair() {
   const [mesJornadaAberto, setMesJornadaAberto] =
     useState<string | null>(null);
 
+  const [mostrarHorarios, setMostrarHorarios] =
+    useState(false);
+
+  const [horariosDisponiveis, setHorariosDisponiveis] =
+    useState<string[]>([]);
+
+  const [carregandoHorarios, setCarregandoHorarios] =
+    useState(false);
+
+  const [alterandoAgenda, setAlterandoAgenda] =
+    useState(false);
+
+  const [mensagemAgenda, setMensagemAgenda] =
+    useState<string | null>(null);
+
   useEffect(() => {
   if (!token) return;
 
@@ -561,6 +576,166 @@ async function sair() {
   modoPreview,
   previewClientId,
 ]);
+
+  async function carregarHorariosDisponiveis() {
+    if (!dados?.proximo_atendimento || modoPreview) {
+      return;
+    }
+
+    try {
+      setCarregandoHorarios(true);
+      setMensagemAgenda(null);
+
+      const response = await fetch(
+        `/api/terapia/agenda-cliente?token=${encodeURIComponent(
+          token
+        )}&appointmentId=${encodeURIComponent(
+          dados.proximo_atendimento.id
+        )}`,
+        {
+          cache: "no-store",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Não foi possível carregar os horários disponíveis."
+        );
+      }
+
+      setHorariosDisponiveis(
+        Array.isArray(data?.horarios)
+          ? data.horarios
+          : []
+      );
+
+      setMostrarHorarios(true);
+    } catch (error) {
+      setMensagemAgenda(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível carregar os horários."
+      );
+    } finally {
+      setCarregandoHorarios(false);
+    }
+  }
+
+  async function cancelarSessao() {
+    if (!dados?.proximo_atendimento || modoPreview) {
+      return;
+    }
+
+    const confirmou = window.confirm(
+      "Deseja realmente cancelar esta sessão? O cancelamento ficará registrado no seu histórico."
+    );
+
+    if (!confirmou) {
+      return;
+    }
+
+    try {
+      setAlterandoAgenda(true);
+      setMensagemAgenda(null);
+
+      const response = await fetch(
+        "/api/terapia/agenda-cliente",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            token,
+            appointmentId:
+              dados.proximo_atendimento.id,
+            action: "cancel",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Não foi possível cancelar a sessão."
+        );
+      }
+
+      window.location.reload();
+    } catch (error) {
+      setMensagemAgenda(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível cancelar a sessão."
+      );
+    } finally {
+      setAlterandoAgenda(false);
+    }
+  }
+
+  async function remarcarSessao(
+    horario: string
+  ) {
+    if (!dados?.proximo_atendimento || modoPreview) {
+      return;
+    }
+
+    const confirmou = window.confirm(
+      `Deseja mudar sua sessão para ${horario}?`
+    );
+
+    if (!confirmou) {
+      return;
+    }
+
+    try {
+      setAlterandoAgenda(true);
+      setMensagemAgenda(null);
+
+      const response = await fetch(
+        "/api/terapia/agenda-cliente",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            token,
+            appointmentId:
+              dados.proximo_atendimento.id,
+            action: "reschedule",
+            time: horario,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Não foi possível mudar o horário."
+        );
+      }
+
+      window.location.reload();
+    } catch (error) {
+      setMensagemAgenda(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível mudar o horário."
+      );
+    } finally {
+      setAlterandoAgenda(false);
+    }
+  }
 
   if (carregando) {
     return (
@@ -730,20 +905,112 @@ async function sair() {
                   {proximo.duration_minutes} minutos
                 </p>
 
-                {proximo.meet_url ? (
-                  <a
-                    href={proximo.meet_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-5 inline-flex rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#5E7357] shadow transition hover:bg-orange-50"
-                  >
-                    Entrar na sessão
-                  </a>
-                ) : (
-                  <p className="mt-5 inline-flex rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-xs font-semibold text-orange-50">
-                    O acesso à sala será liberado
-                    antes do encontro.
-                  </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {proximo.meet_url ? (
+                    <a
+                      href={proximo.meet_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#5E7357] shadow transition hover:bg-orange-50"
+                    >
+                      Entrar na sessão
+                    </a>
+                  ) : (
+                    <p className="inline-flex rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-xs font-semibold text-orange-50">
+                      O acesso à sala será liberado
+                      antes do encontro.
+                    </p>
+                  )}
+
+                  {!modoPreview && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={cancelarSessao}
+                        disabled={alterandoAgenda}
+                        className="inline-flex rounded-xl border border-white/50 bg-transparent px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Cancelar sessão
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={carregarHorariosDisponiveis}
+                        disabled={
+                          carregandoHorarios ||
+                          alterandoAgenda
+                        }
+                        className="inline-flex rounded-xl border border-white/30 bg-white/15 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {carregandoHorarios
+                          ? "Buscando horários..."
+                          : "Escolher outro horário"}
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {mensagemAgenda && (
+                  <div className="mt-4 rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm text-white">
+                    {mensagemAgenda}
+                  </div>
+                )}
+
+                {mostrarHorarios && !modoPreview && (
+                  <div className="mt-5 rounded-2xl bg-white p-5 text-[#4F5E4A] shadow-lg">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-extrabold">
+                          Horários disponíveis neste dia
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-[#6C8465]">
+                          Escolha um horário livre para
+                          mudar sua sessão.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setMostrarHorarios(false)
+                        }
+                        className="rounded-lg px-2 py-1 text-lg text-[#6C8465]"
+                        aria-label="Fechar horários"
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    {horariosDisponiveis.length === 0 ? (
+                      <p className="mt-4 rounded-xl bg-[#F7F1E4] p-4 text-sm text-[#6C8465]">
+                        Não há outro horário disponível
+                        neste dia.
+                      </p>
+                    ) : (
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        {horariosDisponiveis.map(
+                          (horario) => (
+                            <button
+                              key={horario}
+                              type="button"
+                              onClick={() =>
+                                remarcarSessao(
+                                  horario
+                                )
+                              }
+                              disabled={
+                                alterandoAgenda
+                              }
+                              className="rounded-xl border border-[#8AA27A] bg-[#EEF3E9] px-5 py-3 text-sm font-extrabold text-[#5E7357] transition hover:bg-[#DDE8D6] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {horario}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             )}
