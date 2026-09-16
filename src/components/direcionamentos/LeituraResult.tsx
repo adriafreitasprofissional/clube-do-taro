@@ -5,8 +5,16 @@ import type { Leitura } from "@/lib/direcionamento-engine";
 import { cartasCiganas, focos, orixas, tarot } from "@/lib/direcionamento-engine";
 import { EditableField } from "@/components/direcionamentos/EditableField";
 import { gerarPdfMisticoBlob } from "@/lib/direcionamento-pdf";
+import { supabase } from "@/lib/supabase";
 
 type EditValue = string | string[];
+
+type StatusPublicacao = {
+  pdfPronto: boolean;
+  audioPronto: boolean;
+  liberado: boolean;
+  releasedAt: string | null;
+};
 
 interface Props {
   leitura: Leitura;
@@ -34,6 +42,17 @@ export function LeituraResult(props: Props) {
   const [gerandoAudio, setGerandoAudio] = useState(false);
 const [rascunhoAudioCarregado, setRascunhoAudioCarregado] = useState(false);
 const [salvandoPdf, setSalvandoPdf] = useState(false);
+const [statusPublicacao, setStatusPublicacao] =
+  useState<StatusPublicacao>({
+    pdfPronto: false,
+    audioPronto: false,
+    liberado: false,
+    releasedAt: null,
+  });
+const [carregandoStatus, setCarregandoStatus] =
+  useState(false);
+const [liberando, setLiberando] =
+  useState(false);
 
 const chaveRascunhoAudio =
 
@@ -81,6 +100,145 @@ useEffect(() => {
   rascunhoAudioCarregado,
 ]);
 
+
+  async function carregarStatusPublicacao() {
+    if (!props.slug || !props.dataInicio) {
+      return;
+    }
+
+    try {
+      setCarregandoStatus(true);
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        return;
+      }
+
+      const response = await fetch(
+        `/api/direcionamentos/liberar?slug=${encodeURIComponent(
+          props.slug
+        )}&dataInicio=${encodeURIComponent(
+          props.dataInicio
+        )}`,
+        {
+          cache: "no-store",
+          headers: {
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Não foi possível verificar a publicação."
+        );
+      }
+
+      setStatusPublicacao({
+        pdfPronto: Boolean(data.pdfPronto),
+        audioPronto: Boolean(data.audioPronto),
+        liberado: Boolean(data.liberado),
+        releasedAt: data.releasedAt || null,
+      });
+    } catch (error) {
+      console.error(
+        "Erro ao verificar publicação:",
+        error
+      );
+    } finally {
+      setCarregandoStatus(false);
+    }
+  }
+
+  useEffect(() => {
+    void carregarStatusPublicacao();
+  }, [props.slug, props.dataInicio]);
+
+  async function liberarDirecionamento() {
+    if (
+      !statusPublicacao.pdfPronto ||
+      !statusPublicacao.audioPronto
+    ) {
+      alert(
+        "Gere e salve o PDF e o áudio antes de liberar."
+      );
+      return;
+    }
+
+    const confirmar = window.confirm(
+      `Liberar agora o PDF e o áudio de ${leitura.nome} para esta semana?`
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      setLiberando(true);
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error(
+          "Sua sessão administrativa expirou. Entre novamente no ADM."
+        );
+      }
+
+      const response = await fetch(
+        "/api/direcionamentos/liberar",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            slug: props.slug,
+            dataInicio: props.dataInicio,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Não foi possível liberar o direcionamento."
+        );
+      }
+
+      await carregarStatusPublicacao();
+
+      alert(
+        "Direcionamento liberado. PDF e áudio já podem aparecer para a assinante."
+      );
+    } catch (error) {
+      console.error(
+        "Erro ao liberar direcionamento:",
+        error
+      );
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Erro ao liberar direcionamento."
+      );
+    } finally {
+      setLiberando(false);
+    }
+  }
 
   async function gerarRoteiroAudio() {
     try {
@@ -186,6 +344,8 @@ async function gerarPdfESalvar() {
     alert(
       "PDF salvo no Drive como rascunho e baixado no computador."
     );
+
+    await carregarStatusPublicacao();
   } catch (error) {
     console.error(
       "Erro ao gerar PDF:",
@@ -255,6 +415,8 @@ link.download = nomeArquivo;
       link.remove();
 
       URL.revokeObjectURL(url);
+
+      await carregarStatusPublicacao();
     } catch (error) {
       console.error(error);
 
@@ -443,6 +605,83 @@ link.download = nomeArquivo;
   
 </div>
      
+      <section className={box}>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-xl font-bold text-yellow-300">
+              Publicação do direcionamento
+            </h3>
+
+            <p className="mt-2 text-sm text-purple-200">
+              PDF e áudio podem ficar prontos como rascunho. A assinante só recebe quando você liberar.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              void carregarStatusPublicacao()
+            }
+            disabled={carregandoStatus}
+            className="rounded-xl border border-purple-400/40 px-4 py-2 text-sm font-semibold text-purple-100 disabled:opacity-50"
+          >
+            {carregandoStatus
+              ? "VERIFICANDO..."
+              : "ATUALIZAR STATUS"}
+          </button>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className={sub}>
+            <p className={label}>PDF</p>
+            <p className="mt-2 font-bold text-purple-50">
+              {statusPublicacao.pdfPronto
+                ? "✓ Pronto e salvo"
+                : "○ Ainda falta gerar"}
+            </p>
+          </div>
+
+          <div className={sub}>
+            <p className={label}>Áudio</p>
+            <p className="mt-2 font-bold text-purple-50">
+              {statusPublicacao.audioPronto
+                ? "✓ Pronto e salvo"
+                : "○ Ainda falta gerar"}
+            </p>
+          </div>
+        </div>
+
+        {statusPublicacao.liberado ? (
+          <div className="mt-5 rounded-2xl border border-green-400/30 bg-green-500/10 p-4 text-center font-bold text-green-200">
+            ✓ DIRECIONAMENTO LIBERADO PARA A ASSINANTE
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={liberarDirecionamento}
+            disabled={
+              liberando ||
+              carregandoStatus ||
+              !statusPublicacao.pdfPronto ||
+              !statusPublicacao.audioPronto
+            }
+            className="mt-5 w-full rounded-2xl bg-green-500 px-5 py-4 text-lg font-black text-[#10180f] transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            {liberando
+              ? "LIBERANDO..."
+              : "LIBERAR DIRECIONAMENTO"}
+          </button>
+        )}
+
+        {!statusPublicacao.liberado &&
+          (!statusPublicacao.pdfPronto ||
+            !statusPublicacao.audioPronto) && (
+            <p className="mt-3 text-center text-xs text-purple-300">
+              O botão será liberado quando o PDF e o áudio estiverem salvos.
+            </p>
+          )}
+      </section>
+
     </div>
   );
 }

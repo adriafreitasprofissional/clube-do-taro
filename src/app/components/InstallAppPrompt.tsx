@@ -26,8 +26,18 @@ export default function InstallAppPrompt() {
     useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    // Mostrar somente na página principal www.magiaoriente.com.br
-    if (window.location.pathname !== "/") {
+    const host = window.location.hostname.toLowerCase();
+
+    const dominioClube =
+      host === "magiaoriente.com.br" ||
+      host === "www.magiaoriente.com.br";
+
+    // Este aviso pertence exclusivamente ao Clube do Tarô.
+    // Nunca deve aparecer no domínio comercial do Terapia em Dia.
+    if (
+      !dominioClube ||
+      window.location.pathname !== "/"
+    ) {
       return;
     }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
@@ -16,21 +17,63 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Clube do Tarô",
-  description: "Portal exclusivo para assinantes",
-  manifest: "/manifest.json",
+export async function generateMetadata(): Promise<Metadata> {
+  const cabecalhos = await headers();
 
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
+  const host = (cabecalhos.get("host") || "")
+    .split(":")[0]
+    .toLowerCase();
+
+  const dominioTerapia =
+    host === "adriafreitasterapeuta.com.br" ||
+    host === "www.adriafreitasterapeuta.com.br";
+
+  if (dominioTerapia) {
+    return {
+      title: {
+        default: "Terapia em Dia",
+        template: "%s | Terapia em Dia",
+      },
+      description:
+        "Plataforma de acompanhamento terapêutico para pacientes e profissionais.",
+      manifest: "/terapia-manifest.json",
+      appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "Terapia em Dia",
+      },
+      icons: {
+        icon: [
+          {
+            url: "/terapia-icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            url: "/terapia-icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+        apple: "/terapia-icon-192.png",
+      },
+    };
+  }
+
+  return {
     title: "Clube do Tarô",
-  },
-
-  icons: {
-    apple: "/apple-touch-icon.png",
-  },
-};
+    description: "Portal exclusivo para assinantes",
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: "Clube do Tarô",
+    },
+    icons: {
+      apple: "/apple-touch-icon.png",
+    },
+  };
+}
 
 export default function RootLayout({
   children,

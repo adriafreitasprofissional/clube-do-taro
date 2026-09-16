@@ -12,7 +12,6 @@ import {
   HeartHandshake,
   MonitorSmartphone,
   PlayCircle,
-  ShieldCheck,
   Sparkles,
   Stethoscope,
   UserRound,
@@ -38,7 +37,7 @@ function AcessoCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7 }}
-      className={`group relative overflow-hidden rounded-[32px] border p-8 shadow-lg transition duration-500 hover:-translate-y-1 ${
+      className={`group relative min-w-0 overflow-hidden rounded-[28px] border p-6 shadow-lg transition duration-500 hover:-translate-y-1 sm:rounded-[32px] sm:p-8 ${
         destaque
           ? "border-[#93A081] bg-gradient-to-br from-[#66785A] to-[#4F5E4A] text-white"
           : "border-[#D8D2C4] bg-white text-[#4F5E4A]"
@@ -104,7 +103,7 @@ function RecursoCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="rounded-[28px] border border-[#D8D2C4] bg-white p-6 shadow-sm transition hover:-translate-y-1"
+      className="min-w-0 rounded-[24px] border border-[#D8D2C4] bg-white p-5 shadow-sm transition hover:-translate-y-1 sm:rounded-[28px] sm:p-6"
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EEF1E8] text-[#5E7357]">
         {icon}
@@ -138,7 +137,7 @@ export default function TerapiaVitrinePage() {
         />
       </div>
 
-      <section className="mx-auto grid min-h-screen max-w-7xl items-center gap-12 px-6 py-14 md:grid-cols-2">
+      <section className="mx-auto grid min-h-screen max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 sm:py-14 md:grid-cols-2 md:gap-12">
         <motion.div
           initial={{ opacity: 0, y: 34 }}
           animate={{ opacity: 1, y: 0 }}
@@ -149,11 +148,11 @@ export default function TerapiaVitrinePage() {
             Bem-vindos
           </div>
 
-          <h1 className="text-5xl font-extrabold leading-tight text-[#4F5E4A] md:text-7xl">
+          <h1 className="text-4xl font-extrabold leading-tight text-[#4F5E4A] sm:text-5xl md:text-7xl">
             Terapia em Dia
           </h1>
 
-          <p className="mt-3 text-2xl font-semibold text-[#6C8465] md:text-3xl">
+          <p className="mt-3 text-xl font-semibold text-[#6C8465] sm:text-2xl md:text-3xl">
             com Ádria Freitas
           </p>
 
@@ -210,7 +209,7 @@ export default function TerapiaVitrinePage() {
         >
           <div className="absolute inset-0 rounded-[40px] bg-[#8AA27A]/10 blur-[90px]" />
 
-          <div className="relative overflow-hidden rounded-[40px] border border-[#D8D2C4] bg-white p-4 shadow-2xl">
+          <div className="relative w-full max-w-[520px] overflow-hidden rounded-[28px] border border-[#D8D2C4] bg-white p-3 shadow-2xl sm:rounded-[40px] sm:p-4">
             <Image
               src="/imagens/adria-hero.png"
               alt="Ádria Freitas"
@@ -222,8 +221,8 @@ export default function TerapiaVitrinePage() {
         </motion.div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-10">
-        <div className="grid gap-6 md:grid-cols-3">
+      <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">
+        <div className="grid gap-6 md:grid-cols-2">
           <AcessoCard
             title="Área do Paciente"
             subtitle="Acesse seu espaço terapêutico, sua anamnese, orientações, mini palestras, relatórios, gravações e sua jornada de acompanhamento."
@@ -238,17 +237,10 @@ export default function TerapiaVitrinePage() {
             href="/profissional"
             icon={<Stethoscope size={26} />}
           />
-
-          <AcessoCard
-            title="Administração"
-            subtitle="Acesso administrativo central para gestão do sistema, profissionais, conteúdos, recursos e evolução do projeto."
-            href="/admin"
-            icon={<ShieldCheck size={26} />}
-          />
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-20">
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-14 text-center">
           <p className="text-xs font-bold uppercase tracking-[0.34em] text-[#7C8E71]">
             O que o sistema oferece
@@ -304,53 +296,53 @@ export default function TerapiaVitrinePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-6">
+      <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 26 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="rounded-[40px] border border-[#D8D2C4] bg-gradient-to-br from-[#66785A] to-[#4F5E4A] p-8 text-white shadow-xl md:p-12"
+          className="w-full overflow-hidden rounded-[28px] border border-[#D8D2C4] bg-gradient-to-br from-[#66785A] to-[#4F5E4A] p-5 text-white shadow-xl sm:rounded-[40px] sm:p-8 md:p-12"
         >
-          <div className="grid gap-10 md:grid-cols-2">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#DCE5D3]">
+          <div className="grid min-w-0 grid-cols-1 gap-8 md:grid-cols-2 md:gap-10">
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#DCE5D3] sm:text-xs sm:tracking-[0.3em]">
                 Nosso diferencial
               </p>
 
-              <h2 className="mt-4 text-3xl font-extrabold md:text-5xl">
+              <h2 className="mt-4 max-w-full break-words text-2xl font-extrabold leading-tight sm:text-3xl md:text-5xl">
                 Não é só agenda.
                 <br />
                 É acompanhamento de verdade.
               </h2>
 
-              <p className="mt-6 text-base leading-8 text-white/85">
+              <p className="mt-5 max-w-full break-words text-sm leading-7 text-white/85 sm:text-base sm:leading-8">
                 O paciente não entra no aplicativo só para marcar sessão. Ele
-                aprende, acompanha sua jornada, recebe atividades, mini
-                palestras, orientações e continua conectado ao cuidado.
+                aprende, acompanha sua jornada, recebe atividades, mini palestras,
+                orientações e continua conectado ao cuidado.
               </p>
             </div>
 
-            <div className="grid gap-4">
-              <div className="rounded-[28px] bg-white/10 p-5 backdrop-blur-md">
-                <p className="font-bold">Leveza e segurança</p>
-                <p className="mt-2 text-sm leading-7 text-white/80">
+            <div className="grid min-w-0 gap-4">
+              <div className="min-w-0 rounded-[22px] bg-white/10 p-4 backdrop-blur-md sm:rounded-[28px] sm:p-5">
+                <p className="break-words font-bold">Leveza e segurança</p>
+                <p className="mt-2 break-words text-sm leading-6 text-white/80 sm:leading-7">
                   Linguagem simples, acolhedora e respeitosa, sempre com espaço
                   para o paciente dizer: “no momento não consigo responder”.
                 </p>
               </div>
 
-              <div className="rounded-[28px] bg-white/10 p-5 backdrop-blur-md">
-                <p className="font-bold">Agentes inteligentes como suporte</p>
-                <p className="mt-2 text-sm leading-7 text-white/80">
+              <div className="min-w-0 rounded-[22px] bg-white/10 p-4 backdrop-blur-md sm:rounded-[28px] sm:p-5">
+                <p className="break-words font-bold">Agentes inteligentes como suporte</p>
+                <p className="mt-2 break-words text-sm leading-6 text-white/80 sm:leading-7">
                   Apoiam a criação de quizzes, atividades e conteúdos, sempre
                   com revisão e controle do profissional.
                 </p>
               </div>
 
-              <div className="rounded-[28px] bg-white/10 p-5 backdrop-blur-md">
-                <p className="font-bold">Tecnologia sem complicação</p>
-                <p className="mt-2 text-sm leading-7 text-white/80">
+              <div className="min-w-0 rounded-[22px] bg-white/10 p-4 backdrop-blur-md sm:rounded-[28px] sm:p-5">
+                <p className="break-words font-bold">Tecnologia sem complicação</p>
+                <p className="mt-2 break-words text-sm leading-6 text-white/80 sm:leading-7">
                   Você cuida dos seus pacientes. Nós cuidamos da tecnologia, da
                   implantação e do suporte.
                 </p>
@@ -360,7 +352,7 @@ export default function TerapiaVitrinePage() {
         </motion.div>
       </section>
 
-      <section id="planos" className="mx-auto max-w-7xl px-6 py-20">
+      <section id="planos" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-14 text-center">
           <p className="text-xs font-bold uppercase tracking-[0.34em] text-[#7C8E71]">
             Para terapeutas
@@ -405,7 +397,7 @@ export default function TerapiaVitrinePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="rounded-[28px] border border-[#D8D2C4] bg-white p-6 shadow-sm"
+              className="min-w-0 rounded-[24px] border border-[#D8D2C4] bg-white p-5 shadow-sm sm:rounded-[28px] sm:p-6"
             >
               <p className="text-lg font-extrabold text-[#4F5E4A]">
                 {plano.title}
@@ -427,20 +419,20 @@ export default function TerapiaVitrinePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-24">
+      <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 sm:pb-24">
         <motion.div
           initial={{ opacity: 0, y: 26 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="grid items-center gap-10 rounded-[40px] border border-[#D8D2C4] bg-white p-8 shadow-lg md:grid-cols-2 md:p-10"
+          className="grid min-w-0 items-center gap-8 rounded-[28px] border border-[#D8D2C4] bg-white p-5 shadow-lg sm:rounded-[40px] sm:p-8 md:grid-cols-2 md:p-10"
         >
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7C8E71]">
               Universo Ádria
             </p>
 
-            <h2 className="mt-4 text-4xl font-extrabold text-[#4F5E4A]">
+            <h2 className="mt-4 text-3xl font-extrabold text-[#4F5E4A] sm:text-4xl">
               Terapeuta, escritora e criadora
             </h2>
 
