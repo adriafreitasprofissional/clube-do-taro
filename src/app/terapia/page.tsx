@@ -1,8 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+};
 
 export default function TerapiaInicioPage() {
   const router = useRouter();
@@ -16,9 +28,96 @@ export default function TerapiaInicioPage() {
   const [erro, setErro] =
     useState<string | null>(null);
 
+  const [instalacao, setInstalacao] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [ios, setIos] = useState(false);
+  const [instalado, setInstalado] =
+    useState(false);
+  const [mostrarInstrucaoIos, setMostrarInstrucaoIos] =
+    useState(false);
+
+  useEffect(() => {
+    const nav = navigator as Navigator & {
+      standalone?: boolean;
+    };
+
+    const ehIos =
+      /iphone|ipad|ipod/i.test(
+        navigator.userAgent
+      );
+
+    const modoStandalone =
+      window.matchMedia(
+        "(display-mode: standalone)"
+      ).matches || nav.standalone === true;
+
+    setIos(ehIos);
+    setInstalado(modoStandalone);
+
+    function aoPoderInstalar(
+      event: Event
+    ) {
+      event.preventDefault();
+
+      setInstalacao(
+        event as BeforeInstallPromptEvent
+      );
+    }
+
+    function aoInstalar() {
+      setInstalado(true);
+      setInstalacao(null);
+    }
+
+    window.addEventListener(
+      "beforeinstallprompt",
+      aoPoderInstalar
+    );
+
+    window.addEventListener(
+      "appinstalled",
+      aoInstalar
+    );
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        aoPoderInstalar
+      );
+
+      window.removeEventListener(
+        "appinstalled",
+        aoInstalar
+      );
+    };
+  }, []);
+
+  async function instalarAplicativo() {
+    if (instalado) return;
+
+    if (ios) {
+      setMostrarInstrucaoIos(true);
+      return;
+    }
+
+    if (!instalacao) {
+      alert(
+        "Se o botão de instalação não aparecer, abra esta página no Chrome e use o menu do navegador para escolher “Instalar aplicativo” ou “Adicionar à tela inicial”."
+      );
+      return;
+    }
+
+    await instalacao.prompt();
+    await instalacao.userChoice;
+
+    setInstalacao(null);
+  }
+
   async function entrar() {
     if (!email || !senha) {
-      setErro("Preencha seu e-mail e sua senha.");
+      setErro(
+        "Preencha seu e-mail e sua senha."
+      );
       return;
     }
 
@@ -51,15 +150,24 @@ export default function TerapiaInicioPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F8F4EC] px-5 py-12 text-[#5E7357]">
+    <main className="min-h-screen bg-[#F8F4EC] px-5 py-10 text-[#5E7357]">
       <div className="mx-auto max-w-md">
-        <div className="rounded-[32px] border border-[#DCCFB8] bg-[#F7F1E4] p-8 shadow-xl">
+        <div className="rounded-[32px] border border-[#DCCFB8] bg-[#F7F1E4] p-7 shadow-xl sm:p-8">
           <div className="text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#8AA27A]">
+            <Image
+              src="/terapia-icon-512.png"
+              alt="Terapia em Dia com Ádria Freitas"
+              width={150}
+              height={150}
+              priority
+              className="mx-auto rounded-full"
+            />
+
+            <p className="mt-5 text-xs font-bold uppercase tracking-[0.24em] text-[#8AA27A]">
               Terapia em Dia
             </p>
 
-            <h1 className="mt-3 text-3xl font-bold">
+            <h1 className="mt-2 text-3xl font-bold">
               com Ádria Freitas
             </h1>
 
@@ -69,6 +177,49 @@ export default function TerapiaInicioPage() {
               do Clube do Tarô.
             </p>
           </div>
+
+          {!instalado && (
+            <div className="mt-7 rounded-2xl border border-[#C9D5C1] bg-[#EEF3E9] p-5 text-center">
+              <p className="text-base font-extrabold text-[#4F5E4A]">
+                Tenha o Terapia em Dia no seu celular
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-[#6C8465]">
+                Instale o aplicativo e abra seu
+                espaço terapêutico direto pela tela
+                do seu celular.
+              </p>
+
+              <button
+                type="button"
+                onClick={instalarAplicativo}
+                className="mt-4 w-full rounded-xl bg-[#5E7357] px-5 py-3 font-bold text-white shadow transition hover:bg-[#4F6249]"
+              >
+                📲 Instalar aplicativo
+              </button>
+
+              {mostrarInstrucaoIos && (
+                <div className="mt-4 rounded-xl bg-white p-4 text-left text-sm leading-6 text-[#5E7357]">
+                  <p className="font-bold">
+                    No iPhone:
+                  </p>
+                  <p className="mt-1">
+                    1. Toque em Compartilhar.
+                    <br />
+                    2. Escolha “Adicionar à Tela de Início”.
+                    <br />
+                    3. Toque em “Adicionar”.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {instalado && (
+            <div className="mt-7 rounded-2xl border border-[#C9D5C1] bg-[#EEF3E9] p-4 text-center text-sm font-bold text-[#5E7357]">
+              ✓ Terapia em Dia já está instalado neste aparelho.
+            </div>
+          )}
 
           <div className="mt-8 space-y-5">
             <div>
@@ -83,6 +234,7 @@ export default function TerapiaInicioPage() {
                   setEmail(e.target.value)
                 }
                 placeholder="seuemail@exemplo.com"
+                autoComplete="username"
                 className="mt-2 w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 text-[#4F5E4A] outline-none focus:border-[#5E7357]"
               />
             </div>
@@ -104,6 +256,7 @@ export default function TerapiaInicioPage() {
                     setSenha(e.target.value)
                   }
                   placeholder="Sua senha"
+                  autoComplete="current-password"
                   className="w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 pr-12 text-[#4F5E4A] outline-none focus:border-[#5E7357]"
                 />
 
