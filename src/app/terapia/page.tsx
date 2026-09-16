@@ -1,198 +1,158 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-function esperar(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+export default function TerapiaInicioPage() {
+  const router = useRouter();
 
-async function fetchComTimeout(
-  url: string,
-  init: RequestInit,
-  timeoutMs = 10000
-) {
-  const controller = new AbortController();
-
-  const timer = window.setTimeout(() => {
-    controller.abort();
-  }, timeoutMs);
-
-  try {
-    return await fetch(url, {
-      ...init,
-      signal: controller.signal,
-      cache: "no-store",
-    });
-  } finally {
-    window.clearTimeout(timer);
-  }
-}
-
-export default function TerapiaEntrarPage() {
-  const iniciou = useRef(false);
-
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] =
+    useState(false);
+  const [carregando, setCarregando] =
+    useState(false);
   const [erro, setErro] =
     useState<string | null>(null);
 
-  const [status, setStatus] =
-    useState("Abrindo seu espaço...");
+  async function entrar() {
+    if (!email || !senha) {
+      setErro(
+        "Preencha seu e-mail e sua senha."
+      );
+      return;
+    }
 
-  const abrirPortal = useCallback(async () => {
+    setCarregando(true);
     setErro(null);
-    setStatus("Abrindo seu espaço...");
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { error } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
 
-      if (!session?.access_token) {
-        window.location.replace("/terapia");
-        return;
+      if (error) {
+        throw new Error(
+          "E-mail ou senha incorretos."
+        );
       }
 
-      let ultimoErro: unknown = null;
-
-      for (let tentativa = 1; tentativa <= 3; tentativa++) {
-        try {
-          setStatus(
-            tentativa === 1
-              ? "Abrindo seu espaço..."
-              : "Tentando conectar novamente..."
-          );
-
-          const response = await fetchComTimeout(
-            "/api/terapia/acesso-logado",
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${session.access_token}`,
-              },
-            },
-            10000
-          );
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(
-              data?.error ||
-                "Não foi possível abrir seu espaço."
-            );
-          }
-
-          if (data.tipo === "admin") {
-            window.location.replace("/terapia/admin");
-            return;
-          }
-
-          if (!data.access_token) {
-            throw new Error(
-              "Seu acesso ao Terapia em Dia não foi localizado."
-            );
-          }
-
-          window.localStorage.setItem(
-            "terapia_em_dia_access_token",
-            data.access_token
-          );
-
-          // No aplicativo instalado usamos navegação completa.
-          // É mais confiável que router.replace em alguns Android/Samsung.
-          window.location.replace(
-            `/terapia/acesso/${data.access_token}`
-          );
-
-          return;
-        } catch (error) {
-          ultimoErro = error;
-
-          if (tentativa < 3) {
-            await esperar(tentativa === 1 ? 800 : 1500);
-          }
-        }
-      }
-
-      throw ultimoErro;
+      router.push("/terapia/entrar");
     } catch (error) {
-      const mensagem =
+      setErro(
         error instanceof Error
           ? error.message
-          : "";
-
-      const normalizada =
-        mensagem.toLowerCase();
-
-      const rede =
-        normalizada.includes("network") ||
-        normalizada.includes("fetch") ||
-        normalizada.includes("abort");
-
-      setErro(
-        rede
-          ? "Não conseguimos abrir seu espaço agora. Verifique sua internet e toque em “Tentar novamente”."
-          : mensagem ||
-              "Não foi possível abrir seu espaço."
+          : "Não foi possível entrar."
       );
-
-      setStatus("");
+    } finally {
+      setCarregando(false);
     }
-  }, []);
-
-  useEffect(() => {
-    if (iniciou.current) return;
-    iniciou.current = true;
-
-    abrirPortal();
-  }, [abrirPortal]);
-
-  if (erro) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F8F4EC] p-6">
-        <div className="w-full max-w-md rounded-3xl border border-[#DCCFB8] bg-[#F7F1E4] p-6 text-center shadow-lg">
-          <p className="text-lg font-extrabold text-[#5E7357]">
-            Não foi possível abrir seu espaço
-          </p>
-
-          <p className="mt-3 text-sm leading-6 text-[#6C8465]">
-            {erro}
-          </p>
-
-          <button
-            type="button"
-            onClick={abrirPortal}
-            className="mt-5 w-full rounded-xl bg-[#5E7357] px-5 py-3 font-bold text-white"
-          >
-            Tentar novamente
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              window.location.replace("/terapia")
-            }
-            className="mt-3 w-full rounded-xl border border-[#C8B8A8] px-5 py-3 font-bold text-[#5E7357]"
-          >
-            Voltar ao login
-          </button>
-        </div>
-      </main>
-    );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F8F4EC] p-8 text-center text-[#5E7357]">
-      <div>
-        <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-[#D7E1D2] border-t-[#5E7357]" />
+    <main className="min-h-screen bg-[#F8F4EC] px-5 py-10 text-[#5E7357]">
+      <div className="mx-auto max-w-md">
+        <div className="rounded-[32px] border border-[#DCCFB8] bg-[#F7F1E4] p-7 shadow-xl sm:p-8">
+          <div className="text-center">
+            <Image
+              src="/terapia-icon-512-v2.png"
+              alt="Terapia em Dia"
+              width={150}
+              height={150}
+              priority
+              className="mx-auto rounded-full"
+            />
 
-        <p className="mt-4 font-bold">
-          {status}
-        </p>
+            <p className="mt-5 text-xs font-bold uppercase tracking-[0.24em] text-[#8AA27A]">
+              Terapia em Dia
+            </p>
 
-        <p className="mt-2 text-sm text-[#7A8D73]">
-          Isso deve levar apenas alguns segundos.
-        </p>
+            <h1 className="mt-2 text-3xl font-bold">
+              com Ádria Freitas
+            </h1>
+
+            <p className="mt-4 text-sm leading-7 text-[#6C8465]">
+              Acesse seu espaço terapêutico com seu e-mail e senha cadastrados.
+            </p>
+          </div>
+
+          <div className="mt-8 space-y-5">
+            <div>
+              <label className="text-sm font-semibold">
+                E-mail
+              </label>
+
+              <input
+                type="email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                placeholder="seuemail@exemplo.com"
+                autoComplete="username"
+                className="mt-2 w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 text-[#4F5E4A] outline-none focus:border-[#5E7357]"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold">
+                Senha
+              </label>
+
+              <div className="relative mt-2">
+                <input
+                  type={
+                    mostrarSenha
+                      ? "text"
+                      : "password"
+                  }
+                  value={senha}
+                  onChange={(e) =>
+                    setSenha(e.target.value)
+                  }
+                  placeholder="Sua senha"
+                  autoComplete="current-password"
+                  className="w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 pr-16 text-[#4F5E4A] outline-none focus:border-[#5E7357]"
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMostrarSenha(
+                      !mostrarSenha
+                    )
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#5E7357]"
+                >
+                  {mostrarSenha
+                    ? "Ocultar"
+                    : "Ver"}
+                </button>
+              </div>
+            </div>
+
+            {erro && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {erro}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={entrar}
+              disabled={carregando}
+              className="w-full rounded-xl bg-[#5E7357] px-5 py-3 font-bold text-white transition hover:bg-[#769566] disabled:opacity-60"
+            >
+              {carregando
+                ? "Entrando..."
+                : "Entrar"}
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   );

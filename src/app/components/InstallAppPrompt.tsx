@@ -25,6 +25,8 @@ export default function InstallAppPrompt() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [marca, setMarca] =
     useState<"clube" | "terapia" | null>(null);
+  const [mostrarAjuda, setMostrarAjuda] =
+    useState(false);
 
   useEffect(() => {
     const host = window.location.hostname.toLowerCase();
@@ -98,19 +100,27 @@ export default function InstallAppPrompt() {
       aoPedirInstalacao
     );
 
-    // No iPhone não existe beforeinstallprompt.
-    // Só nele mostramos a orientação manual.
-    let timerIOS: number | undefined;
+    let timer: number | undefined;
 
-    if (ios) {
-      timerIOS = window.setTimeout(() => {
+    // TERAPIA:
+    // O convite aparece em qualquer navegador.
+    // Se o navegador oferecer instalação nativa, o botão usa o evento.
+    // Se não oferecer, o mesmo botão mostra o caminho de instalação
+    // daquele navegador sem mandar a pessoa trocar de navegador.
+    if (paginaTerapia) {
+      timer = window.setTimeout(() => {
+        setMostrar(true);
+      }, 900);
+    } else if (ios) {
+      // Mantém o comportamento do Clube no iPhone.
+      timer = window.setTimeout(() => {
         setMostrar(true);
       }, 900);
     }
 
     return () => {
-      if (timerIOS) {
-        window.clearTimeout(timerIOS);
+      if (timer) {
+        window.clearTimeout(timer);
       }
 
       window.removeEventListener(
@@ -121,20 +131,21 @@ export default function InstallAppPrompt() {
   }, []);
 
   async function instalar() {
-    if (!eventoInstalacao) {
+    if (eventoInstalacao) {
+      await eventoInstalacao.prompt();
+
+      const escolha =
+        await eventoInstalacao.userChoice;
+
+      if (escolha.outcome === "accepted") {
+        setMostrar(false);
+      }
+
+      setEventoInstalacao(null);
       return;
     }
 
-    await eventoInstalacao.prompt();
-
-    const escolha =
-      await eventoInstalacao.userChoice;
-
-    if (escolha.outcome === "accepted") {
-      setMostrar(false);
-    }
-
-    setEventoInstalacao(null);
+    setMostrarAjuda(true);
   }
 
   function agoraNao() {
@@ -178,28 +189,36 @@ export default function InstallAppPrompt() {
           </p>
 
           <h2 className="mt-2 text-center text-2xl font-extrabold text-[#5E7357]">
-            Quer instalar o aplicativo?
+            Instale o aplicativo
           </h2>
 
           <p className="mx-auto mt-3 max-w-sm text-center text-sm leading-6 text-[#6C8465]">
-            Assim você acessa seu espaço terapêutico direto pela tela do celular.
+            Tenha seu espaço terapêutico direto na tela do celular.
           </p>
 
-          {ehIOS ? (
-            <div className="mt-6 rounded-2xl border border-[#DCCFB8] bg-white p-4 text-sm leading-6 text-[#6C8465]">
-              No iPhone, toque em
-              <strong> Compartilhar </strong>
-              e depois em
-              <strong> “Adicionar à Tela de Início”</strong>.
+          <button
+            type="button"
+            onClick={instalar}
+            className="mt-6 w-full rounded-xl bg-[#5E7357] px-5 py-4 text-sm font-extrabold text-white shadow transition hover:bg-[#4F6548]"
+          >
+            INSTALAR APLICATIVO
+          </button>
+
+          {mostrarAjuda && !eventoInstalacao && (
+            <div className="mt-4 rounded-2xl border border-[#DCCFB8] bg-white p-4 text-sm leading-6 text-[#5E7357]">
+              {ehIOS ? (
+                <p>
+                  Toque em <strong>Compartilhar</strong> e depois em{" "}
+                  <strong>Adicionar à Tela de Início</strong>.
+                </p>
+              ) : (
+                <p>
+                  Abra o menu <strong>⋮</strong> deste navegador e toque em{" "}
+                  <strong>Instalar aplicativo</strong> ou{" "}
+                  <strong>Adicionar à tela inicial</strong>.
+                </p>
+              )}
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={instalar}
-              className="mt-6 w-full rounded-xl bg-[#5E7357] px-5 py-4 text-sm font-extrabold text-white shadow transition hover:bg-[#4F6548]"
-            >
-              INSTALAR APLICATIVO
-            </button>
           )}
 
           <button
@@ -214,6 +233,7 @@ export default function InstallAppPrompt() {
     );
   }
 
+  // CLUBE DO TARÔ: preservado.
   return (
     <div className="fixed inset-0 z-[99999] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm sm:items-center">
       <div className="w-full max-w-md overflow-hidden rounded-[30px] border border-[#d7b85c]/25 bg-[linear-gradient(160deg,#1b0d28_0%,#0f0918_58%,#09070f_100%)] p-6 text-white shadow-[0_30px_100px_rgba(0,0,0,.6)]">
