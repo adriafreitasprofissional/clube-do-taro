@@ -1,134 +1,149 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 function esperar(ms: number) {
-  return new Promise((resolve) =>
-    setTimeout(resolve, ms)
-  );
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchComTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs = 10000
+) {
+  const controller = new AbortController();
+
+  const timer = window.setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: controller.signal,
+      cache: "no-store",
+    });
+  } finally {
+    window.clearTimeout(timer);
+  }
 }
 
 export default function TerapiaEntrarPage() {
-  const router = useRouter();
+  const iniciou = useRef(false);
 
   const [erro, setErro] =
     useState<string | null>(null);
 
-  const [tentando, setTentando] =
-    useState(true);
+  const [status, setStatus] =
+    useState("Abrindo seu espaço...");
 
-  const abrirPortal =
-    useCallback(async () => {
-      setErro(null);
-      setTentando(true);
+  const abrirPortal = useCallback(async () => {
+    setErro(null);
+    setStatus("Abrindo seu espaço...");
 
-      try {
-        const {
-          data: { session },
-        } =
-          await supabase.auth.getSession();
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-        if (!session?.access_token) {
-          router.replace("/terapia");
-          return;
-        }
+      if (!session?.access_token) {
+        window.location.replace("/terapia");
+        return;
+      }
 
-        let ultimoErro:
-          unknown = null;
+      let ultimoErro: unknown = null;
 
-        for (
-          let tentativa = 1;
-          tentativa <= 3;
-          tentativa++
-        ) {
-          try {
-            const response =
-              await fetch(
-                "/api/terapia/acesso-logado",
-                {
-                  cache: "no-store",
-                  headers: {
-                    Authorization:
-                      `Bearer ${session.access_token}`,
-                  },
-                }
-              );
+      for (let tentativa = 1; tentativa <= 3; tentativa++) {
+        try {
+          setStatus(
+            tentativa === 1
+              ? "Abrindo seu espaço..."
+              : "Tentando conectar novamente..."
+          );
 
-            const data =
-              await response.json();
+          const response = await fetchComTimeout(
+            "/api/terapia/acesso-logado",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${session.access_token}`,
+              },
+            },
+            10000
+          );
 
-            if (!response.ok) {
-              throw new Error(
-                data?.error ||
-                  "Não foi possível abrir seu espaço."
-              );
-            }
+          const data = await response.json();
 
-            if (
-              data.tipo === "admin"
-            ) {
-              router.replace(
-                "/terapia/admin"
-              );
-              return;
-            }
-
-            window.localStorage.setItem(
-              "terapia_em_dia_access_token",
-              data.access_token
+          if (!response.ok) {
+            throw new Error(
+              data?.error ||
+                "Não foi possível abrir seu espaço."
             );
+          }
 
-            router.replace(
-              `/terapia/acesso/${data.access_token}`
-            );
-
+          if (data.tipo === "admin") {
+            window.location.replace("/terapia/admin");
             return;
-          } catch (error) {
-            ultimoErro = error;
+          }
 
-            if (tentativa < 3) {
-              await esperar(
-                tentativa === 1
-                  ? 700
-                  : 1400
-              );
-            }
+          if (!data.access_token) {
+            throw new Error(
+              "Seu acesso ao Terapia em Dia não foi localizado."
+            );
+          }
+
+          window.localStorage.setItem(
+            "terapia_em_dia_access_token",
+            data.access_token
+          );
+
+          // No aplicativo instalado usamos navegação completa.
+          // É mais confiável que router.replace em alguns Android/Samsung.
+          window.location.replace(
+            `/terapia/acesso/${data.access_token}`
+          );
+
+          return;
+        } catch (error) {
+          ultimoErro = error;
+
+          if (tentativa < 3) {
+            await esperar(tentativa === 1 ? 800 : 1500);
           }
         }
-
-        throw ultimoErro;
-      } catch (error) {
-        const mensagem =
-          error instanceof Error
-            ? error.message
-            : "";
-
-        const erroDeRede =
-          mensagem
-            .toLowerCase()
-            .includes("network") ||
-          mensagem
-            .toLowerCase()
-            .includes("fetch");
-
-        setErro(
-          erroDeRede
-            ? "Não conseguimos abrir seu espaço agora. Verifique sua internet e toque em “Tentar novamente”."
-            : mensagem ||
-                "Não foi possível abrir seu espaço."
-        );
-      } finally {
-        setTentando(false);
       }
-    }, [router]);
+
+      throw ultimoErro;
+    } catch (error) {
+      const mensagem =
+        error instanceof Error
+          ? error.message
+          : "";
+
+      const normalizada =
+        mensagem.toLowerCase();
+
+      const rede =
+        normalizada.includes("network") ||
+        normalizada.includes("fetch") ||
+        normalizada.includes("abort");
+
+      setErro(
+        rede
+          ? "Não conseguimos abrir seu espaço agora. Verifique sua internet e toque em “Tentar novamente”."
+          : mensagem ||
+              "Não foi possível abrir seu espaço."
+      );
+
+      setStatus("");
+    }
+  }, []);
 
   useEffect(() => {
+    if (iniciou.current) return;
+    iniciou.current = true;
+
     abrirPortal();
   }, [abrirPortal]);
 
@@ -155,7 +170,7 @@ export default function TerapiaEntrarPage() {
           <button
             type="button"
             onClick={() =>
-              router.replace("/terapia")
+              window.location.replace("/terapia")
             }
             className="mt-3 w-full rounded-xl border border-[#C8B8A8] px-5 py-3 font-bold text-[#5E7357]"
           >
@@ -167,10 +182,18 @@ export default function TerapiaEntrarPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F8F4EC] p-8 text-center text-[#5E7357]">
-      {tentando
-        ? "Abrindo seu espaço..."
-        : "Preparando seu acesso..."}
+    <main className="flex min-h-screen items-center justify-center bg-[#F8F4EC] p-8 text-center text-[#5E7357]">
+      <div>
+        <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-[#D7E1D2] border-t-[#5E7357]" />
+
+        <p className="mt-4 font-bold">
+          {status}
+        </p>
+
+        <p className="mt-2 text-sm text-[#7A8D73]">
+          Isso deve levar apenas alguns segundos.
+        </p>
+      </div>
     </main>
   );
 }
