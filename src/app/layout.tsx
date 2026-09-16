@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       },
       description:
         "Plataforma de acompanhamento terapêutico para pacientes e profissionais.",
-      manifest: "/terapia-manifest.json?v=2",
+      manifest: "/terapia-manifest.json?v=3",
       appleWebApp: {
         capable: true,
         statusBarStyle: "default",

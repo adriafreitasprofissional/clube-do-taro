@@ -2,23 +2,25 @@
   "name": "Terapia em Dia com Ádria Freitas",
   "short_name": "Terapia em Dia",
   "description": "Seu espaço de acompanhamento terapêutico com Ádria Freitas.",
+  "id": "/terapia",
   "start_url": "/terapia",
-  "scope": "/terapia",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#F8F4EC",
   "theme_color": "#5E7357",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/terapia-icon-192-v2.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/terapia-icon-512-v2.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
