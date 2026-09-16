@@ -25,8 +25,6 @@ export default function InstallAppPrompt() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [marca, setMarca] =
     useState<"clube" | "terapia" | null>(null);
-  const [mostrarPassos, setMostrarPassos] =
-    useState(false);
 
   useEffect(() => {
     const host = window.location.hostname.toLowerCase();
@@ -47,7 +45,9 @@ export default function InstallAppPrompt() {
       dominioTerapia &&
       (path === "/" || path === "/terapia");
 
-    if (!paginaClube && !paginaTerapia) return;
+    if (!paginaClube && !paginaTerapia) {
+      return;
+    }
 
     const marcaAtual =
       paginaTerapia ? "terapia" : "clube";
@@ -58,14 +58,17 @@ export default function InstallAppPrompt() {
       window.matchMedia("(display-mode: standalone)").matches ||
       navigator.standalone === true;
 
-    if (instalado) return;
+    if (instalado) {
+      return;
+    }
 
     const userAgent =
       window.navigator.userAgent.toLowerCase();
 
-    setEhIOS(
-      /iphone|ipad|ipod/.test(userAgent)
-    );
+    const ios =
+      /iphone|ipad|ipod/.test(userAgent);
+
+    setEhIOS(ios);
 
     const chaveAdiar =
       marcaAtual === "terapia"
@@ -76,11 +79,9 @@ export default function InstallAppPrompt() {
       localStorage.getItem(chaveAdiar) || "0"
     );
 
-    if (adiadoAte > Date.now()) return;
-
-    const abrirAviso = window.setTimeout(() => {
-      setMostrar(true);
-    }, 900);
+    if (adiadoAte > Date.now()) {
+      return;
+    }
 
     function aoPedirInstalacao(event: Event) {
       event.preventDefault();
@@ -97,8 +98,20 @@ export default function InstallAppPrompt() {
       aoPedirInstalacao
     );
 
+    // No iPhone não existe beforeinstallprompt.
+    // Só nele mostramos a orientação manual.
+    let timerIOS: number | undefined;
+
+    if (ios) {
+      timerIOS = window.setTimeout(() => {
+        setMostrar(true);
+      }, 900);
+    }
+
     return () => {
-      window.clearTimeout(abrirAviso);
+      if (timerIOS) {
+        window.clearTimeout(timerIOS);
+      }
 
       window.removeEventListener(
         "beforeinstallprompt",
@@ -107,26 +120,21 @@ export default function InstallAppPrompt() {
     };
   }, []);
 
-  async function instalarAndroid() {
-    if (eventoInstalacao) {
-      await eventoInstalacao.prompt();
-
-      const escolha =
-        await eventoInstalacao.userChoice;
-
-      if (escolha.outcome === "accepted") {
-        setMostrar(false);
-      }
-
-      setEventoInstalacao(null);
+  async function instalar() {
+    if (!eventoInstalacao) {
       return;
     }
 
-    // Alguns navegadores Android, como o Samsung Internet,
-    // não entregam o evento de instalação para o site.
-    // Nesse caso mostramos os passos somente após a pessoa
-    // tocar no botão "Instalar aplicativo".
-    setMostrarPassos(true);
+    await eventoInstalacao.prompt();
+
+    const escolha =
+      await eventoInstalacao.userChoice;
+
+    if (escolha.outcome === "accepted") {
+      setMostrar(false);
+    }
+
+    setEventoInstalacao(null);
   }
 
   function agoraNao() {
@@ -148,9 +156,12 @@ export default function InstallAppPrompt() {
     setMostrar(false);
   }
 
-  if (!mostrar || !marca) return null;
+  if (!mostrar || !marca) {
+    return null;
+  }
 
-  const terapia = marca === "terapia";
+  const terapia =
+    marca === "terapia";
 
   if (terapia) {
     return (
@@ -175,48 +186,20 @@ export default function InstallAppPrompt() {
           </p>
 
           {ehIOS ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setMostrarPassos(true)}
-                className="mt-6 w-full rounded-xl bg-[#5E7357] px-5 py-4 text-sm font-extrabold text-white shadow"
-              >
-                INSTALAR APLICATIVO
-              </button>
-
-              {mostrarPassos && (
-                <div className="mt-4 rounded-2xl border border-[#DCCFB8] bg-white p-4 text-sm leading-6 text-[#6C8465]">
-                  <strong>iPhone:</strong> abra esta página no Safari, toque em
-                  <strong> Compartilhar </strong>
-                  e escolha
-                  <strong> “Adicionar à Tela de Início”</strong>.
-                </div>
-              )}
-            </>
+            <div className="mt-6 rounded-2xl border border-[#DCCFB8] bg-white p-4 text-sm leading-6 text-[#6C8465]">
+              No iPhone, toque em
+              <strong> Compartilhar </strong>
+              e depois em
+              <strong> “Adicionar à Tela de Início”</strong>.
+            </div>
           ) : (
-            <>
-              <button
-                type="button"
-                onClick={instalarAndroid}
-                className="mt-6 w-full rounded-xl bg-[#5E7357] px-5 py-4 text-sm font-extrabold text-white shadow transition hover:bg-[#4F6548]"
-              >
-                INSTALAR APLICATIVO
-              </button>
-
-              {mostrarPassos && !eventoInstalacao && (
-                <div className="mt-4 rounded-2xl border border-[#DCCFB8] bg-white p-4 text-sm leading-6 text-[#6C8465]">
-                  Neste navegador, toque no menu
-                  <strong> ⋮ </strong>
-                  e escolha
-                  <strong> “Instalar aplicativo” </strong>
-                  ou
-                  <strong> “Adicionar à tela inicial”</strong>.
-                  <p className="mt-2 text-xs text-[#7A8D73]">
-                    Se preferir, abra este endereço no Google Chrome para instalar com um toque.
-                  </p>
-                </div>
-              )}
-            </>
+            <button
+              type="button"
+              onClick={instalar}
+              className="mt-6 w-full rounded-xl bg-[#5E7357] px-5 py-4 text-sm font-extrabold text-white shadow transition hover:bg-[#4F6548]"
+            >
+              INSTALAR APLICATIVO
+            </button>
           )}
 
           <button
@@ -234,7 +217,7 @@ export default function InstallAppPrompt() {
   return (
     <div className="fixed inset-0 z-[99999] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm sm:items-center">
       <div className="w-full max-w-md overflow-hidden rounded-[30px] border border-[#d7b85c]/25 bg-[linear-gradient(160deg,#1b0d28_0%,#0f0918_58%,#09070f_100%)] p-6 text-white shadow-[0_30px_100px_rgba(0,0,0,.6)]">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#e8cb73]/25 bg-[#e8cb73]/10 text-3xl">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#e8cb73]/25 bg-[#e8cb73]/10 text-3xl shadow-[0_0_35px_rgba(232,203,115,.12)]">
           ✦
         </div>
 
@@ -251,36 +234,32 @@ export default function InstallAppPrompt() {
         </p>
 
         {ehIOS ? (
-          <button
-            type="button"
-            onClick={() => setMostrarPassos(true)}
-            className="mt-6 w-full rounded-full bg-[#d8b650] px-5 py-4 text-sm font-extrabold text-[#1b1021]"
-          >
-            INSTALAR CLUBE DO TARÔ
-          </button>
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+            <p className="font-bold text-[#f1d88a]">
+              No iPhone:
+            </p>
+
+            <div className="mt-3 space-y-3 text-sm leading-6 text-[#e4daef]">
+              <p>1. Abra esta página no Safari.</p>
+              <p>2. Toque no botão Compartilhar.</p>
+              <p>3. Escolha “Adicionar à Tela de Início”.</p>
+              <p>4. Toque em “Adicionar”.</p>
+            </div>
+          </div>
         ) : (
           <button
             type="button"
-            onClick={instalarAndroid}
-            className="mt-6 w-full rounded-full bg-[#d8b650] px-5 py-4 text-sm font-extrabold text-[#1b1021]"
+            onClick={instalar}
+            className="mt-6 w-full rounded-full bg-[#d8b650] px-5 py-4 text-sm font-extrabold text-[#1b1021] transition hover:brightness-110"
           >
             INSTALAR CLUBE DO TARÔ
           </button>
-        )}
-
-        {mostrarPassos && !eventoInstalacao && (
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm leading-6 text-[#e4daef]">
-            Abra o menu do navegador e escolha
-            <strong> “Instalar aplicativo” </strong>
-            ou
-            <strong> “Adicionar à tela inicial”</strong>.
-          </div>
         )}
 
         <button
           type="button"
           onClick={agoraNao}
-          className="mt-4 w-full rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-[#c8b9d8]"
+          className="mt-4 w-full rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-[#c8b9d8] transition hover:bg-white/5"
         >
           Agora não
         </button>
