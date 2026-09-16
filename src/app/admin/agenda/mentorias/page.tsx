@@ -48,6 +48,7 @@ export default function AgendaMentoriasAdminPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
+  const [secoesAbertas, setSecoesAbertas] = useState<Record<string, boolean>>({});
 
   const authFetch = useCallback(async (url: string, init?: RequestInit) => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -87,6 +88,14 @@ export default function AgendaMentoriasAdminPage() {
 
   useEffect(() => {
     carregar();
+  }, [carregar]);
+
+  useEffect(() => {
+    const intervalo = window.setInterval(() => {
+      void carregar();
+    }, 30_000);
+
+    return () => window.clearInterval(intervalo);
   }, [carregar]);
 
   const celulas = useMemo(() => {
@@ -146,6 +155,71 @@ export default function AgendaMentoriasAdminPage() {
         ),
     [dados]
   );
+
+  const compromissosEspelhados = useMemo(
+    () =>
+      (dados?.appointments || [])
+        .filter(
+          (item: any) =>
+            new Date(item.scheduled_at) >= new Date()
+        )
+        .sort(
+          (a: any, b: any) =>
+            new Date(a.scheduled_at).getTime() -
+            new Date(b.scheduled_at).getTime()
+        ),
+    [dados]
+  );
+
+  const compromissosPorMes = useMemo(() => {
+    const grupos = new Map<string, any[]>();
+
+    compromissosEspelhados.forEach((item: any) => {
+      const rotulo = new Date(item.scheduled_at).toLocaleDateString(
+        "pt-BR",
+        {
+          timeZone: "America/Sao_Paulo",
+          month: "long",
+          year: "numeric",
+        }
+      );
+
+      const chave = rotulo.charAt(0).toUpperCase() + rotulo.slice(1);
+      const atuais = grupos.get(chave) || [];
+      atuais.push(item);
+      grupos.set(chave, atuais);
+    });
+
+    return Array.from(grupos.entries()).map(([mes, itens]) => ({
+      mes,
+      itens,
+    }));
+  }, [compromissosEspelhados]);
+
+  const historicoPorMes = useMemo(() => {
+    const grupos = new Map<string, Evento[]>();
+
+    historico.forEach((evento: Evento) => {
+      const rotulo = new Date(evento.starts_at).toLocaleDateString(
+        "pt-BR",
+        {
+          timeZone: "America/Sao_Paulo",
+          month: "long",
+          year: "numeric",
+        }
+      );
+
+      const chave = rotulo.charAt(0).toUpperCase() + rotulo.slice(1);
+      const atuais = grupos.get(chave) || [];
+      atuais.push(evento);
+      grupos.set(chave, atuais);
+    });
+
+    return Array.from(grupos.entries()).map(([mes, eventos]) => ({
+      mes,
+      eventos,
+    }));
+  }, [historico]);
 
   function toggleDate(date: string) {
     setSelecionadas((atuais) =>
@@ -290,10 +364,105 @@ export default function AgendaMentoriasAdminPage() {
     }
   }
 
-  function statusResposta(valor?: string) {
-    if (valor === "confirmed") return "Vai participar";
-    if (valor === "declined") return "Não vai poder";
-    return "Ainda não respondeu";
+  function secaoEstaAberta(
+    chave: string,
+    abertaPorPadrao = false
+  ) {
+    return secoesAbertas[chave] ?? abertaPorPadrao;
+  }
+
+  function alternarSecao(
+    chave: string,
+    abertaPorPadrao = false
+  ) {
+    setSecoesAbertas((atuais) => ({
+      ...atuais,
+      [chave]: !(atuais[chave] ?? abertaPorPadrao),
+    }));
+  }
+
+  function linhaParticipante(
+    evento: Evento,
+    item: any,
+    status: "pending" | "confirmed" | "declined"
+  ) {
+    const cliente = item.cliente;
+    const participante = item.participante;
+
+    const nome =
+      cliente.nome_referencia ||
+      cliente.nome ||
+      "Mentorada";
+
+    const textoStatus =
+      status === "confirmed"
+        ? "Confirmado"
+        : status === "declined"
+        ? "Não vai participar"
+        : "Aguardando resposta";
+
+    return (
+      <div
+        key={cliente.id}
+        className="flex flex-col gap-3 rounded-xl bg-white/[0.04] p-4 md:flex-row md:items-center md:justify-between"
+      >
+        <div>
+          <p className="text-base font-bold text-white">
+            {nome}
+          </p>
+
+          <p
+            className={`mt-1 text-sm ${
+              status === "confirmed"
+                ? "text-green-300"
+                : status === "declined"
+                ? "text-red-300"
+                : "text-purple-300/80"
+            }`}
+          >
+            {textoStatus}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              atualizarPresenca(
+                evento.id,
+                cliente.id,
+                "present"
+              )
+            }
+            className={`rounded-lg px-3 py-2 text-xs font-bold ${
+              participante?.attendance === "present"
+                ? "bg-green-500 text-white"
+                : "border border-green-400/30 text-green-200"
+            }`}
+          >
+            Presente
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              atualizarPresenca(
+                evento.id,
+                cliente.id,
+                "absent"
+              )
+            }
+            className={`rounded-lg px-3 py-2 text-xs font-bold ${
+              participante?.attendance === "absent"
+                ? "bg-red-500 text-white"
+                : "border border-red-400/30 text-red-200"
+            }`}
+          >
+            Faltou
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -608,81 +777,161 @@ export default function AgendaMentoriasAdminPage() {
                   </div>
                 </div>
 
-                {evento.event_type === "group" && (
-                  <div className="mt-5 border-t border-purple-500/20 pt-5">
-                    <p className="text-xs font-bold uppercase tracking-wide text-yellow-300">
-                      Confirmações do grupo Diamante
-                    </p>
-
-                    <div className="mt-3 grid gap-2">
-                      {(dados?.diamond_clients || []).map((cliente: any) => {
-                        const participante = participantes.find(
+                {evento.event_type === "group" &&
+                  (() => {
+                    const itensDiamante = (dados?.diamond_clients || []).map(
+                      (cliente: any) => ({
+                        cliente,
+                        participante: participantes.find(
                           (item) => item.client_id === cliente.id
-                        );
+                        ),
+                      })
+                    );
 
-                        const nome =
-                          cliente.nome_referencia ||
-                          cliente.nome ||
-                          "Mentorada";
+                    const aguardando = itensDiamante.filter(
+                      (item: any) =>
+                        item.participante?.response !== "confirmed" &&
+                        item.participante?.response !== "declined"
+                    );
 
-                        return (
-                          <div
-                            key={cliente.id}
-                            className="flex flex-col gap-3 rounded-xl bg-white/[0.03] p-3 md:flex-row md:items-center md:justify-between"
-                          >
-                            <div>
-                              <p className="text-sm font-bold text-white">
-                                {nome}
-                              </p>
+                    const confirmados = itensDiamante.filter(
+                      (item: any) =>
+                        item.participante?.response === "confirmed"
+                    );
 
-                              <p className="mt-1 text-xs text-purple-300/70">
-                                {statusResposta(participante?.response)}
-                              </p>
-                            </div>
+                    const recusados = itensDiamante.filter(
+                      (item: any) =>
+                        item.participante?.response === "declined"
+                    );
 
-                            <div className="flex flex-wrap gap-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  atualizarPresenca(
-                                    evento.id,
-                                    cliente.id,
-                                    "present"
+                    const chaveAguardando = `${evento.id}-aguardando`;
+                    const chaveConfirmados = `${evento.id}-confirmados`;
+                    const chaveRecusados = `${evento.id}-recusados`;
+
+                    return (
+                      <div className="mt-5 border-t border-purple-500/20 pt-5">
+                        <p className="text-base font-bold uppercase tracking-wide text-yellow-300">
+                          Confirmações do grupo Diamante
+                        </p>
+
+                        <div className="mt-4 grid gap-3">
+                          <div className="overflow-hidden rounded-2xl border border-yellow-400/20 bg-yellow-400/[0.04]">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                alternarSecao(chaveAguardando, true)
+                              }
+                              className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+                            >
+                              <span className="text-base font-bold text-yellow-200">
+                                Aguardando confirmação ({aguardando.length})
+                              </span>
+
+                              <span className="text-xl text-yellow-300">
+                                {secaoEstaAberta(chaveAguardando, true)
+                                  ? "▾"
+                                  : "›"}
+                              </span>
+                            </button>
+
+                            {secaoEstaAberta(chaveAguardando, true) && (
+                              <div className="grid gap-2 border-t border-yellow-400/10 p-3">
+                                {aguardando.length === 0 ? (
+                                  <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
+                                    Ninguém aguardando confirmação.
+                                  </p>
+                                ) : (
+                                  aguardando.map((item: any) =>
+                                    linhaParticipante(
+                                      evento,
+                                      item,
+                                      "pending"
+                                    )
                                   )
-                                }
-                                className={`rounded-lg px-3 py-2 text-xs font-bold ${
-                                  participante?.attendance === "present"
-                                    ? "bg-green-500 text-white"
-                                    : "border border-green-400/30 text-green-200"
-                                }`}
-                              >
-                                Presente
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  atualizarPresenca(
-                                    evento.id,
-                                    cliente.id,
-                                    "absent"
-                                  )
-                                }
-                                className={`rounded-lg px-3 py-2 text-xs font-bold ${
-                                  participante?.attendance === "absent"
-                                    ? "bg-red-500 text-white"
-                                    : "border border-red-400/30 text-red-200"
-                                }`}
-                              >
-                                Faltou
-                              </button>
-                            </div>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+
+                          <div className="overflow-hidden rounded-2xl border border-green-400/20 bg-green-400/[0.04]">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                alternarSecao(chaveConfirmados)
+                              }
+                              className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+                            >
+                              <span className="text-base font-bold text-green-200">
+                                Confirmados ({confirmados.length})
+                              </span>
+
+                              <span className="text-xl text-green-300">
+                                {secaoEstaAberta(chaveConfirmados)
+                                  ? "▾"
+                                  : "›"}
+                              </span>
+                            </button>
+
+                            {secaoEstaAberta(chaveConfirmados) && (
+                              <div className="grid gap-2 border-t border-green-400/10 p-3">
+                                {confirmados.length === 0 ? (
+                                  <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
+                                    Ainda não há confirmações.
+                                  </p>
+                                ) : (
+                                  confirmados.map((item: any) =>
+                                    linhaParticipante(
+                                      evento,
+                                      item,
+                                      "confirmed"
+                                    )
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="overflow-hidden rounded-2xl border border-red-400/20 bg-red-400/[0.03]">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                alternarSecao(chaveRecusados)
+                              }
+                              className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+                            >
+                              <span className="text-base font-bold text-red-200">
+                                Não participarão ({recusados.length})
+                              </span>
+
+                              <span className="text-xl text-red-300">
+                                {secaoEstaAberta(chaveRecusados)
+                                  ? "▾"
+                                  : "›"}
+                              </span>
+                            </button>
+
+                            {secaoEstaAberta(chaveRecusados) && (
+                              <div className="grid gap-2 border-t border-red-400/10 p-3">
+                                {recusados.length === 0 ? (
+                                  <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
+                                    Ninguém recusou esta mentoria.
+                                  </p>
+                                ) : (
+                                  recusados.map((item: any) =>
+                                    linhaParticipante(
+                                      evento,
+                                      item,
+                                      "declined"
+                                    )
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
               </div>
             );
           })}
@@ -690,86 +939,180 @@ export default function AgendaMentoriasAdminPage() {
       </section>
 
       {dados?.settings?.mirror_club_therapy && (
-        <section className="rounded-3xl border border-green-500/20 bg-[#1d0023] p-5">
-          <h2 className="text-xl font-bold text-green-200">
-            Compromissos espelhados da Agenda-Mãe
-          </h2>
+        <section className="overflow-hidden rounded-3xl border border-green-500/20 bg-[#1d0023]">
+          <button
+            type="button"
+            onClick={() => alternarSecao("agenda-mae")}
+            className="flex w-full items-center justify-between gap-4 p-5 text-left"
+          >
+            <div>
+              <h2 className="text-xl font-bold text-green-200">
+                Compromissos espelhados da Agenda-Mãe ({compromissosEspelhados.length})
+              </h2>
 
-          <p className="mt-1 text-sm text-purple-300/70">
-            Estes horários também impedem que você libere uma mentoria no mesmo período.
-          </p>
+              <p className="mt-1 text-sm text-purple-300/70">
+                Estes horários também impedem que você libere uma mentoria no mesmo período.
+              </p>
+            </div>
 
-          <div className="mt-4 grid gap-3">
-            {(dados?.appointments || [])
-              .filter(
-                (item: any) =>
-                  new Date(item.scheduled_at) >= new Date()
-              )
-              .slice(0, 10)
-              .map((item: any) => (
-                <div
-                  key={item.id}
-                  className="rounded-xl border border-green-500/10 bg-green-500/5 p-4"
-                >
-                  <p className="font-bold text-white">
-                    {item.client_name}
-                  </p>
+            <span className="text-2xl text-green-300">
+              {secaoEstaAberta("agenda-mae") ? "▾" : "›"}
+            </span>
+          </button>
 
-                  <p className="mt-1 text-xs capitalize text-green-200/80">
-                    {item.service_type} · {dataHora(item.scheduled_at)}
-                  </p>
-                </div>
-              ))}
-          </div>
+          {secaoEstaAberta("agenda-mae") && (
+            <div className="grid gap-3 border-t border-green-500/10 p-5">
+              {compromissosPorMes.length === 0 ? (
+                <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
+                  Nenhum compromisso futuro espelhado.
+                </p>
+              ) : (
+                compromissosPorMes.map((grupo, indice) => {
+                  const chave = `agenda-mae-${grupo.mes}`;
+                  const abertaPorPadrao = indice === 0;
+
+                  return (
+                    <div
+                      key={grupo.mes}
+                      className="overflow-hidden rounded-2xl border border-green-500/10 bg-green-500/[0.03]"
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          alternarSecao(chave, abertaPorPadrao)
+                        }
+                        className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left"
+                      >
+                        <span className="font-bold text-green-100">
+                          {grupo.mes} ({grupo.itens.length})
+                        </span>
+
+                        <span className="text-lg text-green-300">
+                          {secaoEstaAberta(chave, abertaPorPadrao)
+                            ? "▾"
+                            : "›"}
+                        </span>
+                      </button>
+
+                      {secaoEstaAberta(chave, abertaPorPadrao) && (
+                        <div className="grid gap-3 border-t border-green-500/10 p-3">
+                          {grupo.itens.map((item: any) => (
+                            <div
+                              key={item.id}
+                              className="rounded-xl border border-green-500/10 bg-green-500/5 p-4"
+                            >
+                              <p className="font-bold text-white">
+                                {item.client_name}
+                              </p>
+
+                              <p className="mt-1 text-sm capitalize text-green-200/80">
+                                {item.service_type} · {dataHora(item.scheduled_at)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </section>
       )}
 
-      <section className="rounded-3xl border border-purple-500/20 bg-[#1d0023] p-5">
-        <h2 className="text-xl font-bold text-purple-100">
-          Histórico de mentorias
-        </h2>
+      <section className="overflow-hidden rounded-3xl border border-purple-500/20 bg-[#1d0023]">
+        <button
+          type="button"
+          onClick={() => alternarSecao("historico-mentorias")}
+          className="flex w-full items-center justify-between gap-4 p-5 text-left"
+        >
+          <h2 className="text-xl font-bold text-purple-100">
+            Histórico de mentorias ({historico.length})
+          </h2>
 
-        <div className="mt-4 grid gap-3">
-          {historico.length === 0 && (
-            <p className="text-sm text-purple-300/70">
-              O histórico aparecerá aqui após os encontros.
-            </p>
-          )}
+          <span className="text-2xl text-purple-300">
+            {secaoEstaAberta("historico-mentorias") ? "▾" : "›"}
+          </span>
+        </button>
 
-          {historico.map((evento: Evento) => {
-            const participantes =
-              participantesPorEvento.get(evento.id) || [];
+        {secaoEstaAberta("historico-mentorias") && (
+          <div className="grid gap-3 border-t border-purple-500/10 p-5">
+            {historico.length === 0 ? (
+              <p className="text-sm text-purple-300/70">
+                O histórico aparecerá aqui após os encontros.
+              </p>
+            ) : (
+              historicoPorMes.map((grupo, indice) => {
+                const chave = `historico-${grupo.mes}`;
+                const abertaPorPadrao = indice === 0;
 
-            return (
-              <div
-                key={evento.id}
-                className="rounded-xl border border-purple-500/20 bg-black/20 p-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-bold text-white">
-                      {evento.title}
-                    </p>
+                return (
+                  <div
+                    key={grupo.mes}
+                    className="overflow-hidden rounded-2xl border border-purple-500/20 bg-black/10"
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        alternarSecao(chave, abertaPorPadrao)
+                      }
+                      className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left"
+                    >
+                      <span className="font-bold text-purple-100">
+                        {grupo.mes} ({grupo.eventos.length})
+                      </span>
 
-                    <p className="mt-1 text-xs capitalize text-purple-300">
-                      {dataHora(evento.starts_at)} ·{" "}
-                      {evento.event_type === "group"
-                        ? "Em Grupo"
-                        : "Individual"}
-                    </p>
+                      <span className="text-lg text-purple-300">
+                        {secaoEstaAberta(chave, abertaPorPadrao)
+                          ? "▾"
+                          : "›"}
+                      </span>
+                    </button>
+
+                    {secaoEstaAberta(chave, abertaPorPadrao) && (
+                      <div className="grid gap-3 border-t border-purple-500/10 p-3">
+                        {grupo.eventos.map((evento: Evento) => {
+                          const participantes =
+                            participantesPorEvento.get(evento.id) || [];
+
+                          return (
+                            <div
+                              key={evento.id}
+                              className="rounded-xl border border-purple-500/20 bg-black/20 p-4"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                  <p className="font-bold text-white">
+                                    {evento.title}
+                                  </p>
+
+                                  <p className="mt-1 text-sm capitalize text-purple-300">
+                                    {dataHora(evento.starts_at)} ·{" "}
+                                    {evento.event_type === "group"
+                                      ? "Em Grupo"
+                                      : "Individual"}
+                                  </p>
+                                </div>
+
+                                <span className="rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-200">
+                                  {participantes.filter(
+                                    (item) => item.attendance === "present"
+                                  ).length}{" "}
+                                  presentes
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-
-                  <span className="rounded-full border border-purple-500/30 px-3 py-1 text-xs text-purple-200">
-                    {participantes.filter(
-                      (item) => item.attendance === "present"
-                    ).length}{" "}
-                    presentes
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })
+            )}
+          </div>
+        )}
       </section>
     </div>
   );
