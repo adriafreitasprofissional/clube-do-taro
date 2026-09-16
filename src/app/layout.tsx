@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       },
       description:
         "Plataforma de acompanhamento terapêutico para pacientes e profissionais.",
-      manifest: "/terapia-manifest.json",
+      manifest: "/terapia-manifest.json?v=2",
       appleWebApp: {
         capable: true,
         statusBarStyle: "default",
@@ -45,17 +45,17 @@ export async function generateMetadata(): Promise<Metadata> {
       icons: {
         icon: [
           {
-            url: "/terapia-icon-192.png",
+            url: "/terapia-icon-192-v2.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            url: "/terapia-icon-512.png",
+            url: "/terapia-icon-512-v2.png",
             sizes: "512x512",
             type: "image/png",
           },
         ],
-        apple: "/terapia-icon-192.png",
+        apple: "/terapia-icon-192-v2.png",
       },
     };
   }
