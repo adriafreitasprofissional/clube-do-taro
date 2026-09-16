@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 type Cliente = {
@@ -39,6 +40,7 @@ export default function Page() {
   const [carregando, setCarregando] = useState(true);
   const [publicando, setPublicando] = useState(false);
   const [recadoAberto, setRecadoAberto] = useState<string | null>(null);
+  const [historicoAberto, setHistoricoAberto] = useState(true);
 
   async function carregarDados() {
     setCarregando(true);
@@ -186,19 +188,28 @@ export default function Page() {
     <main className="min-h-screen bg-[#08020d] px-5 py-8 text-white md:px-10">
       <div className="mx-auto max-w-6xl">
         {/* CABEÇALHO */}
-        <div className="mb-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-purple-300">
-            Relacionamento
-          </p>
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-purple-300">
+              Relacionamento
+            </p>
 
-          <h1 className="mt-2 text-3xl font-extrabold text-yellow-400">
-            ✦ Recados da Ádria
-          </h1>
+            <h1 className="mt-2 text-3xl font-extrabold text-yellow-400">
+              ✦ Recados da Ádria
+            </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-purple-200">
-            Um espaço para enviar mensagens especiais aos assinantes
-            e acompanhar quem já recebeu e quem já leu.
-          </p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-purple-200">
+              Um espaço para enviar mensagens especiais aos assinantes
+              e acompanhar quem já recebeu e quem já leu.
+            </p>
+          </div>
+
+          <Link
+            href="/admin"
+            className="shrink-0 rounded-xl border border-purple-500/30 bg-white/[0.03] px-4 py-3 text-sm font-bold text-purple-100 transition hover:border-yellow-400/40 hover:text-yellow-300"
+          >
+            ← Voltar ao painel
+          </Link>
         </div>
 
         {/* NOVO RECADO */}
@@ -328,16 +339,28 @@ export default function Page() {
 
         {/* HISTÓRICO */}
         <section className="mt-8 rounded-3xl border border-purple-500/20 bg-[#120b20] p-6 shadow-xl">
-          <div className="mb-6">
-            <h2 className="text-xl font-extrabold text-yellow-300">
-              ✦ Histórico de Recados
-            </h2>
+          <button
+            type="button"
+            onClick={() => setHistoricoAberto((aberto) => !aberto)}
+            className="flex w-full items-start justify-between gap-4 text-left"
+          >
+            <div>
+              <h2 className="text-xl font-extrabold text-yellow-300">
+                ✦ Histórico de Recados
+              </h2>
 
-            <p className="mt-1 text-sm text-purple-300">
-              Acompanhe os recados publicados e as leituras individuais.
-            </p>
-          </div>
+              <p className="mt-1 text-sm text-purple-300">
+                Acompanhe os recados publicados e as leituras individuais.
+              </p>
+            </div>
 
+            <span className="text-2xl font-bold text-yellow-300">
+              {historicoAberto ? "▾" : "›"}
+            </span>
+          </button>
+
+          {historicoAberto && (
+            <div className="mt-6">
           {carregando ? (
             <p className="text-sm text-purple-300">
               Carregando histórico...
@@ -538,6 +561,8 @@ export default function Page() {
                   </div>
                 );
               })}
+            </div>
+          )}
             </div>
           )}
         </section>
