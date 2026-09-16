@@ -52,6 +52,26 @@ function inicioComFuso(date: string, time: string) {
   return `${date}T${time}:00-03:00`;
 }
 
+function formatarDataConvite(iso: string) {
+  const data = new Date(iso);
+
+  const dia = data.toLocaleDateString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  const hora = data.toLocaleTimeString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return { dia, hora };
+}
+
 export async function GET(request: NextRequest) {
   if (!(await autorizarAdmin(request))) {
     return NextResponse.json(
@@ -65,6 +85,7 @@ export async function GET(request: NextRequest) {
       eventsResult,
       participantsResult,
       clientsResult,
+      activeClientsResult,
       appointmentsResult,
       settingsResult,
     ] = await Promise.all([
@@ -95,6 +116,12 @@ export async function GET(request: NextRequest) {
         .from("club_clients")
         .select("id, nome, nome_referencia, slug, plano, status")
         .ilike("plano", "diamante")
+        .eq("status", "ativo")
+        .order("nome", { ascending: true }),
+
+      supabaseAdmin
+        .from("club_clients")
+        .select("id, nome, nome_referencia, slug, plano, status")
         .eq("status", "ativo")
         .order("nome", { ascending: true }),
 
@@ -148,6 +175,7 @@ export async function GET(request: NextRequest) {
             cliente?.nome ||
             "Mentorada",
           client_slug: cliente?.slug || "",
+          client_plan: cliente?.plano || "",
         };
       }
     );
@@ -176,6 +204,7 @@ export async function GET(request: NextRequest) {
       events: eventsResult.data || [],
       participants,
       diamond_clients: clientsResult.data || [],
+      active_clients: activeClientsResult.data || [],
       appointments,
       settings:
         settingsResult.data || {
@@ -232,6 +261,203 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         mirror_club_therapy: mirror,
+      });
+    }
+
+    if (action === "send_group_invites") {
+      const eventId = String(body.event_id || "").trim();
+      const audience = String(body.audience || "guests").trim();
+
+      const requestedClientIds: string[] = Array.isArray(body.client_ids)
+        ? [
+            ...new Set<string>(
+              body.client_ids
+                .map((item: unknown) => String(item ?? "").trim())
+                .filter(Boolean)
+            ),
+          ]
+        : [];
+
+      if (!eventId) {
+        return NextResponse.json(
+          { error: "Mentoria não informada." },
+          { status: 400 }
+        );
+      }
+
+      if (!["guests", "diamond"].includes(audience)) {
+        return NextResponse.json(
+          { error: "Tipo de convite inválido." },
+          { status: 400 }
+        );
+      }
+
+      const { data: evento, error: eventoError } = await supabaseAdmin
+        .from("club_mentoring_events")
+        .select("id, event_type, title, starts_at, status")
+        .eq("id", eventId)
+        .eq("professional", PROFESSIONAL)
+        .maybeSingle();
+
+      if (eventoError) {
+        return NextResponse.json(
+          { error: eventoError.message },
+          { status: 500 }
+        );
+      }
+
+      if (!evento || evento.event_type !== "group") {
+        return NextResponse.json(
+          { error: "Mentoria em grupo não encontrada." },
+          { status: 404 }
+        );
+      }
+
+      if (evento.status === "cancelled") {
+        return NextResponse.json(
+          { error: "Esta mentoria foi cancelada." },
+          { status: 409 }
+        );
+      }
+
+      let clientesQuery = supabaseAdmin
+        .from("club_clients")
+        .select("id, nome, nome_referencia, slug, plano, status")
+        .eq("status", "ativo");
+
+      if (audience === "diamond") {
+        clientesQuery = clientesQuery.ilike("plano", "diamante");
+      } else {
+        if (!requestedClientIds.length) {
+          return NextResponse.json(
+            { error: "Selecione pelo menos um convidado." },
+            { status: 400 }
+          );
+        }
+
+        clientesQuery = clientesQuery.in("id", requestedClientIds);
+      }
+
+      const { data: clientes, error: clientesError } = await clientesQuery;
+
+      if (clientesError) {
+        return NextResponse.json(
+          { error: clientesError.message },
+          { status: 500 }
+        );
+      }
+
+      const destinatarios = clientes || [];
+
+      if (!destinatarios.length) {
+        return NextResponse.json(
+          { error: "Nenhum destinatário ativo encontrado." },
+          { status: 404 }
+        );
+      }
+
+      const ids = destinatarios.map((cliente) => cliente.id);
+
+      const { data: existentes, error: existentesError } = await supabaseAdmin
+        .from("club_mentoring_participants")
+        .select("id, client_id, response")
+        .eq("event_id", eventId)
+        .in("client_id", ids);
+
+      if (existentesError) {
+        return NextResponse.json(
+          { error: existentesError.message },
+          { status: 500 }
+        );
+      }
+
+      const participacoesExistentes = existentes || [];
+      const jaResponderam = new Set(
+        participacoesExistentes
+          .filter(
+            (item) =>
+              item.response === "confirmed" ||
+              item.response === "declined"
+          )
+          .map((item) => item.client_id)
+      );
+
+      const paraConvidar = destinatarios.filter(
+        (cliente) => !jaResponderam.has(cliente.id)
+      );
+
+      const participantesSemRegistro = paraConvidar.filter(
+        (cliente) =>
+          !participacoesExistentes.some(
+            (item) => item.client_id === cliente.id
+          )
+      );
+
+      if (participantesSemRegistro.length) {
+        const { error: participantesError } = await supabaseAdmin
+          .from("club_mentoring_participants")
+          .insert(
+            participantesSemRegistro.map((cliente) => ({
+              event_id: eventId,
+              client_id: cliente.id,
+              response: "pending",
+              attendance: "not_marked",
+            }))
+          );
+
+        if (participantesError) {
+          return NextResponse.json(
+            { error: participantesError.message },
+            { status: 500 }
+          );
+        }
+      }
+
+      const { dia, hora } = formatarDataConvite(evento.starts_at);
+      const tema =
+        String(evento.title || "").trim() || "Mentoria em Grupo";
+
+      const mensagem = [
+        "Você está convidado(a) para uma mentoria especial do Clube do Tarô.",
+        "",
+        `Data: ${dia}`,
+        `Horário: ${hora}`,
+        "Encontro: Mentoria do Grupo VIP",
+        `Tema: ${tema}`,
+        "Formato: via Google Meet",
+        "",
+        "Acesse sua Agenda de Mentoria no aplicativo para confirmar se vai participar.",
+      ].join("\n");
+
+      if (paraConvidar.length) {
+        const { error: mensagensError } = await supabaseAdmin
+          .from("client_messages")
+          .insert(
+            paraConvidar.map((cliente) => ({
+              client_id: cliente.id,
+              titulo: "Convite para Mentoria em Grupo",
+              mensagem,
+              tipo_destino: "cliente",
+              publicado: true,
+            }))
+          );
+
+        if (mensagensError) {
+          return NextResponse.json(
+            { error: mensagensError.message },
+            { status: 500 }
+          );
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        enviados: paraConvidar.length,
+        ignorados: destinatarios.length - paraConvidar.length,
+        message:
+          paraConvidar.length > 0
+            ? `${paraConvidar.length} convite(s) enviado(s).`
+            : "Ninguém recebeu novo convite porque todos já responderam.",
       });
     }
 

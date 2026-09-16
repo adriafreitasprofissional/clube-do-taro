@@ -43,12 +43,14 @@ export default function AgendaMentoriasAdminPage() {
   const [tipo, setTipo] = useState<"individual" | "group">("individual");
   const [horariosTexto, setHorariosTexto] = useState("19:00");
   const [duracao, setDuracao] = useState(60);
-  const [titulo, setTitulo] = useState("Mentoria em Grupo");
+  const [titulo, setTitulo] = useState("");
   const [dados, setDados] = useState<any>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [secoesAbertas, setSecoesAbertas] = useState<Record<string, boolean>>({});
+  const [convidadosPorEvento, setConvidadosPorEvento] = useState<Record<string, string[]>>({});
+  const [enviandoConvites, setEnviandoConvites] = useState<string | null>(null);
 
   const authFetch = useCallback(async (url: string, init?: RequestInit) => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -253,6 +255,11 @@ export default function AgendaMentoriasAdminPage() {
       return;
     }
 
+    if (tipo === "group" && !titulo.trim()) {
+      setErro("Informe o tema da mentoria em grupo.");
+      return;
+    }
+
     setSalvando(true);
     setErro(null);
     setMensagem(null);
@@ -269,7 +276,7 @@ export default function AgendaMentoriasAdminPage() {
           duration_minutes: duracao,
           title:
             tipo === "group"
-              ? titulo || "Mentoria em Grupo"
+              ? titulo.trim()
               : "Mentoria Individual",
         }),
       });
@@ -292,6 +299,9 @@ export default function AgendaMentoriasAdminPage() {
       );
 
       setSelecionadas([]);
+      if (tipo === "group") {
+        setTitulo("");
+      }
       await carregar();
     } catch (error) {
       setErro(
@@ -361,6 +371,90 @@ export default function AgendaMentoriasAdminPage() {
 
     if (response.ok) {
       await carregar();
+    }
+  }
+
+  function alternarConvidado(eventId: string, clientId: string) {
+    setConvidadosPorEvento((atuais) => {
+      const selecionados = atuais[eventId] || [];
+      const proximo = selecionados.includes(clientId)
+        ? selecionados.filter((id) => id !== clientId)
+        : [...selecionados, clientId];
+
+      return {
+        ...atuais,
+        [eventId]: proximo,
+      };
+    });
+  }
+
+  function selecionarTodosConvidados(eventId: string, clientIds: string[]) {
+    setConvidadosPorEvento((atuais) => ({
+      ...atuais,
+      [eventId]: clientIds,
+    }));
+  }
+
+  async function enviarConvites(
+    evento: Evento,
+    audience: "guests" | "diamond"
+  ) {
+    const clientIds =
+      audience === "guests"
+        ? convidadosPorEvento[evento.id] || []
+        : [];
+
+    if (audience === "guests" && clientIds.length === 0) {
+      setErro("Selecione pelo menos um convidado.");
+      return;
+    }
+
+    const chaveEnvio = `${evento.id}-${audience}`;
+    setEnviandoConvites(chaveEnvio);
+    setErro(null);
+    setMensagem(null);
+
+    try {
+      const response = await authFetch("/api/admin/agenda/mentorias", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "send_group_invites",
+          event_id: evento.id,
+          audience,
+          client_ids: clientIds,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Não foi possível enviar os convites.");
+      }
+
+      setMensagem(
+        data?.message ||
+          (audience === "diamond"
+            ? "Aviso enviado aos mentorados Diamante."
+            : "Convites enviados aos convidados.")
+      );
+
+      if (audience === "guests") {
+        setConvidadosPorEvento((atuais) => ({
+          ...atuais,
+          [evento.id]: [],
+        }));
+      }
+
+      await carregar();
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : "Erro ao enviar convites."
+      );
+    } finally {
+      setEnviandoConvites(null);
     }
   }
 
@@ -567,12 +661,16 @@ export default function AgendaMentoriasAdminPage() {
 
         {tipo === "group" && (
           <label className="mt-5 block text-sm font-bold text-purple-100">
-            Nome do encontro
+            Tema da mentoria
             <input
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
+              placeholder="Ex.: Limites, autoestima e novos ciclos"
               className="mt-2 w-full rounded-xl border border-purple-500/30 bg-black/20 px-4 py-3 text-white"
             />
+            <span className="mt-2 block text-xs font-normal text-purple-300/70">
+              Este tema aparecerá no convite enviado aos participantes.
+            </span>
           </label>
         )}
 
@@ -776,6 +874,224 @@ export default function AgendaMentoriasAdminPage() {
                     </button>
                   </div>
                 </div>
+
+                {evento.event_type === "group" &&
+                  (() => {
+                    const convidadosDisponiveis = (dados?.active_clients || [])
+                      .filter(
+                        (cliente: any) =>
+                          String(cliente.plano || "").toLowerCase() !== "diamante"
+                      );
+
+                    const selecionados =
+                      convidadosPorEvento[evento.id] || [];
+
+                    const idsDisponiveis = convidadosDisponiveis.map(
+                      (cliente: any) => cliente.id
+                    );
+
+                    const convidadosIncluidos = participantes.filter(
+                      (item: any) =>
+                        String(item.client_plan || "").toLowerCase() !== "diamante"
+                    );
+
+                    const chaveConvidados = `${evento.id}-convidados`;
+                    const chaveIncluidos = `${evento.id}-convidados-incluidos`;
+
+                    return (
+                      <div className="mt-5 border-t border-purple-500/20 pt-5">
+                        <div className="rounded-2xl border border-yellow-400/20 bg-yellow-400/[0.04] p-4">
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
+                            Convites da mentoria
+                          </p>
+
+                          <p className="mt-2 text-base font-bold text-white">
+                            Tema: {evento.title}
+                          </p>
+
+                          <p className="mt-1 text-sm capitalize text-purple-200">
+                            {dataHora(evento.starts_at)} · via Google Meet
+                          </p>
+
+                          <div className="mt-4 flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => enviarConvites(evento, "diamond")}
+                              disabled={
+                                enviandoConvites === `${evento.id}-diamond`
+                              }
+                              className="rounded-xl border border-purple-400/30 bg-purple-500/10 px-4 py-3 text-sm font-bold text-purple-100 disabled:opacity-50"
+                            >
+                              {enviandoConvites === `${evento.id}-diamond`
+                                ? "Enviando..."
+                                : "Avisar mentorados Diamante"}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 overflow-hidden rounded-2xl border border-purple-400/20 bg-purple-400/[0.03]">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              alternarSecao(chaveConvidados)
+                            }
+                            className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+                          >
+                            <div>
+                              <p className="text-base font-bold text-purple-100">
+                                Convidados do Clube ({selecionados.length} selecionados)
+                              </p>
+                              <p className="mt-1 text-xs text-purple-300/70">
+                                Escolha uma ou várias pessoas para receber o convite.
+                              </p>
+                            </div>
+
+                            <span className="text-xl text-purple-300">
+                              {secaoEstaAberta(chaveConvidados) ? "▾" : "›"}
+                            </span>
+                          </button>
+
+                          {secaoEstaAberta(chaveConvidados) && (
+                            <div className="border-t border-purple-400/10 p-4">
+                              <div className="mb-3 flex flex-wrap gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    selecionarTodosConvidados(
+                                      evento.id,
+                                      idsDisponiveis
+                                    )
+                                  }
+                                  className="rounded-lg border border-purple-400/20 px-3 py-2 text-xs font-bold text-purple-200"
+                                >
+                                  Selecionar todos
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    selecionarTodosConvidados(evento.id, [])
+                                  }
+                                  className="rounded-lg border border-purple-400/20 px-3 py-2 text-xs font-bold text-purple-200"
+                                >
+                                  Limpar seleção
+                                </button>
+                              </div>
+
+                              <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                                {convidadosDisponiveis.length === 0 ? (
+                                  <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
+                                    Não há outros assinantes ativos para convidar.
+                                  </p>
+                                ) : (
+                                  convidadosDisponiveis.map((cliente: any) => {
+                                    const nome =
+                                      cliente.nome_referencia ||
+                                      cliente.nome ||
+                                      "Assinante";
+
+                                    const marcado = selecionados.includes(
+                                      cliente.id
+                                    );
+
+                                    return (
+                                      <label
+                                        key={cliente.id}
+                                        className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition ${
+                                          marcado
+                                            ? "border-yellow-400/40 bg-yellow-400/[0.08]"
+                                            : "border-purple-500/10 bg-black/10"
+                                        }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={marcado}
+                                          onChange={() =>
+                                            alternarConvidado(
+                                              evento.id,
+                                              cliente.id
+                                            )
+                                          }
+                                          className="h-4 w-4 accent-yellow-400"
+                                        />
+
+                                        <div>
+                                          <p className="font-bold text-white">
+                                            {nome}
+                                          </p>
+                                          <p className="mt-1 text-xs capitalize text-purple-300/70">
+                                            Plano {cliente.plano || "—"}
+                                          </p>
+                                        </div>
+                                      </label>
+                                    );
+                                  })
+                                )}
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  enviarConvites(evento, "guests")
+                                }
+                                disabled={
+                                  selecionados.length === 0 ||
+                                  enviandoConvites === `${evento.id}-guests`
+                                }
+                                className="mt-4 w-full rounded-xl bg-yellow-400 px-5 py-3 text-sm font-extrabold text-black disabled:opacity-40"
+                              >
+                                {enviandoConvites === `${evento.id}-guests`
+                                  ? "Enviando convites..."
+                                  : `Enviar convite aos convidados (${selecionados.length})`}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {convidadosIncluidos.length > 0 && (
+                          <div className="mt-3 overflow-hidden rounded-2xl border border-blue-400/20 bg-blue-400/[0.03]">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                alternarSecao(chaveIncluidos)
+                              }
+                              className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
+                            >
+                              <span className="text-base font-bold text-blue-100">
+                                Convidados incluídos ({convidadosIncluidos.length})
+                              </span>
+
+                              <span className="text-xl text-blue-300">
+                                {secaoEstaAberta(chaveIncluidos) ? "▾" : "›"}
+                              </span>
+                            </button>
+
+                            {secaoEstaAberta(chaveIncluidos) && (
+                              <div className="grid gap-2 border-t border-blue-400/10 p-3">
+                                {convidadosIncluidos.map((item: any) => (
+                                  <div
+                                    key={item.client_id}
+                                    className="rounded-xl bg-black/20 p-3"
+                                  >
+                                    <p className="font-bold text-white">
+                                      {item.client_name || "Convidado"}
+                                    </p>
+                                    <p className="mt-1 text-xs text-blue-200/80">
+                                      {item.response === "confirmed"
+                                        ? "Confirmado"
+                                        : item.response === "declined"
+                                        ? "Não vai participar"
+                                        : "Convite enviado · aguardando resposta"}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                 {evento.event_type === "group" &&
                   (() => {
