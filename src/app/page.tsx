@@ -28,7 +28,7 @@ function PortalCard({
   return (
     <motion.a
       href={href}
-      target="_blank"
+      target={href.startsWith("http") ? "_blank" : undefined}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -299,10 +299,10 @@ seu plano de assinatura.
 }
         />
 
-        <PortalCard
-          title="Universo Literário de Ádria Freitas"
-          subtitle="Próximos lançamentos, trailers, sinopses narradas e experiências literárias imersivas."
-          href="https://uiclap.bio/ADRIAFREITAS"
+     <PortalCard
+  title="Universo Ádria Freitas"
+  subtitle="Livros, personagens, mistérios e experiências que atravessam as páginas. Entre no meu universo."
+  href="/universo-adria-freitas"
           icon={
   <Image
     src="/icons/gold-feather.png"
