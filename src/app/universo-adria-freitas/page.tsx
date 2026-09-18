@@ -221,11 +221,12 @@ export default function UniversoAdriaFreitas() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
               </div>
 
-              <div className="px-2 pb-3 pt-6">
-                <h3 className="font-serif text-2xl text-white">{livro.titulo}</h3>
-                <p className="mt-2 text-sm text-[#d8ba73]">{livro.subtitulo}</p>
+              <div className="px-2 pb-3 pt-5">
+  <h3 className="font-serif text-2xl leading-tight text-white">
+    {livro.titulo}
+  </h3>
 
-                <div className="mt-6 flex gap-2">
+  <div className="mt-5 flex gap-2">
   <a
     href={livro.uiclap}
     target="_blank"
