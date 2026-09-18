@@ -15,14 +15,64 @@ import {
 import CelestialBackground from "../components/CelestialBackground";
 
 const livros = [
-  { titulo: "Exu Lúcifer", subtitulo: "O Príncipe das Trevas", imagem: "/livros/exu-lucifer.png" },
-  { titulo: "Exu Morcego", subtitulo: "O Senhor das Sombras", imagem: "/livros/exu-morcego.png" },
-  { titulo: "Tranca Rua das Almas", subtitulo: "Causa e Efeito", imagem: "/livros/tranca-rua-das-almas.png" },
-  { titulo: "O Ciúmes", subtitulo: "Entre o Amor e o Ódio", imagem: "/livros/o-ciumes.png" },
-  { titulo: "O Destino Nunca Falha", subtitulo: "Encontro e Desencontro", imagem: "/livros/o-destino-nunca-falha.png" },
-  { titulo: "No Portal da Escuridão", subtitulo: "Romance espiritual", imagem: "/livros/no-portal-da-escuridao.png" },
-  { titulo: "Seu Lado Sombrio", subtitulo: "Ação e Reação", imagem: "/livros/seu-lado-sombrio.png" },
-  { titulo: "Exu Treme Terra", subtitulo: "A Missão", imagem: "/livros/exu-treme-terra-a-missao.png" },
+  {
+    titulo: "Exu Lúcifer",
+    subtitulo: "O Príncipe das Trevas",
+    imagem: "/livros/exu-lucifer.png",
+    uiclap: "https://loja.uiclap.com/titulo/ua112984/",
+    amazon: null,
+  },
+  {
+    titulo: "Exu Morcego",
+    subtitulo: "O Senhor das Sombras",
+    imagem: "/livros/exu-morcego.png",
+    uiclap: "https://loja.uiclap.com/titulo/ua116839/",
+    amazon: null,
+  },
+  {
+    titulo: "Tranca Rua das Almas",
+    subtitulo: "Causa e Efeito",
+    imagem: "/livros/tranca-rua-das-almas.png",
+    uiclap: "https://loja.uiclap.com/titulo/ua97277/",
+    amazon: null,
+  },
+  {
+    titulo: "O Ciúmes",
+    subtitulo: "Entre o Amor e o Ódio",
+    imagem: "/livros/o-ciumes.png",
+    uiclap: "https://loja.uiclap.com/titulo/ua84490/",
+    amazon: null,
+  },
+  {
+    titulo: "O Destino Nunca Falha",
+    subtitulo: "Encontro e Desencontro",
+    imagem: "/livros/o-destino-nunca-falha.png",
+    uiclap: "https://loja.uiclap.com/titulo/ua109408/",
+    amazon: null,
+  },
+  {
+    titulo: "No Portal da Escuridão",
+    subtitulo: "Romance espiritual",
+    imagem: "/livros/no-portal-da-escuridao.png",
+    uiclap: "https://loja.uiclap.com/titulo/ua102723/",
+    amazon: null,
+  },
+  {
+    titulo: "Seu Lado Sombrio",
+    subtitulo: "Ação e Reação",
+    imagem: "/livros/seu-lado-sombrio.png",
+    uiclap: "https://loja.uiclap.com/titulo/ua74195/",
+    amazon:
+      "https://www.amazon.com/SEU-LADO-SOMBRIO-REA%C3%87%C3%83O-Portuguese/dp/6501066875?ref_=ast_author_dp_rw&th=1&psc=1&dib=eyJ2IjoiMSJ9.hMgJ02IRgXHZ6X_oKkLZ8M_06BjM-Brki3gAWmmLd1XmO6VvO29kN4lGaPjK53J_i_XAM5pPiuuFwD0Vlm4RrEky7-oj2qiRXwFIuhU0Ulstgy26GXGNXPxowanBuT4htVzvs6NG47Zqkt9-yX52AD_VO1a6iHcSNGDeHsYhNXw.x9EP0klNIPd2R9UJxYzXhAHzsPfeOC8dF-7Df1mi4Ls&dib_tag=AUTHOR",
+  },
+  {
+    titulo: "Exu Treme Terra",
+    subtitulo: "A Missão",
+    imagem: "/livros/exu-treme-terra-a-missao.png",
+    uiclap: "https://loja.uiclap.com/titulo/ua94481/",
+    amazon:
+      "https://www.amazon.com/EXU-TREME-TERRA-MISS%C3%83O-Portuguese-ebook/dp/B0FF2WJHQG?ref_=ast_author_dp_rw&th=1&psc=1&dib=eyJ2IjoiMSJ9.hMgJ02IRgXHZ6X_oKkLZ8M_06BjM-Brki3gAWmmLd1XmO6VvO29kN4lGaPjK53J_i_XAM5pPiuuFwD0Vlm4RrEky7-oj2qiRXwFIuhU0Ulstgy26GXGNXPxowanBuT4htVzvs6NG47Zqkt9-yX52AD_VO1a6iHcSNGDeHsYhNXw.x9EP0klNIPd2R9UJxYzXhAHzsPfeOC8dF-7Df1mi4Ls&dib_tag=AUTHOR",
+  },
 ];
 
 const amazon =
@@ -166,7 +216,7 @@ export default function UniversoAdriaFreitas() {
                   alt={`${livro.titulo} ${livro.subtitulo}`}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover transition duration-700 group-hover:scale-[1.03]"
+                  className="object-cover transition duration-700 group-hover:scale-[1.02]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
               </div>
@@ -176,24 +226,26 @@ export default function UniversoAdriaFreitas() {
                 <p className="mt-2 text-sm text-[#d8ba73]">{livro.subtitulo}</p>
 
                 <div className="mt-6 flex gap-2">
-                  <a
-                    href={uiclap}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-center text-xs uppercase tracking-wider text-white/75 transition hover:border-[#d8ba73]/40 hover:text-[#d8ba73]"
-                  >
-                    Uiclap
-                  </a>
+  <a
+    href={livro.uiclap}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-center text-xs uppercase tracking-wider text-white/75 transition hover:border-[#d8ba73]/40 hover:text-[#d8ba73]"
+  >
+    Uiclap
+  </a>
 
-                  <a
-                    href={amazon}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-center text-xs uppercase tracking-wider text-white/75 transition hover:border-[#d8ba73]/40 hover:text-[#d8ba73]"
-                  >
-                    Amazon
-                  </a>
-                </div>
+  {livro.amazon && (
+    <a
+      href={livro.amazon}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-center text-xs uppercase tracking-wider text-white/75 transition hover:border-[#d8ba73]/40 hover:text-[#d8ba73]"
+    >
+      Amazon
+    </a>
+  )}
+</div>
               </div>
             </motion.article>
           ))}
