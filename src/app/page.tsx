@@ -314,50 +314,64 @@ seu plano de assinatura.
         />
 
         <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="grid items-center gap-12 rounded-[40px] border border-white/10 bg-white/5 p-10 backdrop-blur-2xl md:grid-cols-2"
-        >
-          <Image
-            src="/imagens/adria-hero.png"
-            alt="Ádria"
-            width={500}
-            height={650}
-            className="rounded-[32px] object-cover"
-          />
+  initial={{ opacity: 0, y: 30 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 0.8 }}
+  className="grid items-center gap-12 overflow-hidden rounded-[40px] border border-white/10 bg-white/5 p-6 backdrop-blur-2xl md:grid-cols-2 md:p-10"
+>
+  <div className="relative overflow-hidden rounded-[32px]">
+    <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#120613]/35 via-transparent to-transparent" />
 
-          <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.4em] text-[#E7C96F]">
-              Universo Ádria
-            </p>
+    <Image
+      src="/imagens/adria-universo.png"
+      alt="Ádria Freitas"
+      width={975}
+      height={1612}
+      className="h-[650px] w-full object-cover object-top"
+    />
+  </div>
 
-            <h2 className="font-serif text-5xl">
-              Escritora • Taróloga • Mentora
-            </h2>
+  <div className="md:px-4">
+    <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#E7C96F]">
+      UNIVERSO ÁDRIA
+    </p>
 
-            <p className="mt-6 text-lg leading-relaxed text-white/75">
-              Conecte-se ao universo criativo e espiritual através das minhas redes e projetos.
-            </p>
+    <h2 className="font-serif text-4xl leading-tight text-white md:text-6xl">
+      Não uso rótulos.
+      <br />
+      <span className="text-[#E7C96F]">
+        Sou autêntica e criativa.
+      </span>
+    </h2>
 
-            <div className="mt-10 flex flex-col gap-4 md:flex-row">
-              <a
-                href="https://www.instagram.com/adriafreitastarologa"
-                className="rounded-full border border-white/20 bg-white/10 px-6 py-4"
-              >
-                Instagram Taróloga
-              </a>
+    <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/70">
+      Entre no meu universo e descubra, através das minhas criações,
+      a essência de tudo o que vivo, penso e transformo em arte,
+      espiritualidade e presença.
+    </p>
 
-              <a
-                href="https://www.instagram.com/adriafreitasescritora/"
-                className="rounded-full border border-white/20 bg-white/10 px-6 py-4"
-              >
-                Instagram Escritora
-              </a>
-            </div>
-          </div>
-        </motion.section>
+    <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+      <a
+        href="https://www.instagram.com/adriafreitastarologa"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-full border border-[#E7C96F]/30 bg-white/5 px-6 py-4 text-center transition hover:border-[#E7C96F]/70 hover:bg-white/10"
+      >
+        Instagram Taróloga
+      </a>
+
+      <a
+        href="https://www.instagram.com/adriafreitasescritora/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-full border border-[#E7C96F]/30 bg-white/5 px-6 py-4 text-center transition hover:border-[#E7C96F]/70 hover:bg-white/10"
+      >
+        Instagram Escritora
+      </a>
+    </div>
+  </div>
+</motion.section>
       </section>
     </main>
   );
