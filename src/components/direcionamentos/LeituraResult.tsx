@@ -248,7 +248,11 @@ useEffect(() => {
       const response = await fetch("/api/gerador-direcionamento/roteiro-audio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leitura, parecerAdria }),
+        body: JSON.stringify({
+          leitura,
+          parecerAdria,
+          slug: props.slug,
+        }),
       });
 
       const data = await response.json();

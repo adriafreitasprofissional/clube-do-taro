@@ -1,5 +1,6 @@
 import https from "https";
 import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,7 +53,6 @@ function chamarOpenAI(apiKey: string, prompt: string) {
 
           try {
             const data = JSON.parse(resultado);
-
             const textos: string[] = [];
 
             for (const item of data.output || []) {
@@ -100,7 +100,11 @@ function chamarOpenAI(apiKey: string, prompt: string) {
 
 export async function POST(req: Request) {
   try {
-    const { leitura, parecerAdria = "" } = await req.json();
+    const {
+      leitura,
+      parecerAdria = "",
+      slug = "",
+    } = await req.json();
 
     if (!leitura?.nome || !leitura?.semana) {
       return NextResponse.json(
@@ -118,12 +122,39 @@ export async function POST(req: Request) {
       );
     }
 
-    const primeiroNome =
+    const primeiroNomeCadastro =
       String(leitura.nome).trim().split(/\s+/)[0] ||
       leitura.nome;
 
+    let nomeReferencia = "";
+
+    if (slug && typeof slug === "string") {
+      const {
+        data: cliente,
+        error: clienteError,
+      } = await supabaseAdmin
+        .from("club_clients")
+        .select("nome_referencia")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (clienteError) {
+        console.warn(
+          "Não foi possível buscar nome_referencia. Usando primeiro nome do cadastro:",
+          clienteError.message
+        );
+      } else {
+        nomeReferencia = String(
+          cliente?.nome_referencia || ""
+        ).trim();
+      }
+    }
+
+    const nomeParaAudio =
+      nomeReferencia || primeiroNomeCadastro;
+
     const dadosEssenciais = {
-      nome: primeiroNome,
+      nome: nomeParaAudio,
       semana: leitura.semana,
 
       energiaEspiritual: {
@@ -182,102 +213,81 @@ export async function POST(req: Request) {
     const prompt = `
 Você escreve o resumo falado do Direcionamento Semanal de Ádria Freitas para uma assinante do Clube do Tarô.
 
-IMPORTANTE:
-Isto NÃO é um relatório, NÃO é uma leitura formal e NÃO é para narrar o PDF.
-Precisa parecer um áudio natural de WhatsApp enviado pessoalmente pela Ádria.
+OBJETIVO:
+Criar uma fala natural, simples, direta e personalizada, como se Ádria estivesse falando pessoalmente com a assinante. Não é relatório, não é aula e não é narração do PDF.
+
+NOME:
+- Use sempre este nome ao falar com a assinante: "${nomeParaAudio}".
+- Este nome já prioriza o nome de referência cadastrado, como Nena, Bia ou Gabi.
+- Não troque por outro nome e não use o nome completo se o nome de referência estiver disponível.
 
 TAMANHO:
 - Aproximadamente 220 a 320 palavras.
-- Fala de aproximadamente 1 minuto e meio a 2 minutos e meio.
-- Seja direto.
-- O PDF contém o aprofundamento.
+- Fala de cerca de 1 minuto e meio a 2 minutos e meio.
+- O PDF contém o aprofundamento; o áudio deve selecionar somente o que realmente importa.
 
-JEITO DE FALAR DA ÁDRIA:
-- Natural, próximo, carinhoso e espontâneo.
+ESTILO:
 - Português do Brasil.
-- Pode usar expressões naturais como:
-  "olha",
-  "logo de cara",
-  "então",
-  "hein?",
-  "presta atenção nisso",
-  "eu observaria isso esta semana".
-- Não parecer texto de locutor, palestra, artigo ou podcast.
-- Não usar linguagem excessivamente poética.
-- Não fazer uma aula sobre cada carta.
+- Humano, próximo, acolhedor e firme quando necessário.
+- Frases claras e naturais, próprias de fala.
+- Vá direto ao sentido da leitura.
+- Integre energia espiritual, numerologia, Carta Cigana, Tarô, naipe, elemento e foco sem transformar o texto em lista.
+- Quando houver observação da Ádria, ela tem prioridade e deve entrar de forma natural no direcionamento.
+- Transforme os símbolos em orientação prática para a semana.
+- Varie a construção do texto. Não reproduza a mesma abertura, transição e encerramento em todos os roteiros.
+- O texto deve soar como conversa real, sem marcas de texto gerado por IA.
 
 ABERTURA:
-Comece exatamente de forma natural, usando:
+Comece apenas com:
+"Bom dia, ${nomeParaAudio}, tudo bem?"
 
-"Bom dia, ${primeiroNome}, tudo bem?"
+Depois disso, siga diretamente para a leitura. Não use uma segunda frase de abertura padronizada.
 
-Logo depois, faça um panorama da semana, semelhante a uma conversa:
-
-"Olha, essa semana..."
-
-Apresente naturalmente:
-- energia espiritual/Orixá;
-- vibração da semana;
-- vibração do nome;
-- Carta Cigana;
-- Tarô;
-- foco da semana.
-
-Não transforme essa apresentação em lista.
+EVITE EXPRESSAMENTE:
+- "logo de cara";
+- "Olha, essa semana...";
+- "tá?" como bordão;
+- "hein?" como bordão;
+- "essa combinação pede" repetidamente;
+- "é um convite para";
+- "o universo está mostrando";
+- "energia de transformação";
+- construções artificiais do tipo "não é X, é Y";
+- sequências como "não foi isso, não foi aquilo, foi...";
+- frases de efeito em série;
+- frases prontas ou conclusões genéricas;
+- repetir a mesma ideia com palavras diferentes;
+- excesso de adjetivos;
+- tom de locutor, palestra, artigo, podcast ou texto de IA;
+- linguagem excessivamente poética.
 
 DESENVOLVIMENTO:
-Depois do panorama, converse sobre o sentido geral da combinação.
-
-Explique um pouco a energia espiritual e como ela conversa com a semana.
-
-Junte Carta Cigana e Tarô ao invés de criar uma explicação longa para cada um.
-
-Quando falar de naipe e elemento, seja simples e natural, por exemplo:
-"Essa carta vem no naipe de Espadas e trabalha com o elemento Ar, então..."
-
-Explique somente o necessário para a pessoa compreender o que isso acrescenta ao direcionamento.
-
-Integre a numerologia naturalmente à conversa.
-
-FOCO DA SEMANA:
-Dê atenção especial ao foco, mas sem transformar o áudio em consulta completa.
-
-Conecte o foco ao conjunto da leitura.
-
-Pode fazer uma pequena chamada prática e carinhosa, por exemplo:
-"vamos prestar atenção nisso esta semana, hein?"
-"vamos cuidar um pouco mais disso, tá?"
-
-Se o foco for Saúde:
-- não diagnostique;
-- não diga que a pessoa tem uma doença;
-- não substitua acompanhamento médico;
-- pode incentivar cuidados gerais e exames de rotina de forma leve e responsável.
+- Apresente a energia espiritual e explique de forma simples como ela conversa com o momento da semana.
+- Una Carta Cigana e Tarô quando fizer sentido, em vez de explicar cada carta isoladamente.
+- Explique naipe e elemento apenas quando acrescentarem algo útil.
+- Integre a numerologia à leitura sem criar um bloco técnico.
+- Dê atenção especial ao foco da semana.
+- Se houver pergunta, preocupação ou observação da Ádria, responda de forma objetiva e coerente com os dados disponíveis.
+- Não invente fatos da vida da assinante.
+- Prefira orientações concretas a frases abstratas.
+- Se uma ideia já foi dita, avance; não explique novamente.
 
 FINAL:
-Convide a pessoa a ler o PDF, porque nele estão os detalhes.
+- Termine com uma orientação concreta para a pessoa aplicar na semana.
+- Convide brevemente a consultar o PDF para os detalhes.
+- Não use sempre a mesma frase final.
+- O encerramento deve ser simples e natural.
 
-Pode terminar naturalmente em linha semelhante a:
-
-"Depois leia com calma o restante do seu PDF porque lá estão seus pontos fortes, o que observar e as outras orientações. Um beijo e tenha uma ótima semana."
-
-REGRAS IMPORTANTES:
-- Não inventar fatos sobre a vida da assinante.
-- Não inventar cartas, números ou informações espirituais.
-- Não fazer previsão.
-- Não afirmar que algo vai acontecer.
-- Não assustar.
-- Não culpar.
-- Não pressionar.
+CUIDADOS:
+- Não inventar cartas, números, acontecimentos ou informações espirituais.
+- Não fazer previsão absoluta nem afirmar que algo certamente acontecerá.
+- Não assustar, culpar ou pressionar.
 - Não tratar energia semanal como Orixá de cabeça.
 - Babá Egum deve ser tratado como ancestralidade, não como Orixá.
-- Não usar títulos.
-- Não usar tópicos.
-- Não usar numeração.
-- Não separar cada elemento da leitura em um bloco técnico.
-- Não repetir informações.
-- Não escrever 500 ou 600 palavras.
-- Não repetir todo o PDF.
+- Se o foco for Saúde, não diagnosticar nem substituir avaliação profissional; pode orientar cuidados gerais e avaliação adequada quando necessário.
+- Não usar títulos, tópicos ou numeração na resposta final.
+- Não repetir o PDF.
+- Não repetir frases ou estruturas dentro do próprio roteiro.
 
 DADOS APROVADOS:
 ${JSON.stringify(dadosEssenciais, null, 2)}
@@ -288,7 +298,7 @@ ${
   "Nenhuma observação adicional."
 }
 
-Retorne SOMENTE a fala final do áudio.
+Retorne SOMENTE a fala final do áudio, pronta para gravação.
 `;
 
     const roteiro = await chamarOpenAI(apiKey, prompt);
