@@ -34,33 +34,41 @@ function criarSlug(
 }
 
 async function listarClientes(
-  professional: string
+  professional: string,
+  centralAccess = false
 ) {
+  let query =
+    supabaseAdmin
+      .from(
+        "therapy_client_access"
+      )
+      .select(`
+        client_id,
+        active,
+        professional,
+        club_clients (
+          id,
+          nome,
+          nome_referencia,
+          email,
+          whatsapp,
+          slug
+        )
+      `)
+      .eq("active", true);
+
+  if (!centralAccess) {
+    query =
+      query.eq(
+        "professional",
+        professional
+      );
+  }
+
   const {
     data,
     error,
-  } = await supabaseAdmin
-    .from(
-      "therapy_client_access"
-    )
-    .select(`
-      client_id,
-      active,
-      professional,
-      club_clients (
-        id,
-        nome,
-        nome_referencia,
-        email,
-        whatsapp,
-        slug
-      )
-    `)
-    .eq("active", true)
-    .eq(
-      "professional",
-      professional
-    );
+  } = await query;
 
   if (error) {
     throw error;
@@ -118,7 +126,8 @@ export async function GET(
   try {
     const clientes =
       await listarClientes(
-        admin.professional
+        admin.professional,
+        admin.central_access
       );
 
     return NextResponse.json({

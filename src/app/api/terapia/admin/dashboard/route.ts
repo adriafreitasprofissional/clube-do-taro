@@ -25,28 +25,35 @@ export async function GET(
   }
 
   try {
+    let acessosQuery =
+      supabaseAdmin
+        .from("therapy_client_access")
+        .select(`
+          client_id,
+          active,
+          professional,
+          club_clients (
+            id,
+            nome,
+            nome_referencia,
+            email,
+            slug
+          )
+        `)
+        .eq("active", true);
+
+    if (!admin.central_access) {
+      acessosQuery =
+        acessosQuery.eq(
+          "professional",
+          admin.professional
+        );
+    }
+
     const {
       data: acessos,
       error,
-    } = await supabaseAdmin
-      .from("therapy_client_access")
-      .select(`
-        client_id,
-        active,
-        professional,
-        club_clients (
-          id,
-          nome,
-          nome_referencia,
-          email,
-          slug
-        )
-      `)
-      .eq("active", true)
-      .eq(
-        "professional",
-        admin.professional
-      );
+    } = await acessosQuery;
 
     if (error) {
       return NextResponse.json(
@@ -102,8 +109,8 @@ export async function GET(
 
       anamneses = a || [];
 
-      const { data: p } =
-        await supabaseAdmin
+      let proximosQuery =
+        supabaseAdmin
           .from("appointments")
           .select(`
             id,
@@ -118,10 +125,6 @@ export async function GET(
               nome_referencia
             )
           `)
-          .eq(
-            "professional",
-            admin.professional
-          )
           .in("client_id", ids)
           .neq(
             "status",
@@ -135,6 +138,17 @@ export async function GET(
             ascending: true,
           })
           .limit(12);
+
+      if (!admin.central_access) {
+        proximosQuery =
+          proximosQuery.eq(
+            "professional",
+            admin.professional
+          );
+      }
+
+      const { data: p } =
+        await proximosQuery;
 
       proximos = (
         p || []
