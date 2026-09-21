@@ -11,7 +11,7 @@ import {
   ExternalLink,
   Sparkles,
 } from "lucide-react";
-
+ 
 import CelestialBackground from "../components/CelestialBackground";
 
 const livros = [
@@ -210,16 +210,15 @@ export default function UniversoAdriaFreitas() {
               transition={{ duration: 0.6, delay: index * 0.04 }}
               className="group overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.035] p-4 backdrop-blur-xl transition duration-500 hover:-translate-y-2 hover:border-[#d8ba73]/40 hover:bg-white/[0.06]"
             >
-              <div className="relative aspect-[2/3] overflow-hidden rounded-[22px] bg-black/20">
-                <Image
-                  src={livro.imagem}
-                  alt={`${livro.titulo} ${livro.subtitulo}`}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover transition duration-700 group-hover:scale-[1.02]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
-              </div>
+              <div className="relative aspect-[2/3] overflow-hidden rounded-[22px] bg-[#0d0b0f] p-3">
+  <Image
+    src={livro.imagem}
+    alt={`${livro.titulo} ${livro.subtitulo}`}
+    fill
+    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+    className="object-contain p-2 transition duration-700 group-hover:scale-[1.02]"
+  />
+</div>
 
               <div className="px-2 pb-3 pt-5">
   <h3 className="font-serif text-2xl leading-tight text-white">

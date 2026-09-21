@@ -277,6 +277,12 @@ FINAL:
 - Convide brevemente a consultar o PDF para os detalhes.
 - Não use sempre a mesma frase final.
 - O encerramento deve ser simples e natural.
+ENCERRAMENTO OBRIGATÓRIO:
+- Sempre termine o roteiro com uma despedida.
+- Use o nome de referência/apelido da pessoa, que está em leitura.nome.
+- Termine exatamente neste formato:
+
+"Ótima semana, ${leitura.nome}. Beijos."
 
 CUIDADOS:
 - Não inventar cartas, números, acontecimentos ou informações espirituais.
@@ -288,6 +294,11 @@ CUIDADOS:
 - Não usar títulos, tópicos ou numeração na resposta final.
 - Não repetir o PDF.
 - Não repetir frases ou estruturas dentro do próprio roteiro.
+
+
+Não use nome completo se houver nome de referência.
+Não invente outro nome.
+Não omita a despedida.
 
 DADOS APROVADOS:
 ${JSON.stringify(dadosEssenciais, null, 2)}

@@ -1,0 +1,164 @@
+export default function PoliticaDePrivacidadePage() {
+  return (
+    <main className="min-h-screen bg-[#12091f] px-6 py-12 text-white">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="mb-8 text-3xl font-semibold">
+          Política de Privacidade
+        </h1>
+
+        <div className="space-y-6 text-base leading-7 text-white/85">
+          <p>
+            Última atualização: 20 de setembro de 2026.
+          </p>
+
+          <p>
+            O Clube do Tarô respeita a privacidade de seus usuários e se
+            compromete a utilizar os dados pessoais e informações autorizadas
+            somente para as finalidades necessárias ao funcionamento da
+            plataforma.
+          </p>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              1. Informações utilizadas pelo Clube do Tarô
+            </h2>
+
+            <p>
+              O Clube do Tarô pode utilizar informações fornecidas durante o
+              cadastro e uso da plataforma, como nome, e-mail e informações
+              necessárias para a prestação dos serviços contratados.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              2. Uso do Google Drive
+            </h2>
+
+            <p>
+              O Clube do Tarô utiliza a integração com o Google Drive para
+              auxiliar na organização, criação, armazenamento e gerenciamento
+              de arquivos relacionados ao funcionamento da plataforma, como
+              documentos, PDFs, áudios e materiais produzidos para os
+              assinantes.
+            </p>
+
+            <p className="mt-3">
+              O acesso ao Google Drive ocorre somente mediante autorização da
+              conta Google responsável pela operação do sistema e é utilizado
+              exclusivamente para as funcionalidades necessárias ao Clube do
+              Tarô.
+            </p>
+
+            <p className="mt-3">
+              As informações obtidas por meio das APIs do Google não são
+              utilizadas para publicidade, não são vendidas e não são
+              comercializadas com terceiros.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              3. Como utilizamos as informações
+            </h2>
+
+            <p>
+              Os dados são utilizados para disponibilizar os serviços do Clube
+              do Tarô, organizar conteúdos, gerar materiais, manter o histórico
+              dos assinantes, disponibilizar arquivos e permitir o
+              funcionamento das ferramentas administrativas da plataforma.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              4. Compartilhamento de informações
+            </h2>
+
+            <p>
+              O Clube do Tarô não vende informações pessoais. Dados poderão ser
+              processados por serviços tecnológicos utilizados para o
+              funcionamento da plataforma, sempre dentro da finalidade
+              necessária para prestação do serviço.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              5. Armazenamento e segurança
+            </h2>
+
+            <p>
+              São adotadas medidas técnicas e administrativas razoáveis para
+              proteger informações e credenciais utilizadas pela plataforma
+              contra acessos não autorizados, perda, alteração ou divulgação
+              indevida.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              6. Revogação do acesso ao Google
+            </h2>
+
+            <p>
+              O acesso concedido ao Clube do Tarô por meio de uma Conta Google
+              pode ser revogado pelo titular da conta nas configurações de
+              segurança da própria Conta Google.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              7. Exclusão de dados
+            </h2>
+
+            <p>
+              Solicitações relacionadas à exclusão, correção ou esclarecimentos
+              sobre dados pessoais podem ser encaminhadas pelo e-mail de
+              contato informado nesta política.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              8. Alterações nesta política
+            </h2>
+
+            <p>
+              Esta Política de Privacidade poderá ser atualizada sempre que
+              houver alterações relevantes nos serviços, integrações ou formas
+              de tratamento de dados do Clube do Tarô.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xl font-semibold text-white">
+              9. Contato
+            </h2>
+
+            <p>
+              Em caso de dúvidas relacionadas à privacidade ou ao uso de dados,
+              entre em contato pelo e-mail:
+            </p>
+
+            <p className="mt-2">
+              <a
+                href="mailto:adriafreitasprofissional@gmail.com"
+                className="text-purple-300 underline"
+              >
+                adriafreitasprofissional@gmail.com
+              </a>
+            </p>
+          </section>
+
+          <hr className="border-white/15" />
+
+          <p className="text-sm text-white/60">
+            Clube do Tarô — www.magiaoriente.com.br
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
