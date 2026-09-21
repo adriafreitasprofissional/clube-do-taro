@@ -83,7 +83,7 @@ export default function TerapiaEntrarPage() {
           }
 
           if (data.tipo === "admin") {
-            window.location.replace("/terapia/admin");
+            window.location.replace("/admin/terapia");
             return;
           }
 
