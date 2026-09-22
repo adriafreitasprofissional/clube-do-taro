@@ -42,7 +42,7 @@ const modulos: Modulo[] = [
     descricao:
       "Formulários, histórico das respostas e informações iniciais da paciente.",
     icone: "📝",
-    href: "/admin/terapia/anamneses",
+    href: "/terapia/admin/anamneses",
     destaque: "ATIVO",
   },
   {

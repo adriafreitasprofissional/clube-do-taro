@@ -242,7 +242,7 @@ export default function PacientesPage() {
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
-                  href={`/admin/terapia/anamneses/${paciente.id}`}
+                  href={`/terapia/admin/anamneses/${paciente.id}`}
                   className="rounded-xl border border-[#aebe79]/35 px-4 py-2 text-xs font-bold text-[#cbd69d]"
                 >
                   Ver anamnese
