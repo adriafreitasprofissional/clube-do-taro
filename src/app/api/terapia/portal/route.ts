@@ -123,6 +123,7 @@ const {
     scheduled_at,
     session_title,
     recording_url,
+    content_links,
     client_report,
     client_activity,
     published_to_client,

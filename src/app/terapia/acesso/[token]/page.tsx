@@ -82,6 +82,12 @@ jornada: {
   scheduled_at: string;
   session_title: string | null;
   recording_url: string | null;
+  content_links:
+    | {
+        title: string;
+        url: string;
+      }[]
+    | null;
   client_report: string | null;
   client_activity: string | null;
   published_to_client: boolean;
@@ -221,7 +227,7 @@ function baixarRelatorioPDF(
     pdf.setFontSize(9);
 
     pdf.text("CLIENTE", margin + 8, y + 8);
-    pdf.text("SESSÒO", margin + 8, y + 18);
+    pdf.text("SESSÃO", margin + 8, y + 18);
     pdf.text("DATA", margin + 8, y + 28);
 
     pdf.setTextColor(
@@ -1284,10 +1290,12 @@ async function sair() {
     </div>
 
     <span
-      className="shrink-0 text-3xl font-light leading-none text-[#8AA27A]"
+      className="shrink-0 rounded-xl border border-[#B9C7AE] bg-[#F3F7F0] px-4 py-2 text-sm font-extrabold text-[#5E7357]"
       aria-hidden="true"
     >
-      {jornadaAberta ? "⌄" : "›"}
+      {jornadaAberta
+        ? "– Fechar jornada"
+        : "+ Abrir jornada"}
     </span>
   </button>
 
@@ -1375,11 +1383,13 @@ async function sair() {
                     </span>
 
                     <span
-                      className="text-3xl font-light leading-none text-[#8AA27A]"
-                      aria-hidden="true"
-                    >
-                      {aberto ? "⌄" : "›"}
-                    </span>
+      className="shrink-0 rounded-lg border border-[#C8D3C0] bg-white px-3 py-2 text-xs font-extrabold text-[#5E7357]"
+      aria-hidden="true"
+    >
+      {aberto
+        ? "– Fechar mês"
+        : "+ Abrir mês"}
+    </span>
                   </button>
 
                   {aberto && (
@@ -1422,15 +1432,53 @@ async function sair() {
                             )}
 
                             <div className="mt-5 flex flex-wrap gap-3">
-                              {sessao.recording_url && (
-                                <a
-                                  href={sessao.recording_url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex rounded-xl bg-[#8AA27A] px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-[#769566]"
-                                >
-                                  ▶ Assistir gravação
-                                </a>
+                              {Array.isArray(
+                                sessao.content_links
+                              ) &&
+                              sessao.content_links.filter(
+                                (conteudo) =>
+                                  conteudo?.url
+                              ).length > 0 ? (
+                                <>
+                                  {sessao.content_links
+                                    .filter(
+                                      (conteudo) =>
+                                        conteudo?.url
+                                    )
+                                    .map(
+                                      (
+                                        conteudo,
+                                        index
+                                      ) => (
+                                        <a
+                                          key={`${sessao.id}-conteudo-${index}`}
+                                          href={
+                                            conteudo.url
+                                          }
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center rounded-xl bg-[#8AA27A] px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-[#769566]"
+                                        >
+                                          ▶{" "}
+                                          {conteudo.title?.trim() ||
+                                            "Abrir conteúdo"}
+                                        </a>
+                                      )
+                                    )}
+                                </>
+                              ) : (
+                                sessao.recording_url && (
+                                  <a
+                                    href={
+                                      sessao.recording_url
+                                    }
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center rounded-xl bg-[#8AA27A] px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-[#769566]"
+                                  >
+                                    ▶ Assistir gravação
+                                  </a>
+                                )
                               )}
 
                               {sessao.client_report && (
