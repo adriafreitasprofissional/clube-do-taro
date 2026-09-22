@@ -143,7 +143,7 @@ export default function ResponderAtividadePage() {
               ?.access_token
           ) {
             throw new Error(
-              "Sua sessÃ£o administrativa expirou."
+              "Sua sessão administrativa expirou."
             );
           }
 
@@ -173,13 +173,13 @@ export default function ResponderAtividadePage() {
         ) {
           throw new Error(
             data?.error ||
-              "NÃ£o foi possÃ­vel abrir esta atividade."
+              "Não foi possível abrir esta atividade."
           );
         }
 
         if (!data?.quiz) {
           throw new Error(
-            "Atividade nÃ£o encontrada."
+            "Atividade não encontrada."
           );
         }
 
@@ -298,7 +298,7 @@ export default function ResponderAtividadePage() {
   ) {
     if (preview) {
       setMensagem(
-        "VisualizaÃ§Ã£o do ADM: as respostas nÃ£o sÃ£o salvas."
+        "Visualização do ADM: as respostas não são salvas."
       );
       return;
     }
@@ -338,7 +338,7 @@ export default function ResponderAtividadePage() {
       ) {
         throw new Error(
           data?.error ||
-            "NÃ£o foi possÃ­vel salvar a atividade."
+            "Não foi possível salvar a atividade."
         );
       }
 
@@ -347,7 +347,7 @@ export default function ResponderAtividadePage() {
         "submit"
       ) {
         setMensagem(
-          "Atividade concluÃ­da e enviada."
+          "Atividade concluída e enviada."
         );
 
         setQuiz(
@@ -362,7 +362,7 @@ export default function ResponderAtividadePage() {
         );
       } else {
         setMensagem(
-          "Suas respostas foram salvas. VocÃª pode continuar depois."
+          "Suas respostas foram salvas. Você pode continuar depois."
         );
       }
     } catch (
@@ -399,7 +399,7 @@ export default function ResponderAtividadePage() {
       <main className="min-h-screen bg-[#F8F4EC] p-6">
         <div className="mx-auto max-w-xl rounded-3xl border border-red-200 bg-white p-7 text-center text-red-700">
           {erro ||
-            "Atividade nÃ£o encontrada."}
+            "Atividade não encontrada."}
         </div>
       </main>
     );
@@ -410,7 +410,7 @@ export default function ResponderAtividadePage() {
       <div className="mx-auto max-w-3xl">
         {preview && (
           <div className="mb-5 rounded-2xl bg-[#5E7357] p-4 text-sm font-bold text-white">
-            VisualizaÃ§Ã£o do ADM â€” teste Ã  vontade; nenhuma resposta serÃ¡ salva.
+            Visualização do ADM — teste à vontade; nenhuma resposta será salva.
           </div>
         )}
 
@@ -418,12 +418,12 @@ export default function ResponderAtividadePage() {
           href={`/terapia/acesso/${token}/atividades`}
           className="text-sm font-bold text-[#6C8465]"
         >
-          â† Minhas Atividades
+          ← Minhas Atividades
         </Link>
 
         <section className="mt-7 rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-sm md:p-8">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#8AA27A]">
-            Atividade terapÃªutica
+            Atividade terapêutica
           </p>
 
           <h1 className="mt-3 text-3xl font-extrabold text-[#4F5E4A]">
@@ -444,7 +444,7 @@ export default function ResponderAtividadePage() {
 
           {concluida && (
             <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-700">
-              âœ“ Esta atividade jÃ¡ foi concluÃ­da.
+              ✓ Esta atividade já foi concluÃ­da.
             </div>
           )}
         </section>
@@ -630,7 +630,7 @@ export default function ResponderAtividadePage() {
                         )
                       }
                       rows={5}
-                      placeholder="Escreva apenas o que se sentir confortÃ¡vel para responder..."
+                      placeholder="Escreva apenas o que se sentir confortável para responder..."
                       className="mt-5 w-full rounded-xl border border-[#C8B8A8] bg-white px-4 py-3 outline-none focus:border-[#8AA27A]"
                     />
                   )}

@@ -150,7 +150,7 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Acesso nÃ£o informado.",
+            "Acesso não informado.",
         },
         { status: 400 }
       );
@@ -166,7 +166,7 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Paciente nÃ£o encontrada ou acesso expirado.",
+            "Paciente não encontrada ou acesso expirado.",
         },
         { status: 401 }
       );
@@ -350,7 +350,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "Atividade ou acesso nÃ£o informado.",
+            "Atividade ou acesso não informado.",
         },
         { status: 400 }
       );
@@ -366,7 +366,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "Paciente nÃ£o encontrada ou acesso expirado.",
+            "Paciente não encontrada ou acesso expirado.",
         },
         { status: 401 }
       );
@@ -378,7 +378,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "A visualizaÃ§Ã£o administrativa nÃ£o salva respostas.",
+            "A visualização administrativa não salva respostas.",
         },
         { status: 403 }
       );
@@ -415,7 +415,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "Atividade nÃ£o encontrada.",
+            "Atividade não encontrada.",
         },
         { status: 404 }
       );
@@ -447,7 +447,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "Esta atividade jÃ¡ foi finalizada.",
+            "Esta atividade já foi finalizada.",
         },
         { status: 409 }
       );

@@ -5,17 +5,13 @@ import {
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { getTherapyAdmin } from "../_auth";
 
-function rel(
-  item: any
-) {
+function rel(item: any) {
   return Array.isArray(item)
     ? item[0] || null
     : item || null;
 }
 
-function criarSlug(
-  nome: string
-) {
+function criarSlug(nome: string) {
   return nome
     .normalize("NFD")
     .replace(
@@ -74,9 +70,7 @@ async function listarClientes(
     throw error;
   }
 
-  return (
-    data || []
-  )
+  return (data || [])
     .map((item: any) => {
       const cliente =
         rel(
@@ -88,8 +82,7 @@ async function listarClientes(
       }
 
       return {
-        id:
-          item.client_id,
+        id: item.client_id,
         nome:
           cliente.nome_referencia ||
           cliente.nome ||
@@ -168,6 +161,11 @@ export async function POST(
     const body =
       await request.json();
 
+    const clientId =
+      String(
+        body.clientId || ""
+      ).trim();
+
     const nome =
       String(
         body.nome || ""
@@ -191,39 +189,8 @@ export async function POST(
         body.whatsapp || ""
       ).trim();
 
-    if (
-      !nome ||
-      !email
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Nome e e-mail são obrigatórios.",
-        },
-        { status: 400 }
-      );
-    }
-
-    let {
-      data: cliente,
-      error:
-        clienteBuscaError,
-    } = await supabaseAdmin
-      .from("club_clients")
-      .select(
-        "id, nome, nome_referencia, email, whatsapp, slug"
-      )
-      .ilike(
-        "email",
-        email
-      )
-      .maybeSingle();
-
-    if (
-      clienteBuscaError
-    ) {
-      throw clienteBuscaError;
-    }
+    let cliente: any =
+      null;
 
     let novoUsuario =
       false;
@@ -231,152 +198,214 @@ export async function POST(
     let senhaTemporaria:
       string | null = null;
 
-    if (!cliente) {
-      senhaTemporaria =
-        crypto
-          .randomUUID()
-          .replace(/-/g, "")
-          .slice(0, 10);
-
+    if (clientId) {
       const {
-        data: authUser,
-        error:
-          authError,
-      } =
-        await supabaseAdmin
-          .auth.admin
-          .createUser({
-            email,
-            password:
-              senhaTemporaria,
-            email_confirm:
-              true,
-            user_metadata: {
-              display_name:
-                nome,
-            },
-          });
+        data,
+        error,
+      } = await supabaseAdmin
+        .from("club_clients")
+        .select(
+          "id, nome, nome_referencia, email, whatsapp, slug"
+        )
+        .eq(
+          "id",
+          clientId
+        )
+        .maybeSingle();
 
-      if (authError) {
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
         return NextResponse.json(
           {
             error:
-              authError.message,
+              "Pessoa não encontrada no banco de dados.",
+          },
+          { status: 404 }
+        );
+      }
+
+      cliente = data;
+    } else {
+      if (
+        !nome ||
+        !email
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Nome e e-mail são obrigatórios.",
           },
           { status: 400 }
         );
       }
 
-      const userId =
-        authUser.user?.id;
+      const {
+        data,
+        error,
+      } = await supabaseAdmin
+        .from("club_clients")
+        .select(
+          "id, nome, nome_referencia, email, whatsapp, slug"
+        )
+        .ilike(
+          "email",
+          email
+        )
+        .maybeSingle();
 
-      if (!userId) {
-        throw new Error(
-          "Não foi possível criar o acesso da paciente."
-        );
+      if (error) {
+        throw error;
       }
 
-      const slugBase =
-        criarSlug(nome) ||
-        `paciente-${userId.slice(
-          0,
-          6
-        )}`;
+      cliente = data;
 
-      let slug =
-        slugBase;
+      if (!cliente) {
+        senhaTemporaria =
+          crypto
+            .randomUUID()
+            .replace(/-/g, "")
+            .slice(0, 10);
 
-      const {
-        data:
-          slugExistente,
-      } =
-        await supabaseAdmin
-          .from(
-            "club_clients"
-          )
-          .select("id")
-          .eq(
-            "slug",
-            slug
-          )
-          .maybeSingle();
+        const {
+          data: authUser,
+          error: authError,
+        } =
+          await supabaseAdmin
+            .auth.admin
+            .createUser({
+              email,
+              password:
+                senhaTemporaria,
+              email_confirm:
+                true,
+              user_metadata: {
+                display_name:
+                  nome,
+              },
+            });
 
-      if (slugExistente) {
-        slug =
-          `${slugBase}-${userId.slice(
-            0,
-            5
-          )}`;
-      }
-
-      const {
-        data:
-          novoCliente,
-        error:
-          novoClienteError,
-      } =
-        await supabaseAdmin
-          .from(
-            "club_clients"
-          )
-          .insert({
-            id: userId,
-            nome,
-            nome_referencia:
-              nomeReferencia ||
-              nome.split(" ")[0],
-            email,
-            whatsapp,
-            plano:
-              "terapia",
-            tipo_assinatura:
-              "terapia",
-            senha_inicial:
-              senhaTemporaria,
-            data_inicio:
-              new Date()
-                .toISOString()
-                .slice(
-                  0,
-                  10
-                ),
-            slug,
-            status:
-              "ativo",
-            produto:
-              "Terapia em Dia",
-            acesso_app:
-              true,
-            direcionamento_exclusivo:
-              false,
-          })
-          .select(
-            "id, nome, nome_referencia, email, whatsapp, slug"
-          )
-          .single();
-
-      if (
-        novoClienteError
-      ) {
-        await supabaseAdmin
-          .auth.admin
-          .deleteUser(
-            userId
+        if (authError) {
+          return NextResponse.json(
+            {
+              error:
+                authError.message,
+            },
+            { status: 400 }
           );
+        }
 
-        throw novoClienteError;
+        const userId =
+          authUser.user?.id;
+
+        if (!userId) {
+          throw new Error(
+            "Não foi possível criar o acesso da paciente."
+          );
+        }
+
+        const slugBase =
+          criarSlug(nome) ||
+          `paciente-${userId.slice(
+            0,
+            6
+          )}`;
+
+        let slug =
+          slugBase;
+
+        const {
+          data:
+            slugExistente,
+        } =
+          await supabaseAdmin
+            .from(
+              "club_clients"
+            )
+            .select("id")
+            .eq(
+              "slug",
+              slug
+            )
+            .maybeSingle();
+
+        if (slugExistente) {
+          slug =
+            `${slugBase}-${userId.slice(
+              0,
+              5
+            )}`;
+        }
+
+        const {
+          data: novoCliente,
+          error:
+            novoClienteError,
+        } =
+          await supabaseAdmin
+            .from(
+              "club_clients"
+            )
+            .insert({
+              id: userId,
+              nome,
+              nome_referencia:
+                nomeReferencia ||
+                nome.split(" ")[0],
+              email,
+              whatsapp,
+              plano:
+                "terapia",
+              tipo_assinatura:
+                "terapia",
+              senha_inicial:
+                senhaTemporaria,
+              data_inicio:
+                new Date()
+                  .toISOString()
+                  .slice(
+                    0,
+                    10
+                  ),
+              slug,
+              status:
+                "ativo",
+              produto:
+                "Terapia em Dia",
+              acesso_app:
+                true,
+              direcionamento_exclusivo:
+                false,
+            })
+            .select(
+              "id, nome, nome_referencia, email, whatsapp, slug"
+            )
+            .single();
+
+        if (
+          novoClienteError
+        ) {
+          await supabaseAdmin
+            .auth.admin
+            .deleteUser(
+              userId
+            );
+
+          throw novoClienteError;
+        }
+
+        cliente =
+          novoCliente;
+
+        novoUsuario =
+          true;
       }
-
-      cliente =
-        novoCliente;
-
-      novoUsuario =
-        true;
     }
 
     const {
-      data:
-        vinculoAtual,
+      data: vinculos,
       error:
         vinculoError,
     } = await supabaseAdmin
@@ -389,19 +418,30 @@ export async function POST(
       .eq(
         "client_id",
         cliente.id
-      )
-      .maybeSingle();
+      );
 
     if (vinculoError) {
       throw vinculoError;
     }
 
+    const vinculoAtual =
+      (vinculos || []).find(
+        (item: any) =>
+          item.professional ===
+          admin.professional
+      );
+
+    const vinculoOutroAtivo =
+      (vinculos || []).find(
+        (item: any) =>
+          item.active === true &&
+          item.professional !==
+            admin.professional
+      );
+
     if (
-      vinculoAtual &&
-      vinculoAtual.professional !==
-        admin.professional &&
-      vinculoAtual.active ===
-        true
+      !vinculoAtual &&
+      vinculoOutroAtivo
     ) {
       return NextResponse.json(
         {
@@ -422,8 +462,6 @@ export async function POST(
             "therapy_client_access"
           )
           .update({
-            professional:
-              admin.professional,
             active: true,
           })
           .eq(

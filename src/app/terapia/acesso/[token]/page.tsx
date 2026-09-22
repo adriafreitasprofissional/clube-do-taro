@@ -145,7 +145,7 @@ function baixarRelatorioPDF(
   let y = 20;
 
   function desenharCabecalho(
-    subtitulo = "RelatÃ³rio de sessÃ£o"
+    subtitulo = "Relatório de sessão"
   ) {
     pdf.setFillColor(
       corPrincipal[0],
@@ -174,7 +174,7 @@ function baixarRelatorioPDF(
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(10);
     pdf.text(
-      "com Ãdria Freitas",
+      "com Ádria Freitas",
       margin + 8,
       y + 15
     );
@@ -221,7 +221,7 @@ function baixarRelatorioPDF(
     pdf.setFontSize(9);
 
     pdf.text("CLIENTE", margin + 8, y + 8);
-    pdf.text("SESSÃƒO", margin + 8, y + 18);
+    pdf.text("SESSÒO", margin + 8, y + 18);
     pdf.text("DATA", margin + 8, y + 28);
 
     pdf.setTextColor(
@@ -286,13 +286,13 @@ function baixarRelatorioPDF(
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
     pdf.text(
-      "Ãdria Freitas â€¢ Terapia em Dia",
+      "Ádria Freitas ⬢ Terapia em Dia",
       margin,
       pageHeight - 12
     );
 
     pdf.text(
-      `PÃ¡gina ${pdf.getNumberOfPages()}`,
+      `Página ${pdf.getNumberOfPages()}`,
       pageWidth - margin,
       pageHeight - 12,
       { align: "right" }
@@ -301,7 +301,7 @@ function baixarRelatorioPDF(
 
   desenharCabecalho();
   desenharBlocoInfo();
-  desenharTituloSecao("SÃ­ntese da sessÃ£o");
+  desenharTituloSecao("Síntese da sessão");
 
   pdf.setFillColor(255, 255, 255);
   pdf.setDrawColor(
@@ -320,7 +320,7 @@ function baixarRelatorioPDF(
   );
 
   const texto = pdf.splitTextToSize(
-    relatorio || "RelatÃ³rio nÃ£o informado.",
+    relatorio || "Relatório não informado.",
     contentWidth - 12
   );
 
@@ -352,10 +352,10 @@ function baixarRelatorioPDF(
       pdf.addPage();
       y = 20;
       desenharCabecalho(
-        "ContinuaÃ§Ã£o do relatÃ³rio"
+        "Continuação do relatório"
       );
       desenharTituloSecao(
-        "SÃ­ntese da sessÃ£o"
+        "Síntese da sessão"
       );
 
       boxTop = y;
@@ -392,7 +392,7 @@ function baixarRelatorioPDF(
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(11);
   pdf.text(
-    "Acompanhamento terapÃªutico",
+    "Acompanhamento terapêutico",
     margin,
     y
   );
@@ -407,7 +407,7 @@ function baixarRelatorioPDF(
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
   pdf.text(
-    "Este relatÃ³rio faz parte do processo terapÃªutico individual da cliente.",
+    "Este relatório faz parte do processo terapêutico individual da cliente.",
     margin,
     y
   );
@@ -475,6 +475,9 @@ async function sair() {
   const [mesJornadaAberto, setMesJornadaAberto] =
     useState<string | null>(null);
 
+  const [jornadaAberta, setJornadaAberta] =
+    useState(false);
+
   const [mostrarHorarios, setMostrarHorarios] =
     useState(false);
 
@@ -510,7 +513,7 @@ async function sair() {
       if (modoPreview) {
         if (!previewClientId) {
           throw new Error(
-            "Paciente nÃ£o informada."
+            "Paciente não informada."
           );
         }
 
@@ -521,7 +524,7 @@ async function sair() {
 
         if (!session?.access_token) {
           throw new Error(
-            "Sua sessÃ£o administrativa expirou."
+            "Sua sessão administrativa expirou."
           );
         }
 
@@ -554,7 +557,7 @@ async function sair() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "NÃ£o foi possÃ­vel abrir seu espaÃ§o."
+            "Não foi possível abrir seu espaço."
         );
       }
 
@@ -563,7 +566,7 @@ async function sair() {
       setErro(
         error instanceof Error
           ? error.message
-          : "NÃ£o foi possÃ­vel abrir seu espaÃ§o."
+          : "Não foi possível abrir seu espaço."
       );
     } finally {
       setCarregando(false);
@@ -602,7 +605,7 @@ async function sair() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "NÃ£o foi possÃ­vel carregar os horÃ¡rios disponÃ­veis."
+            "Não foi possível carregar os horários disponíveis."
         );
       }
 
@@ -617,7 +620,7 @@ async function sair() {
       setMensagemAgenda(
         error instanceof Error
           ? error.message
-          : "NÃ£o foi possÃ­vel carregar os horÃ¡rios."
+          : "Não foi possível carregar os horários."
       );
     } finally {
       setCarregandoHorarios(false);
@@ -630,7 +633,7 @@ async function sair() {
     }
 
     const confirmou = window.confirm(
-      "Deseja realmente cancelar esta sessÃ£o? O cancelamento ficarÃ¡ registrado no seu histÃ³rico."
+      "Deseja realmente cancelar esta sessão? O cancelamento ficará registrado no seu histórico."
     );
 
     if (!confirmou) {
@@ -663,7 +666,7 @@ async function sair() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "NÃ£o foi possÃ­vel cancelar a sessÃ£o."
+            "Não foi possível cancelar a sessão."
         );
       }
 
@@ -672,7 +675,7 @@ async function sair() {
       setMensagemAgenda(
         error instanceof Error
           ? error.message
-          : "NÃ£o foi possÃ­vel cancelar a sessÃ£o."
+          : "Não foi possível cancelar a sessão."
       );
     } finally {
       setAlterandoAgenda(false);
@@ -687,7 +690,7 @@ async function sair() {
     }
 
     const confirmou = window.confirm(
-      `Deseja mudar sua sessÃ£o para ${horario}?`
+      `Deseja mudar sua sessão para ${horario}?`
     );
 
     if (!confirmou) {
@@ -721,7 +724,7 @@ async function sair() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "NÃ£o foi possÃ­vel mudar o horÃ¡rio."
+            "Não foi possível mudar o horário."
         );
       }
 
@@ -730,7 +733,7 @@ async function sair() {
       setMensagemAgenda(
         error instanceof Error
           ? error.message
-          : "NÃ£o foi possÃ­vel mudar o horÃ¡rio."
+          : "Não foi possível mudar o horário."
       );
     } finally {
       setAlterandoAgenda(false);
@@ -740,7 +743,7 @@ async function sair() {
   if (carregando) {
     return (
       <main className="min-h-screen bg-[#F8F4EC] p-8 text-center text-[#6C8465]">
-        Preparando seu espaÃ§o...
+        Preparando seu espaço...
       </main>
     );
   }
@@ -750,7 +753,7 @@ async function sair() {
       <main className="min-h-screen bg-[#F8F4EC] p-8">
         <div className="mx-auto max-w-xl rounded-3xl border border-red-200 bg-white p-7 text-center text-red-700 shadow">
           {erro ||
-            "NÃ£o foi possÃ­vel abrir seu espaÃ§o."}
+            "Não foi possível abrir seu espaço."}
         </div>
       </main>
     );
@@ -782,11 +785,11 @@ async function sair() {
         <div className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em]">
-              VisualizaÃ§Ã£o do ADM
+              Visualização do ADM
             </p>
 
             <p className="mt-1 text-sm">
-              VocÃª estÃ¡ vendo o portal como{" "}
+              Você está vendo o portal como{" "}
               <strong>
                 {dados.cliente.nome}
               </strong>
@@ -813,9 +816,11 @@ async function sair() {
         <aside className="border-b border-[#DCCFB8] bg-[#F7F1E4] p-6 md:w-72 md:border-b-0 md:border-r">
           <div className="md:sticky md:top-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#8AA27A] font-black text-white shadow">
-                TE
-              </div>
+              <img
+                src="/terapia-icon-192-v2.png"
+                alt="Terapia em Dia"
+                className="h-12 w-12 rounded-full object-cover shadow"
+              />
 
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#8AA27A]">
@@ -823,14 +828,14 @@ async function sair() {
                 </p>
 
                 <p className="mt-1 text-sm font-semibold text-[#5E7357]">
-                  com Ãdria Freitas
+                  com Ádria Freitas
                 </p>
               </div>
             </div>
 
             <div className="mt-8 rounded-2xl border border-[#DCCFB8] bg-white p-5">
               <p className="text-xs uppercase tracking-wide text-[#6C8465]">
-                Seu espaÃ§o
+                Seu espaço
               </p>
 
               <p className="mt-2 text-xl font-bold">
@@ -878,7 +883,7 @@ async function sair() {
         <section className="flex-1 px-5 py-8 md:px-10">
           <div className="mx-auto max-w-4xl">
             <p className="text-sm font-semibold text-[#8AA27A]">
-              Seu acompanhamento comeÃ§a aqui
+              Seu acompanhamento começa aqui
             </p>
 
             <h1 className="mt-2 text-3xl font-extrabold md:text-4xl">
@@ -886,16 +891,16 @@ async function sair() {
             </h1>
 
             <p className="mt-4 max-w-2xl text-sm leading-7 text-[#6C8465] md:text-base">
-              Este Ã© o seu espaÃ§o de acompanhamento
-              com Ãdria Freitas. Aqui vocÃª poderÃ¡
+              Este é o seu espaço de acompanhamento
+              com Ádria Freitas. Aqui você poderá
               organizar sua jornada, acessar suas
-              sessÃµes e acompanhar as prÃ³ximas etapas.
+              sessões e acompanhar as próximas etapas.
             </p>
 
             {proximo && (
               <div className="mt-8 overflow-hidden rounded-3xl border border-[#DCCFB8] bg-gradient-to-br from-[#8AA27A] to-[#5E7357] p-6 text-white shadow-xl">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-100">
-                  PrÃ³ximo encontro
+                  Próximo encontro
                 </p>
 
                 <h2 className="mt-3 text-2xl font-bold">
@@ -920,11 +925,11 @@ async function sair() {
                       rel="noreferrer"
                       className="inline-flex rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#5E7357] shadow transition hover:bg-orange-50"
                     >
-                      Entrar na sessÃ£o
+                      Entrar na sessão
                     </a>
                   ) : (
                     <p className="inline-flex rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-xs font-semibold text-orange-50">
-                      O acesso Ã  sala serÃ¡ liberado
+                      O acesso à sala será liberado
                       antes do encontro.
                     </p>
                   )}
@@ -937,7 +942,7 @@ async function sair() {
                         disabled={alterandoAgenda}
                         className="inline-flex rounded-xl border border-white/50 bg-transparent px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        Cancelar sessÃ£o
+                        Cancelar sessão
                       </button>
 
                       <button
@@ -950,8 +955,8 @@ async function sair() {
                         className="inline-flex rounded-xl border border-white/30 bg-white/15 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {carregandoHorarios
-                          ? "Buscando horÃ¡rios..."
-                          : "Escolher outro horÃ¡rio"}
+                          ? "Buscando horários..."
+                          : "Escolher outro horário"}
                       </button>
                     </>
                   )}
@@ -968,12 +973,12 @@ async function sair() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-sm font-extrabold">
-                          HorÃ¡rios disponÃ­veis neste dia
+                          Horários disponíveis neste dia
                         </p>
 
                         <p className="mt-1 text-xs leading-5 text-[#6C8465]">
-                          Escolha um horÃ¡rio livre para
-                          mudar sua sessÃ£o.
+                          Escolha um horário livre para
+                          mudar sua sessão.
                         </p>
                       </div>
 
@@ -983,15 +988,15 @@ async function sair() {
                           setMostrarHorarios(false)
                         }
                         className="rounded-lg px-2 py-1 text-lg text-[#6C8465]"
-                        aria-label="Fechar horÃ¡rios"
+                        aria-label="Fechar horários"
                       >
-                        Ã—
+                        ×
                       </button>
                     </div>
 
                     {horariosDisponiveis.length === 0 ? (
                       <p className="mt-4 rounded-xl bg-[#F7F1E4] p-4 text-sm text-[#6C8465]">
-                        NÃ£o hÃ¡ outro horÃ¡rio disponÃ­vel
+                        Não há outro horário disponível
                         neste dia.
                       </p>
                     ) : (
@@ -1029,9 +1034,9 @@ async function sair() {
                   </p>
 
                   <p className="mt-1 text-sm text-[#6C8465]">
-                    Uma explicaÃ§Ã£o preparada para
+                    Uma explicação preparada para
                     complementar o que conversamos
-                    em sessÃ£o.
+                    em sessão.
                   </p>
                 </div>
 
@@ -1069,7 +1074,7 @@ async function sair() {
                     ?.therapist_note && (
                     <div className="mt-5 rounded-2xl bg-[#F7F1E4] p-4">
                       <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
-                        Um recado para vocÃª
+                        Um recado para você
                       </p>
 
                       <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#5E7357]">
@@ -1089,12 +1094,12 @@ async function sair() {
                     rel="noreferrer"
                     className="mt-5 inline-flex rounded-xl bg-[#6C8465] px-5 py-3 text-sm font-bold text-white shadow transition hover:bg-[#5E7357]"
                   >
-                    â–¶ Assistir mini palestra
+                    ▶ Assistir mini palestra
                   </a>
 
                   <p className="mt-4 text-xs leading-5 text-[#8A9284]">
-                    Assista no seu tempo. VocÃª
-                    poderÃ¡ voltar a este conteÃºdo
+                    Assista no seu tempo. Você
+                    poderá voltar a este conteúdo
                     sempre que quiser.
                   </p>
                 </div>
@@ -1113,7 +1118,7 @@ async function sair() {
                   </h2>
 
                   <p className="mt-2 text-sm leading-6 text-[#6C8465]">
-                    Aqui ficam os conteÃºdos que
+                    Aqui ficam os conteúdos que
                     foram indicados ao longo do
                     seu acompanhamento.
                   </p>
@@ -1155,7 +1160,7 @@ async function sair() {
 
                                 {palestra.duration_minutes && (
                                   <span>
-                                    â€¢{" "}
+                                    ⬢{" "}
                                     {
                                       palestra.duration_minutes
                                     }{" "}
@@ -1166,7 +1171,7 @@ async function sair() {
 
                               {indicacao.session_date && (
                                 <p className="mt-2 text-xs text-[#93998D]">
-                                  Indicada na sessÃ£o de{" "}
+                                  Indicada na sessão de{" "}
                                   {new Date(
                                     `${indicacao.session_date}T12:00:00`
                                   ).toLocaleDateString(
@@ -1184,7 +1189,7 @@ async function sair() {
                               rel="noreferrer"
                               className="shrink-0 rounded-xl border border-[#8AA27A] bg-white px-4 py-2 text-sm font-bold text-[#5E7357] transition hover:bg-[#F0F3EB]"
                             >
-                              â–¶ Assistir
+                              ▶ Assistir
                             </a>
                           </div>
                         </div>
@@ -1205,7 +1210,7 @@ async function sair() {
                 }`}
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">
-                  ðŸ“
+                  📝
                 </div>
 
                 <h2 className="mt-4 text-xl font-extrabold">
@@ -1214,8 +1219,8 @@ async function sair() {
 
                 <p className="mt-3 text-sm leading-6 text-[#6C8465]">
                   {dados.anamnese.preenchida
-                    ? "Sua anamnese foi recebida pela Ãdria."
-                    : "Preencha suas informaÃ§Ãµes antes do primeiro encontro."}
+                    ? "Sua anamnese foi recebida pela Ádria."
+                    : "Preencha suas informações antes do primeiro encontro."}
                 </p>
 
                 <p
@@ -1226,8 +1231,8 @@ async function sair() {
                   }`}
                 >
                   {dados.anamnese.preenchida
-                    ? "âœ“ Anamnese preenchida"
-                    : "Preencher agora â†’"}
+                    ? "✓ Anamnese preenchida"
+                    : "Preencher agora →"}
                 </p>
               </Link>
               <Link
@@ -1235,7 +1240,7 @@ async function sair() {
                 className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg transition hover:-translate-y-1 hover:border-[#8AA27A]"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">
-                  ðŸ§©
+                  🧩
                 </div>
 
                 <h2 className="mt-4 text-xl font-extrabold">
@@ -1243,206 +1248,226 @@ async function sair() {
                 </h2>
 
                 <p className="mt-3 text-sm leading-6 text-[#6C8465]">
-                  Acesse as atividades e reflexÃµes preparadas para acompanhar seu processo entre as sessÃµes.
+                  Acesse as atividades e reflexões preparadas para acompanhar seu processo entre as sessões.
                 </p>
 
                 <p className="mt-5 text-sm font-bold text-[#8AA27A]">
-                  Abrir atividades â†’
+                  Abrir atividades →
                 </p>
               </Link>
 
             <div className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg md:col-span-2">
-  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">
-    ðŸŒ¿
-  </div>
+  <button
+    type="button"
+    onClick={() =>
+      setJornadaAberta(
+        (atual) => !atual
+      )
+    }
+    aria-expanded={jornadaAberta}
+    className="flex w-full items-center justify-between gap-4 text-left"
+  >
+    <div className="flex items-center gap-4">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">
+        🌿
+      </div>
 
-  <h2 className="mt-4 text-xl font-extrabold">
-  Minha Jornada
-</h2>
+      <div>
+        <h2 className="text-xl font-extrabold">
+          Minha Jornada
+        </h2>
 
-<p className="mt-2 text-sm leading-6 text-[#6C8465]">
-  Aqui ficam organizadas suas sessÃµes,
-  gravaÃ§Ãµes, relatÃ³rios e orientaÃ§Ãµes.
-</p>
+        <p className="mt-1 text-sm leading-6 text-[#6C8465]">
+          Aqui ficam organizadas suas sessões, gravações, relatórios e orientações.
+        </p>
+      </div>
+    </div>
 
-{dados.jornada.length === 0 ? (
-  <div className="mt-5 rounded-2xl bg-[#F7F1E4] p-5 text-sm text-[#6C8465]">
-    Sua jornada serÃ¡ registrada aqui durante
-    o acompanhamento.
-  </div>
-) : (
-  <div className="mt-6 space-y-4">
-    {(() => {
-      const jornadaOrdenada = [...dados.jornada].sort(
-        (a, b) =>
-          new Date(b.scheduled_at).getTime() -
-          new Date(a.scheduled_at).getTime()
-      );
+    <span
+      className="shrink-0 text-3xl font-light leading-none text-[#8AA27A]"
+      aria-hidden="true"
+    >
+      {jornadaAberta ? "⌄" : "›"}
+    </span>
+  </button>
 
-      const gruposPorMes = jornadaOrdenada.reduce<
-        Record<string, typeof dados.jornada>
-      >((grupos, sessao) => {
-        const data = new Date(sessao.scheduled_at);
+  {jornadaAberta && (
+    <>
+      {dados.jornada.length === 0 ? (
+        <div className="mt-5 rounded-2xl bg-[#F7F1E4] p-5 text-sm text-[#6C8465]">
+          Sua jornada será registrada aqui durante o acompanhamento.
+        </div>
+      ) : (
+        <div className="mt-6 space-y-4">
+          {(() => {
+            const jornadaOrdenada = [...dados.jornada].sort(
+              (a, b) =>
+                new Date(b.scheduled_at).getTime() -
+                new Date(a.scheduled_at).getTime()
+            );
 
-        const chaveMes = `${data.getFullYear()}-${String(
-          data.getMonth() + 1
-        ).padStart(2, "0")}`;
+            const gruposPorMes = jornadaOrdenada.reduce<
+              Record<string, typeof dados.jornada>
+            >((grupos, sessao) => {
+              const data = new Date(sessao.scheduled_at);
 
-        if (!grupos[chaveMes]) {
-          grupos[chaveMes] = [];
-        }
+              const chaveMes = `${data.getFullYear()}-${String(
+                data.getMonth() + 1
+              ).padStart(2, "0")}`;
 
-        grupos[chaveMes].push(sessao);
-
-        return grupos;
-      }, {});
-
-      const agora = new Date();
-
-      const chaveMesAtual = `${agora.getFullYear()}-${String(
-        agora.getMonth() + 1
-      ).padStart(2, "0")}`;
-
-      const chavesDosMeses = Object.keys(gruposPorMes);
-
-      const mesInicial = gruposPorMes[chaveMesAtual]
-        ? chaveMesAtual
-        : chavesDosMeses[0];
-
-      return chavesDosMeses.map((chaveMes) => {
-        const sessoes = gruposPorMes[chaveMes];
-
-        const [ano, mes] = chaveMes.split("-").map(Number);
-
-        const nomeMes = new Date(
-          ano,
-          mes - 1,
-          1
-        ).toLocaleDateString("pt-BR", {
-          month: "long",
-          year: "numeric",
-        });
-
-        const aberto =
-          mesJornadaAberto === null
-            ? chaveMes === mesInicial
-            : mesJornadaAberto === chaveMes;
-
-        return (
-          <div
-            key={chaveMes}
-            className="overflow-hidden rounded-2xl border border-[#DCCFB8] bg-[#FDFBF7]"
-          >
-            <button
-              type="button"
-              onClick={() =>
-                setMesJornadaAberto(
-                  aberto ? "" : chaveMes
-                )
+              if (!grupos[chaveMes]) {
+                grupos[chaveMes] = [];
               }
-              aria-expanded={aberto}
-              className="flex w-full items-center justify-between gap-4 bg-[#F3EEE4] px-5 py-5 text-left transition hover:bg-[#EDE5D7]"
-            >
-              <span className="text-lg font-extrabold capitalize text-[#4F5E4A]">
-                {nomeMes}
-              </span>
 
-              <span
-                className={`text-3xl font-light leading-none text-[#8AA27A] transition-transform ${
-                  aberto ? "rotate-90" : ""
-                }`}
-                aria-hidden="true"
-              >
-                â€º
-              </span>
-            </button>
+              grupos[chaveMes].push(sessao);
 
-            {aberto && (
-              <div className="space-y-4 p-4">
-                {sessoes.map((sessao) => {
-                  const titulo =
-                    sessao.session_title ||
-                    sessao.service_type ||
-                    "SessÃ£o";
+              return grupos;
+            }, {});
 
-                  return (
-                    <div
-                      key={sessao.id}
-                      className="rounded-2xl border border-[#DCCFB8] bg-white p-5"
+            const agora = new Date();
+
+            const chaveMesAtual = `${agora.getFullYear()}-${String(
+              agora.getMonth() + 1
+            ).padStart(2, "0")}`;
+
+            const chavesDosMeses = Object.keys(gruposPorMes);
+
+            const mesInicial = gruposPorMes[chaveMesAtual]
+              ? chaveMesAtual
+              : chavesDosMeses[0];
+
+            return chavesDosMeses.map((chaveMes) => {
+              const sessoes = gruposPorMes[chaveMes];
+
+              const [ano, mes] = chaveMes.split("-").map(Number);
+
+              const nomeMes = new Date(
+                ano,
+                mes - 1,
+                1
+              ).toLocaleDateString("pt-BR", {
+                month: "long",
+                year: "numeric",
+              });
+
+              const aberto =
+                mesJornadaAberto === null
+                  ? chaveMes === mesInicial
+                  : mesJornadaAberto === chaveMes;
+
+              return (
+                <div
+                  key={chaveMes}
+                  className="overflow-hidden rounded-2xl border border-[#DCCFB8] bg-[#FDFBF7]"
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMesJornadaAberto(
+                        aberto ? "" : chaveMes
+                      )
+                    }
+                    aria-expanded={aberto}
+                    className="flex w-full items-center justify-between gap-4 bg-[#F3EEE4] px-5 py-5 text-left transition hover:bg-[#EDE5D7]"
+                  >
+                    <span className="text-lg font-extrabold capitalize text-[#4F5E4A]">
+                      {nomeMes}
+                    </span>
+
+                    <span
+                      className="text-3xl font-light leading-none text-[#8AA27A]"
+                      aria-hidden="true"
                     >
-                      <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
-                        {new Date(
-                          sessao.scheduled_at
-                        ).toLocaleDateString("pt-BR")}
-                      </p>
+                      {aberto ? "⌄" : "›"}
+                    </span>
+                  </button>
 
-                      <h3 className="mt-2 text-lg font-extrabold text-[#4F5E4A]">
-                        {titulo}
-                      </h3>
+                  {aberto && (
+                    <div className="space-y-4 p-4">
+                      {sessoes.map((sessao) => {
+                        const titulo =
+                          sessao.session_title ||
+                          sessao.service_type ||
+                          "Sessão";
 
-                      <p className="mt-1 text-sm text-[#6C8465]">
-                        {sessao.service_type}
-                      </p>
-
-                      {sessao.client_activity && (
-                        <div className="mt-4 rounded-xl bg-[#F3EEE4] p-4">
-                          <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
-                            OrientaÃ§Ã£o
-                          </p>
-
-                          <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#5E7357]">
-                            {sessao.client_activity}
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="mt-5 flex flex-wrap gap-3">
-                        {sessao.recording_url && (
-                          <a
-                            href={sessao.recording_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex rounded-xl bg-[#8AA27A] px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-[#769566]"
+                        return (
+                          <div
+                            key={sessao.id}
+                            className="rounded-2xl border border-[#DCCFB8] bg-white p-5"
                           >
-                            â–¶ Assistir gravaÃ§Ã£o
-                          </a>
-                        )}
+                            <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
+                              {new Date(
+                                sessao.scheduled_at
+                              ).toLocaleDateString("pt-BR")}
+                            </p>
 
-                        {sessao.client_report && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              baixarRelatorioPDF(
-                                dados.cliente.nome,
-                                titulo,
-                                sessao.scheduled_at,
-                                sessao.client_report || ""
-                              )
-                            }
-                            className="inline-flex rounded-xl border border-[#8AA27A] bg-white px-4 py-3 text-sm font-bold text-[#5E7357] shadow transition hover:bg-[#F7F1E4]"
-                          >
-                            ðŸ“„ Baixar relatÃ³rio
-                          </button>
-                        )}
-                      </div>
+                            <h3 className="mt-2 text-lg font-extrabold text-[#4F5E4A]">
+                              {titulo}
+                            </h3>
+
+                            <p className="mt-1 text-sm text-[#6C8465]">
+                              {sessao.service_type}
+                            </p>
+
+                            {sessao.client_activity && (
+                              <div className="mt-4 rounded-xl bg-[#F3EEE4] p-4">
+                                <p className="text-xs font-bold uppercase tracking-wide text-[#8AA27A]">
+                                  Orientação
+                                </p>
+
+                                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#5E7357]">
+                                  {sessao.client_activity}
+                                </p>
+                              </div>
+                            )}
+
+                            <div className="mt-5 flex flex-wrap gap-3">
+                              {sessao.recording_url && (
+                                <a
+                                  href={sessao.recording_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex rounded-xl bg-[#8AA27A] px-4 py-3 text-sm font-bold text-white shadow transition hover:bg-[#769566]"
+                                >
+                                  ▶ Assistir gravação
+                                </a>
+                              )}
+
+                              {sessao.client_report && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    baixarRelatorioPDF(
+                                      dados.cliente.nome,
+                                      titulo,
+                                      sessao.scheduled_at,
+                                      sessao.client_report || ""
+                                    )
+                                  }
+                                  className="inline-flex rounded-xl border border-[#8AA27A] bg-white px-4 py-3 text-sm font-bold text-[#5E7357] shadow transition hover:bg-[#F7F1E4]"
+                                >
+                                  📄 Baixar relatório
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      });
-    })()}
-  </div>
-)}
-
+                  )}
+                </div>
+              );
+            });
+          })()}
+        </div>
+      )}
+    </>
+  )}
 </div>
-              
 
               <div className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">
-                  ðŸ“…
+                  📅
                 </div>
 
                 <h2 className="mt-4 text-xl font-extrabold">
@@ -1451,24 +1476,24 @@ async function sair() {
 
                 <p className="mt-3 text-sm leading-6 text-[#6C8465]">
                   {proximo
-                    ? `Seu prÃ³ximo encontro estÃ¡ marcado para ${formatarDataHora(
+                    ? `Seu próximo encontro está marcado para ${formatarDataHora(
                         proximo.scheduled_at
                       )}.`
-                    : "Nenhum prÃ³ximo encontro encontrado."}
+                    : "Nenhum próximo encontro encontrado."}
                 </p>
               </div>
 
               <div className="rounded-3xl border border-[#DCCFB8] bg-white p-6 shadow-lg">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#EFE5D3] text-xl">
-                  âœ¦
+                  ✦
                 </div>
 
                 <h2 className="mt-4 text-xl font-extrabold">
-                  Recados da Ãdria
+                  Recados da Ádria
                 </h2>
 
                 <p className="mt-3 text-sm leading-6 text-[#6C8465]">
-                  Este espaÃ§o receberÃ¡ orientaÃ§Ãµes
+                  Este espaço receberá orientações
                   e recados relacionados ao seu
                   acompanhamento.
                 </p>
@@ -1485,8 +1510,8 @@ async function sair() {
               </p>
 
               <p className="mt-2 text-xs leading-6 text-[#6C8465]">
-                Seu link de acesso Ã© individual.
-                NÃ£o encaminhe este endereÃ§o para
+                Seu link de acesso é individual.
+                Não encaminhe este endereço para
                 outras pessoas.
               </p>
             </div>

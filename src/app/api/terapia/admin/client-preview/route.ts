@@ -29,7 +29,7 @@ export async function GET(
     return NextResponse.json(
       {
         error:
-          "Acesso nÃƒÂ£o autorizado.",
+          "Acesso nÒ£o autorizado.",
       },
       { status: 401 }
     );
@@ -47,7 +47,7 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Paciente nÃƒÂ£o informada.",
+            "Paciente nÒ£o informada.",
         },
         { status: 400 }
       );
@@ -97,7 +97,7 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Paciente nÃƒÂ£o encontrada.",
+            "Paciente nÒ£o encontrada.",
         },
         { status: 404 }
       );
@@ -116,7 +116,7 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Cadastro da paciente nÃƒÂ£o encontrado.",
+            "Cadastro da paciente nÒ£o encontrado.",
         },
         { status: 404 }
       );

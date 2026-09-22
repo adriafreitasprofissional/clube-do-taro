@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 
@@ -108,15 +108,15 @@ export default function InstallAppPrompt() {
 
     // TERAPIA:
     // O convite aparece em qualquer navegador.
-    // Se o navegador oferecer instalaÃ§Ã£o nativa, o botÃ£o usa o evento.
-    // Se nÃ£o oferecer, o mesmo botÃ£o mostra o caminho de instalaÃ§Ã£o
+    // Se o navegador oferecer instalação nativa, o botão usa o evento.
+    // Se não oferecer, o mesmo botão mostra o caminho de instalação
     // daquele navegador sem mandar a pessoa trocar de navegador.
     if (paginaTerapia) {
       timer = window.setTimeout(() => {
         setMostrar(true);
       }, 900);
     } else if (ios) {
-      // MantÃ©m o comportamento do Clube no iPhone.
+      // Mantém o comportamento do Clube no iPhone.
       timer = window.setTimeout(() => {
         setMostrar(true);
       }, 900);
@@ -197,7 +197,7 @@ export default function InstallAppPrompt() {
           </h2>
 
           <p className="mx-auto mt-3 max-w-sm text-center text-sm leading-6 text-[#6C8465]">
-            Tenha seu espaÃ§o terapÃªutico direto na tela do celular.
+            Tenha seu espaço terapêutico direto na tela do celular.
           </p>
 
           <button
@@ -213,13 +213,13 @@ export default function InstallAppPrompt() {
               {ehIOS ? (
                 <p>
                   Toque em <strong>Compartilhar</strong> e depois em{" "}
-                  <strong>Adicionar Ã  Tela de InÃ­cio</strong>.
+                  <strong>Adicionar à Tela de Início</strong>.
                 </p>
               ) : (
                 <p>
-                  Abra o menu <strong>â‹®</strong> deste navegador e toque em{" "}
+                  Abra o menu <strong>⋮</strong> deste navegador e toque em{" "}
                   <strong>Instalar aplicativo</strong> ou{" "}
-                  <strong>Adicionar Ã  tela inicial</strong>.
+                  <strong>Adicionar à tela inicial</strong>.
                 </p>
               )}
             </div>
@@ -230,23 +230,23 @@ export default function InstallAppPrompt() {
             onClick={agoraNao}
             className="mt-4 w-full rounded-xl border border-[#C8B8A8] px-5 py-3 text-sm font-semibold text-[#6C8465] transition hover:bg-[#E9E4D7]"
           >
-            Agora nÃ£o
+            Agora não
           </button>
         </div>
       </div>
     );
   }
 
-  // CLUBE DO TARÃ”: preservado.
+  // CLUBE DO TARÔ: preservado.
   return (
     <div className="fixed inset-0 z-[99999] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm sm:items-center">
       <div className="w-full max-w-md overflow-hidden rounded-[30px] border border-[#d7b85c]/25 bg-[linear-gradient(160deg,#1b0d28_0%,#0f0918_58%,#09070f_100%)] p-6 text-white shadow-[0_30px_100px_rgba(0,0,0,.6)]">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#e8cb73]/25 bg-[#e8cb73]/10 text-3xl shadow-[0_0_35px_rgba(232,203,115,.12)]">
-          âœ¦
+          ✦
         </div>
 
         <p className="mt-5 text-center text-[11px] font-bold uppercase tracking-[0.28em] text-[#cdb8ec]">
-          Clube do TarÃ´
+          Clube do Tarô
         </p>
 
         <h2 className="mt-2 text-center font-serif text-3xl text-[#f1d88a]">
@@ -254,7 +254,7 @@ export default function InstallAppPrompt() {
         </h2>
 
         <p className="mx-auto mt-3 max-w-sm text-center text-sm leading-6 text-[#ded3eb]">
-          Tenha acesso rÃ¡pido ao seu portal, direcionamentos e novidades como um aplicativo.
+          Tenha acesso rápido ao seu portal, direcionamentos e novidades como um aplicativo.
         </p>
 
         {ehIOS ? (
@@ -264,10 +264,10 @@ export default function InstallAppPrompt() {
             </p>
 
             <div className="mt-3 space-y-3 text-sm leading-6 text-[#e4daef]">
-              <p>1. Abra esta pÃ¡gina no Safari.</p>
-              <p>2. Toque no botÃ£o Compartilhar.</p>
-              <p>3. Escolha â€œAdicionar Ã  Tela de InÃ­cioâ€.</p>
-              <p>4. Toque em â€œAdicionarâ€.</p>
+              <p>1. Abra esta página no Safari.</p>
+              <p>2. Toque no botão Compartilhar.</p>
+              <p>3. Escolha “Adicionar à Tela de Início”.</p>
+              <p>4. Toque em “Adicionar”.</p>
             </div>
           </div>
         ) : (
@@ -276,7 +276,7 @@ export default function InstallAppPrompt() {
             onClick={instalar}
             className="mt-6 w-full rounded-full bg-[#d8b650] px-5 py-4 text-sm font-extrabold text-[#1b1021] transition hover:brightness-110"
           >
-            INSTALAR CLUBE DO TARÃ”
+            INSTALAR CLUBE DO TARÔ
           </button>
         )}
 
@@ -285,7 +285,7 @@ export default function InstallAppPrompt() {
           onClick={agoraNao}
           className="mt-4 w-full rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-[#c8b9d8] transition hover:bg-white/5"
         >
-          Agora nÃ£o
+          Agora não
         </button>
       </div>
     </div>
