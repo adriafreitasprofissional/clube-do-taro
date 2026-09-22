@@ -29,7 +29,7 @@ export async function GET(
     return NextResponse.json(
       {
         error:
-          "Acesso não autorizado.",
+          "Acesso nÃƒÂ£o autorizado.",
       },
       { status: 401 }
     );
@@ -47,40 +47,47 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Paciente não informada.",
+            "Paciente nÃƒÂ£o informada.",
         },
         { status: 400 }
       );
     }
 
+    let acessoQuery =
+      supabaseAdmin
+        .from(
+          "therapy_client_access"
+        )
+        .select(`
+          client_id,
+          professional,
+          active,
+          club_clients (
+            id,
+            nome,
+            nome_referencia,
+            email,
+            slug
+          )
+        `)
+        .eq(
+          "client_id",
+          clientId
+        )
+        .eq("active", true);
+
+    if (!admin.central_access) {
+      acessoQuery =
+        acessoQuery.eq(
+          "professional",
+          admin.professional
+        );
+    }
+
     const {
       data: acesso,
       error: acessoError,
-    } = await supabaseAdmin
-      .from(
-        "therapy_client_access"
-      )
-      .select(`
-        client_id,
-        professional,
-        active,
-        club_clients (
-          id,
-          nome,
-          nome_referencia,
-          email,
-          slug
-        )
-      `)
-      .eq(
-        "client_id",
-        clientId
-      )
-      .eq(
-        "professional",
-        admin.professional
-      )
-      .eq("active", true)
+    } = await acessoQuery
       .maybeSingle();
 
     if (
@@ -90,11 +97,15 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Paciente não encontrada.",
+            "Paciente nÃƒÂ£o encontrada.",
         },
         { status: 404 }
       );
     }
+
+    const professionalPaciente =
+      acesso.professional ||
+      admin.professional;
 
     const cliente =
       normalizarCliente(
@@ -105,7 +116,7 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            "Cadastro da paciente não encontrado.",
+            "Cadastro da paciente nÃƒÂ£o encontrado.",
         },
         { status: 404 }
       );
@@ -133,7 +144,7 @@ export async function GET(
       )
       .eq(
         "professional",
-        admin.professional
+        professionalPaciente
       )
       .neq(
         "status",
@@ -173,7 +184,7 @@ export async function GET(
       )
       .eq(
         "professional",
-        admin.professional
+        professionalPaciente
       )
       .eq(
         "published_to_client",
@@ -346,3 +357,4 @@ export async function GET(
     );
   }
 }
+
