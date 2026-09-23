@@ -37,8 +37,8 @@ export default function InstallAppPrompt() {
       host === "www.magiaoriente.com.br";
 
     const dominioTerapia =
-      host === "adriafreitasterapeuta.com.br" ||
-      host === "www.adriafreitasterapeuta.com.br";
+      host === "adriafreitasterapias.com.br" ||
+      host === "www.adriafreitasterapias.com.br";
 
     const paginaClube =
       dominioClube && path === "/";
@@ -48,7 +48,9 @@ export default function InstallAppPrompt() {
       (
         path === "/" ||
         path === "/terapia" ||
-        path.startsWith("/terapia/acesso/")
+        path.startsWith("/terapia/acesso/") ||
+        path.startsWith("/terapia/admin") ||
+        path.startsWith("/profissional")
       );
 
     if (!paginaClube && !paginaTerapia) {
@@ -106,17 +108,11 @@ export default function InstallAppPrompt() {
 
     let timer: number | undefined;
 
-    // TERAPIA:
-    // O convite aparece em qualquer navegador.
-    // Se o navegador oferecer instalação nativa, o botão usa o evento.
-    // Se não oferecer, o mesmo botão mostra o caminho de instalação
-    // daquele navegador sem mandar a pessoa trocar de navegador.
     if (paginaTerapia) {
       timer = window.setTimeout(() => {
         setMostrar(true);
       }, 900);
     } else if (ios) {
-      // Mantém o comportamento do Clube no iPhone.
       timer = window.setTimeout(() => {
         setMostrar(true);
       }, 900);
@@ -237,7 +233,7 @@ export default function InstallAppPrompt() {
     );
   }
 
-  // CLUBE DO TARÔ: preservado.
+  // CLUBE DO TARÔ: comportamento preservado.
   return (
     <div className="fixed inset-0 z-[99999] flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm sm:items-center">
       <div className="w-full max-w-md overflow-hidden rounded-[30px] border border-[#d7b85c]/25 bg-[linear-gradient(160deg,#1b0d28_0%,#0f0918_58%,#09070f_100%)] p-6 text-white shadow-[0_30px_100px_rgba(0,0,0,.6)]">
@@ -291,4 +287,3 @@ export default function InstallAppPrompt() {
     </div>
   );
 }
-

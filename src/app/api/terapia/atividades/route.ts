@@ -257,6 +257,12 @@ export async function GET(
         .in(
           "quiz_id",
           ids
+        )
+        .order(
+          "started_at",
+          {
+            ascending: false,
+          }
         );
 
       if (error) {
@@ -268,14 +274,20 @@ export async function GET(
     }
 
     const porQuiz =
-      new Map(
-        respostas.map(
-          (item: any) => [
-            item.quiz_id,
-            item,
-          ]
+      new Map<string, any>();
+
+    for (const item of respostas) {
+      if (
+        !porQuiz.has(
+          item.quiz_id
         )
-      );
+      ) {
+        porQuiz.set(
+          item.quiz_id,
+          item
+        );
+      }
+    }
 
     const resultado =
       (quizzes || []).map(
@@ -423,6 +435,7 @@ export async function POST(
 
     const {
       data: atual,
+      error: atualError,
     } = await supabaseAdmin
       .from(
         "therapy_quiz_responses"
@@ -438,7 +451,18 @@ export async function POST(
         "client_id",
         paciente.clientId
       )
+      .order(
+        "started_at",
+        {
+          ascending: false,
+        }
+      )
+      .limit(1)
       .maybeSingle();
+
+    if (atualError) {
+      throw atualError;
+    }
 
     if (
       atual?.status ===
@@ -480,33 +504,67 @@ export async function POST(
           : null,
     };
 
-    const {
-      data: resposta,
-      error,
-    } = await supabaseAdmin
-      .from(
-        "therapy_quiz_responses"
-      )
-      .upsert(
-        payload,
-        {
-          onConflict:
-            "quiz_id,client_id",
-        }
-      )
-      .select(`
-        id,
-        quiz_id,
-        client_id,
-        answers,
-        status,
-        started_at,
-        submitted_at
-      `)
-      .single();
+    let resposta: any = null;
+    let salvarError: any = null;
 
-    if (error) {
-      throw error;
+    if (atual?.id) {
+      const resultado =
+        await supabaseAdmin
+          .from(
+            "therapy_quiz_responses"
+          )
+          .update(
+            payload
+          )
+          .eq(
+            "id",
+            atual.id
+          )
+          .select(`
+            id,
+            quiz_id,
+            client_id,
+            answers,
+            status,
+            started_at,
+            submitted_at
+          `)
+          .single();
+
+      resposta =
+        resultado.data;
+
+      salvarError =
+        resultado.error;
+    } else {
+      const resultado =
+        await supabaseAdmin
+          .from(
+            "therapy_quiz_responses"
+          )
+          .insert(
+            payload
+          )
+          .select(`
+            id,
+            quiz_id,
+            client_id,
+            answers,
+            status,
+            started_at,
+            submitted_at
+          `)
+          .single();
+
+      resposta =
+        resultado.data;
+
+      salvarError =
+        resultado.error;
+    }
+
+    if (salvarError) {
+      throw salvarError;
     }
 
     return NextResponse.json({

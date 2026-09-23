@@ -3,6 +3,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import Link from "next/link";
@@ -111,6 +112,9 @@ export default function ResponderAtividadePage() {
     string | null
   >(null);
 
+  const ultimaVersaoSalvaRef =
+    useRef<string>("{}");
+
   const concluida =
     quiz?.resposta
       ?.status ===
@@ -192,12 +196,20 @@ export default function ResponderAtividadePage() {
             ?.resposta
             ?.answers;
 
-        setRespostas(
+        const respostasIniciais =
           salvas &&
             typeof salvas ===
               "object"
             ? salvas
-            : {}
+            : {};
+
+        ultimaVersaoSalvaRef.current =
+          JSON.stringify(
+            respostasIniciais
+          );
+
+        setRespostas(
+          respostasIniciais
         );
       } catch (
         error
@@ -294,19 +306,26 @@ export default function ResponderAtividadePage() {
   async function salvar(
     action:
       | "save"
-      | "submit"
-  ) {
+      | "submit",
+    silencioso = false
+  ): Promise<boolean> {
     if (preview) {
-      setMensagem(
-        "Visualização do ADM: as respostas não são salvas."
-      );
-      return;
+      if (!silencioso) {
+        setMensagem(
+          "Visualização do ADM: as respostas não são salvas."
+        );
+      }
+
+      return false;
     }
 
     try {
-      setSalvando(true);
+      if (!silencioso) {
+        setSalvando(true);
+        setMensagem(null);
+      }
+
       setErro(null);
-      setMensagem(null);
 
       const response =
         await fetch(
@@ -330,56 +349,116 @@ export default function ResponderAtividadePage() {
           }
         );
 
-      const data =
-        await response.json();
+      const texto =
+        await response.text();
 
-      if (
-        !response.ok
-      ) {
+      let data: any = {};
+
+      try {
+        data = texto
+          ? JSON.parse(texto)
+          : {};
+      } catch {
+        throw new Error(
+          "O servidor retornou uma resposta inválida ao salvar a atividade."
+        );
+      }
+
+      if (!response.ok) {
         throw new Error(
           data?.error ||
             "Não foi possível salvar a atividade."
         );
       }
 
-      if (
-        action ===
-        "submit"
-      ) {
-        setMensagem(
-          "Atividade concluída e enviada."
+      ultimaVersaoSalvaRef.current =
+        JSON.stringify(
+          respostas
         );
 
-        setQuiz(
-          (atual) =>
-            atual
-              ? {
-                  ...atual,
-                  resposta:
-                    data.resposta,
-                }
-              : atual
-        );
-      } else {
+      setQuiz(
+        (atual) =>
+          atual
+            ? {
+                ...atual,
+                resposta:
+                  data.resposta ||
+                  atual.resposta,
+              }
+            : atual
+      );
+
+      if (!silencioso) {
         setMensagem(
-          "Suas respostas foram salvas. Você pode continuar depois."
+          action === "submit"
+            ? "Atividade concluída e enviada."
+            : "Suas respostas foram salvas. Você pode continuar depois."
         );
       }
-    } catch (
-      error
-    ) {
+
+      return true;
+    } catch (error) {
       setErro(
-        error instanceof
-          Error
+        error instanceof Error
           ? error.message
           : "Erro ao salvar atividade."
       );
+
+      return false;
     } finally {
-      setSalvando(
-        false
-      );
+      if (!silencioso) {
+        setSalvando(false);
+      }
     }
   }
+
+  useEffect(() => {
+    if (
+      carregando ||
+      preview ||
+      concluida ||
+      !token ||
+      !quizId
+    ) {
+      return;
+    }
+
+    const versaoAtual =
+      JSON.stringify(
+        respostas
+      );
+
+    if (
+      versaoAtual ===
+      ultimaVersaoSalvaRef.current
+    ) {
+      return;
+    }
+
+    const timer =
+      window.setTimeout(
+        () => {
+          void salvar(
+            "save",
+            true
+          );
+        },
+        1200
+      );
+
+    return () => {
+      window.clearTimeout(
+        timer
+      );
+    };
+  }, [
+    respostas,
+    carregando,
+    preview,
+    concluida,
+    token,
+    quizId,
+  ]);
 
   if (
     carregando
@@ -444,7 +523,7 @@ export default function ResponderAtividadePage() {
 
           {concluida && (
             <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-700">
-              ✓ Esta atividade já foi concluÃ­da.
+              ✓ Esta atividade já foi concluída.
             </div>
           )}
         </section>
@@ -777,15 +856,23 @@ export default function ResponderAtividadePage() {
                 salvando
               }
               onClick={async () => {
-                if (!preview) {
+                if (preview) {
+                  router.push(
+                    `/terapia/acesso/${token}/atividades`
+                  );
+                  return;
+                }
+
+                const salvou =
                   await salvar(
                     "save"
                   );
-                }
 
-                router.push(
-                  `/terapia/acesso/${token}/atividades`
-                );
+                if (salvou) {
+                  router.push(
+                    `/terapia/acesso/${token}/atividades`
+                  );
+                }
               }}
               className="sm:col-span-2 rounded-xl bg-[#F0E8DA] px-5 py-3 text-sm font-bold text-[#6C5B4C]"
             >
