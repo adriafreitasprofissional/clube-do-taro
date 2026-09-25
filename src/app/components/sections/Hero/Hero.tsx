@@ -38,13 +38,12 @@ export default function Hero() {
 
       <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row">
 
-  <button
-  type="button"
-  disabled
-  className="cursor-not-allowed rounded-full bg-[#D4AF37]/60 px-8 py-5 text-center font-semibold text-[#1B1235]/70"
->
-  VAGAS MENSAIS ESGOTADAS
-</button>
+  <a
+    href="#planos-mensais"
+    className="rounded-full bg-[#D4AF37] px-8 py-4 text-center font-semibold text-[#1B1235] shadow-lg transition hover:scale-105"
+  >
+    Quero Conhecer Clube Mensal
+  </a>
 
   <a
     href="#planos-anuais"
