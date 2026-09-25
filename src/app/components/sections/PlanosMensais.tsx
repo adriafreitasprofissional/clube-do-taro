@@ -142,13 +142,23 @@ async function comprar(plano: (typeof planos)[number]) {
           Cancelar
         </button>
 
-        <button
-  type="button"
-  disabled
-  className="mt-2 flex h-12 w-full cursor-not-allowed items-center justify-center rounded-full border border-white/15 bg-white/10 text-sm font-semibold uppercase tracking-[0.16em] text-white/55"
->
-  Vagas esgotadas
-</button>
+        {planoSelecionado.nome === "Bronze" ? (
+          <button
+            type="button"
+            disabled
+            className="mt-2 flex h-12 w-full cursor-not-allowed items-center justify-center rounded-full border border-white/15 bg-white/10 px-4 text-center text-sm font-semibold text-white/55"
+          >
+            Disponível somente no plano anual
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => comprar(planoSelecionado)}
+            className="mt-2 flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-700 via-fuchsia-600 to-purple-600 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-[1.02]"
+          >
+            Ir para pagamento
+          </button>
+        )}
       </div>
     </div>
   </div>
@@ -167,8 +177,8 @@ async function comprar(plano: (typeof planos)[number]) {
           </h2>
 
           <p className="mt-6 text-lg text-gray-300">
-            As vagas para novas assinaturas mensais estão esgotadas.
-            Confira abaixo as opções de assinatura anual disponíveis.
+            Prata, Ouro e Diamante estão disponíveis também na assinatura mensal.
+            O plano Bronze está disponível exclusivamente na modalidade anual.
           </p>
 
         </div>
