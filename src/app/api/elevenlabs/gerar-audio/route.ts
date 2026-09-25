@@ -31,6 +31,7 @@ export async function POST(req: Request) {
       nome,
       slug,
       dataInicio,
+      dataFim,
     } = await req.json();
 
     if (!texto || typeof texto !== "string") {
@@ -152,8 +153,22 @@ export async function POST(req: Request) {
       }
     );
 
-    const data = new Date(
-      `${dataInicio}T12:00:00`
+    const dataInicial = new Date(`${dataInicio}T12:00:00`);
+    const dataFinal = dataFim
+      ? new Date(`${dataFim}T12:00:00`)
+      : new Date(dataInicial);
+
+    if (!dataFim) {
+      dataFinal.setDate(dataFinal.getDate() + 6);
+    }
+
+    const diferencaDias = Math.round(
+      (dataFinal.getTime() - dataInicial.getTime()) / 86400000
+    );
+
+    const data = new Date(dataInicial);
+    data.setDate(
+      data.getDate() + Math.floor(diferencaDias / 2)
     );
 
     if (Number.isNaN(data.getTime())) {
@@ -235,33 +250,27 @@ export async function POST(req: Request) {
 const driveFileUrl =
   `https://drive.google.com/file/d/${arquivoDrive.id}/view`;
 
-// Verifica se este áudio já existia.
-// Se já estava publicado, permanece publicado.
-// Se for novo, nasce como rascunho.
-const {
-  data: assetExistente,
-  error: assetExistenteError,
-} = await supabaseAdmin
-  .from("club_directional_assets")
-  .select("ativo,released_at")
-  .eq("client_id", cliente.id)
-  .eq("ano", pasta.ano)
-  .eq("mes", pasta.mes)
-  .eq("semana", String(semana))
-  .eq("tipo", "audio_individual")
-  .maybeSingle();
+    // Ao gerar novamente, toda a semana volta para rascunho.
+    const { error: resetError } = await supabaseAdmin
+      .from("club_directional_assets")
+      .update({
+        ativo: false,
+        released_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("client_id", cliente.id)
+      .eq("ano", pasta.ano)
+      .eq("mes", pasta.mes)
+      .eq("semana", String(semana))
+      .in("tipo", ["pdf_individual", "audio_individual"]);
 
-if (assetExistenteError) {
-  throw assetExistenteError;
-}
+    if (resetError) {
+      throw resetError;
+    }
 
-const ativo =
-  assetExistente
-    ? Boolean(assetExistente.ativo)
-    : false;
-
-const releasedAt =
-  assetExistente?.released_at || null;
+// Todo áudio gerado fica como rascunho até a liberação manual.
+const ativo = false;
+const releasedAt = null;
 
 const {
   error: assetError,

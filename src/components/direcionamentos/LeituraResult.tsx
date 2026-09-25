@@ -120,9 +120,7 @@ useEffect(() => {
       const response = await fetch(
         `/api/direcionamentos/liberar?slug=${encodeURIComponent(
           props.slug
-        )}&dataInicio=${encodeURIComponent(
-          props.dataInicio
-        )}`,
+        )}&dataInicio=${encodeURIComponent(props.dataInicio)}&dataFim=${encodeURIComponent(props.dataFim)}`,
         {
           cache: "no-store",
           headers: {
@@ -159,7 +157,7 @@ useEffect(() => {
 
   useEffect(() => {
     void carregarStatusPublicacao();
-  }, [props.slug, props.dataInicio]);
+  }, [props.slug, props.dataInicio, props.dataFim]);
 
   async function liberarDirecionamento() {
     if (
@@ -301,10 +299,9 @@ async function gerarPdfESalvar() {
       props.slug
     );
 
-    formData.append(
-      "dataInicio",
-      props.dataInicio
-    );
+    formData.append("dataInicio", props.dataInicio);
+
+    formData.append("dataFim", props.dataFim);
 
     const response =
       await fetch(

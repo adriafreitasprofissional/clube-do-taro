@@ -32,9 +32,9 @@ export async function POST(req: Request) {
       formData.get("slug") || ""
     ).trim();
 
-    const dataInicio = String(
-      formData.get("dataInicio") || ""
-    ).trim();
+    const dataInicio = String(formData.get("dataInicio") || "").trim();
+
+    const dataFim = String(formData.get("dataFim") || "").trim();
 
     if (!arquivo || typeof arquivo === "string") {
       return NextResponse.json(
@@ -60,8 +60,22 @@ export async function POST(req: Request) {
       );
     }
 
-    const data = new Date(
-      `${dataInicio}T12:00:00`
+    const dataInicial = new Date(`${dataInicio}T12:00:00`);
+    const dataFinal = dataFim
+      ? new Date(`${dataFim}T12:00:00`)
+      : new Date(dataInicial);
+
+    if (!dataFim) {
+      dataFinal.setDate(dataFinal.getDate() + 6);
+    }
+
+    const diferencaDias = Math.round(
+      (dataFinal.getTime() - dataInicial.getTime()) / 86400000
+    );
+
+    const data = new Date(dataInicial);
+    data.setDate(
+      data.getDate() + Math.floor(diferencaDias / 2)
     );
 
     if (Number.isNaN(data.getTime())) {
@@ -144,31 +158,27 @@ export async function POST(req: Request) {
       );
     }
 
-    const {
-      data: assetExistente,
-      error: assetExistenteError,
-    } = await supabaseAdmin
+    // Ao gerar novamente, toda a semana volta para rascunho.
+    const { error: resetError } = await supabaseAdmin
       .from("club_directional_assets")
-      .select("ativo,released_at")
+      .update({
+        ativo: false,
+        released_at: null,
+        updated_at: new Date().toISOString(),
+      })
       .eq("client_id", cliente.id)
       .eq("ano", pasta.ano)
       .eq("mes", pasta.mes)
       .eq("semana", String(semana))
-      .eq("tipo", "pdf_individual")
-      .maybeSingle();
+      .in("tipo", ["pdf_individual", "audio_individual"]);
 
-    if (assetExistenteError) {
-      throw assetExistenteError;
+    if (resetError) {
+      throw resetError;
     }
 
-    const ativo =
-      assetExistente
-        ? Boolean(assetExistente.ativo)
-        : false;
-
-    const releasedAt =
-      assetExistente?.released_at ||
-      null;
+    // Todo PDF gerado fica como rascunho até a liberação manual.
+    const ativo = false;
+    const releasedAt = null;
 
     const agora =
       new Date().toISOString();

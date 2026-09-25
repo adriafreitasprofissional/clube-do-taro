@@ -39,10 +39,25 @@ function numeroSemanaDoMes(
 }
 
 function obterPeriodo(
-  dataInicio: string
+  dataInicio: string,
+  dataFim?: string
 ) {
-  const data = new Date(
-    `${dataInicio}T12:00:00`
+  const dataInicial = new Date(`${dataInicio}T12:00:00`);
+  const dataFinal = dataFim
+    ? new Date(`${dataFim}T12:00:00`)
+    : new Date(dataInicial);
+
+  if (!dataFim) {
+    dataFinal.setDate(dataFinal.getDate() + 6);
+  }
+
+  const diferencaDias = Math.round(
+    (dataFinal.getTime() - dataInicial.getTime()) / 86400000
+  );
+
+  const data = new Date(dataInicial);
+  data.setDate(
+    data.getDate() + Math.floor(diferencaDias / 2)
   );
 
   if (Number.isNaN(data.getTime())) {
@@ -287,8 +302,12 @@ export async function GET(
       );
     }
 
+    const dataFim = String(
+      request.nextUrl.searchParams.get("dataFim") || ""
+    ).trim();
+
     const periodo =
-      obterPeriodo(dataInicio);
+      obterPeriodo(dataInicio, dataFim);
 
     const assets =
       await buscarAssets({
@@ -393,8 +412,12 @@ export async function POST(
       );
     }
 
+    const dataFim = String(
+      body?.dataFim || ""
+    ).trim();
+
     const periodo =
-      obterPeriodo(dataInicio);
+      obterPeriodo(dataInicio, dataFim);
 
     const assets =
       await buscarAssets({
