@@ -219,7 +219,8 @@ export default function PainelProfissionalPage() {
             marginTop: "32px",
           }}
         >
-          <div style={{ ...card, cursor: "pointer" }} onClick={() => router.push("/profissional/consulentes")}>`r`n            <h2>Consulentes</h2>
+          <div style={{ ...card, cursor: "pointer" }} onClick={() => router.push("/profissional/consulentes")}>
+            <h2>Consulentes</h2>
 
             <p>
               Cadastre e organize seus consulentes.

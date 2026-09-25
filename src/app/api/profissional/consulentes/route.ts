@@ -91,7 +91,7 @@ export async function GET(req: Request) {
     const { data, error } = await supabaseAdmin
       .from("club_clients")
       .select(
-        "id,nome,nome_referencia,email,whatsapp,slug,status,plano,created_at"
+        "id,nome,nome_referencia,email,whatsapp,slug,status,plano"
       )
       .eq(
         "professional_id",
