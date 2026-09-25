@@ -168,6 +168,20 @@ export default function TerapiaAdminShell({
     perfil?.nome ||
     "Profissional";
 
+    const ehLilian =
+  window.location.hostname === "localhost" ||
+  String(
+    perfil?.nome_completo ||
+    perfil?.nome ||
+    ""
+  )
+    .toLowerCase()
+    .includes("lilian");
+
+const logoProfissional = ehLilian
+  ? "/imagens/lilian-logo.png"
+  : "/terapia-icon-512-v2.png";
+  
   return (
     <div className="min-h-screen bg-[#F8F4EC] text-[#4F5E4A]">
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[#DCCFB8] bg-[#F7F1E4]/95 px-4 py-4 backdrop-blur md:hidden">

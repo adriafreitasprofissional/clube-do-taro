@@ -37,8 +37,8 @@ export default function InstallAppPrompt() {
       host === "www.magiaoriente.com.br";
 
     const dominioTerapia =
-      host === "adriafreitasterapias.com.br" ||
-      host === "www.adriafreitasterapias.com.br";
+        host === "adriafreitasterapeuta.com.br" ||
+host === "www.adriafreitasterapeuta.com.br";
 
     const paginaClube =
       dominioClube && path === "/";

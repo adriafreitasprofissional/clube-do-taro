@@ -37,7 +37,7 @@ export default function TerapiaInicioPage() {
 
       if (error) {
         throw new Error(
-          "E-mail ou senha incorretos."
+          error.message || "Não foi possível entrar."
         );
       }
 
