@@ -137,7 +137,7 @@ const ehHomem =
 const saudacao = ehHomem ? "Bem-vindo" : "Bem-vinda";
 
 const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
-  const temConvites = plano === "prata" || plano === "ouro";
+  
   const ehDiamante = plano === "diamante";
 
   return (
@@ -327,23 +327,26 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
   </p>
 </Link>
 
-              {temConvites && (
-                <Link
-                  href={`/cliente/${slug}/convites`}
-                  className="rounded-2xl border border-purple-500/30 bg-[#19172f] p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/60"
-                >
-                  <p className="text-3xl">✨</p>
-                  <h3 className="mt-4 text-xl font-extrabold text-yellow-400">
-                    Convites Especiais
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 text-purple-100">
-                    Veja convites para encontros, lives e experiências do clube.
-                  </p>
-                  <p className="mt-5 text-sm font-bold text-yellow-300">
-                    Ver convites →
-                  </p>
-                </Link>
-              )}
+     <Link
+  href={`/cliente/${slug}/agenda-mentoria`}
+  className="rounded-2xl border border-yellow-400/50 bg-yellow-500/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-300"
+>
+  <p className="text-3xl">🗓️</p>
+
+  <h3 className="mt-4 text-xl font-extrabold text-yellow-300">
+    {ehDiamante ? "Agenda de Mentoria" : "Agenda do Clube"}
+  </h3>
+
+  <p className="mt-3 text-sm leading-6 text-purple-50">
+    {ehDiamante
+      ? "Veja os horários individuais e confirme sua participação nas mentorias em grupo."
+      : "Consulte seus convites especiais e confirme sua participação nos encontros do Clube."}
+  </p>
+
+  <p className="mt-5 text-sm font-bold text-yellow-200">
+    Abrir minha agenda →
+  </p>
+</Link>         
 
               
 {ehDiamante && (

@@ -34,14 +34,15 @@ async function clienteAutorizada(
 
   if (!cliente) return null;
 
-  if (
-    String(cliente.status || "").toLowerCase() !== "ativo" ||
-    String(cliente.plano || "").toLowerCase() !== "diamante"
-  ) {
+  if (String(cliente.status || "").toLowerCase() !== "ativo") {
     return null;
   }
 
   return cliente;
+}
+
+function ehDiamante(plano: string | null) {
+  return String(plano || "").toLowerCase() === "diamante";
 }
 
 export async function GET(
@@ -61,33 +62,63 @@ export async function GET(
   }
 
   try {
-    const { data: events, error: eventsError } =
+    const diamante = ehDiamante(cliente.plano);
+
+    const { data: participacoesCliente, error: participacoesError } =
       await supabaseAdmin
+        .from("club_mentoring_participants")
+        .select(
+          "id, event_id, client_id, response, attendance, responded_at"
+        )
+        .eq("client_id", cliente.id);
+
+    if (participacoesError) {
+      return NextResponse.json(
+        { error: participacoesError.message },
+        { status: 500 }
+      );
+    }
+
+    const participations = participacoesCliente || [];
+
+    let events: any[] = [];
+
+    if (diamante) {
+      const { data, error } = await supabaseAdmin
         .from("club_mentoring_events")
         .select("*")
         .neq("status", "cancelled")
         .order("starts_at", { ascending: true });
 
-    if (eventsError) {
-      return NextResponse.json(
-        { error: eventsError.message },
-        { status: 500 }
-      );
-    }
+      if (error) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 500 }
+        );
+      }
 
-    const eventIds = (events || []).map((item) => item.id);
-    let participations: any[] = [];
+      events = data || [];
+    } else {
+      const eventIds = participations.map((item) => item.event_id);
 
-    if (eventIds.length) {
-      const { data } = await supabaseAdmin
-        .from("club_mentoring_participants")
-        .select(
-          "id, event_id, client_id, response, attendance, responded_at"
-        )
-        .eq("client_id", cliente.id)
-        .in("event_id", eventIds);
+      if (eventIds.length) {
+        const { data, error } = await supabaseAdmin
+          .from("club_mentoring_events")
+          .select("*")
+          .in("id", eventIds)
+          .eq("event_type", "group")
+          .neq("status", "cancelled")
+          .order("starts_at", { ascending: true });
 
-      participations = data || [];
+        if (error) {
+          return NextResponse.json(
+            { error: error.message },
+            { status: 500 }
+          );
+        }
+
+        events = data || [];
+      }
     }
 
     return NextResponse.json({
@@ -98,8 +129,10 @@ export async function GET(
           cliente.nome ||
           "Mentorada",
         slug: cliente.slug,
+        plano: cliente.plano,
+        eh_diamante: diamante,
       },
-      events: events || [],
+      events,
       participations,
     });
   } catch (error: unknown) {
@@ -135,6 +168,7 @@ export async function POST(
     const body = await request.json();
     const action = String(body.action || "").trim();
     const eventId = String(body.event_id || "").trim();
+    const diamante = ehDiamante(cliente.plano);
 
     if (!eventId) {
       return NextResponse.json(
@@ -144,6 +178,16 @@ export async function POST(
     }
 
     if (action === "book_individual") {
+      if (!diamante) {
+        return NextResponse.json(
+          {
+            error:
+              "O agendamento de mentoria individual é exclusivo do Plano Diamante.",
+          },
+          { status: 403 }
+        );
+      }
+
       const { error } = await supabaseAdmin.rpc(
         "book_club_individual_mentoring",
         {
@@ -178,6 +222,33 @@ export async function POST(
           { error: "Resposta inválida." },
           { status: 400 }
         );
+      }
+
+      if (!diamante) {
+        const { data: convite, error: conviteError } =
+          await supabaseAdmin
+            .from("club_mentoring_participants")
+            .select("id")
+            .eq("event_id", eventId)
+            .eq("client_id", cliente.id)
+            .maybeSingle();
+
+        if (conviteError) {
+          return NextResponse.json(
+            { error: conviteError.message },
+            { status: 500 }
+          );
+        }
+
+        if (!convite) {
+          return NextResponse.json(
+            {
+              error:
+                "Você não possui convite para esta mentoria.",
+            },
+            { status: 403 }
+          );
+        }
       }
 
       const { error } = await supabaseAdmin.rpc(
