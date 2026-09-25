@@ -486,7 +486,8 @@ export default function GeradorDirecionamentoPage() {
   leitura={leitura}
   slug={cliente.slug || ""}
   dataInicio={dataInicio}
-  dataFim={dataFim}  
+  dataFim={dataFim}
+  onLiberado={trocarAssinante}  
 
           onTrocarOrixa={(v) =>
             gerar({

@@ -26,6 +26,7 @@ interface Props {
   onTrocarCartaCigana?: (value: string) => void;
   onTrocarCartaTaro?: (value: string) => void;
   onEditarCampo?: (path: string, value: EditValue) => void;
+  onLiberado?: () => void;
 }
 
 const box = "rounded-2xl border border-purple-500/20 bg-[#151221] p-6";
@@ -204,6 +205,7 @@ useEffect(() => {
           body: JSON.stringify({
             slug: props.slug,
             dataInicio: props.dataInicio,
+            dataFim: props.dataFim,
           }),
         }
       );
@@ -218,6 +220,8 @@ useEffect(() => {
       }
 
       await carregarStatusPublicacao();
+
+      props.onLiberado?.();
 
       alert(
         "Direcionamento liberado. PDF e áudio já podem aparecer para a assinante."
