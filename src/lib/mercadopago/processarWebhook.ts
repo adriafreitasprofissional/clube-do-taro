@@ -95,6 +95,33 @@ if (!userId) {
   return pagamento;
 }
 
+const hoje = new Date();
+const hojeTexto = hoje.toISOString().slice(0, 10);
+const diaVencimento = hoje.getDate();
+
+const ultimoDiaProximoMes = new Date(
+  hoje.getFullYear(),
+  hoje.getMonth() + 2,
+  0
+).getDate();
+
+const diaProximoVencimento = Math.min(
+  diaVencimento,
+  ultimoDiaProximoMes
+);
+
+const proximoVencimentoData = new Date(
+  hoje.getFullYear(),
+  hoje.getMonth() + 1,
+  diaProximoVencimento
+);
+
+const proximoVencimento = [
+  proximoVencimentoData.getFullYear(),
+  String(proximoVencimentoData.getMonth() + 1).padStart(2, "0"),
+  String(proximoVencimentoData.getDate()).padStart(2, "0"),
+].join("-");
+
 const { error: erroInsert } = await supabaseAdmin
   .from("club_clients")
   .insert({
@@ -105,7 +132,12 @@ const { error: erroInsert } = await supabaseAdmin
     status: "ativo",
     slug: email.split("@")[0],
    senha_inicial: senha,
-    data_inicio: new Date().toISOString().slice(0, 10),
+    data_inicio: hojeTexto,
+    tipo_assinatura: "mensal",
+    ultimo_pagamento: hojeTexto,
+    status_pagamento: "em_dia",
+    dia_vencimento: diaVencimento,
+    proximo_vencimento: proximoVencimento,
     role: "cliente",
     metodo_pagamento: "mercadopago",
     produto: "Clube do Tarô",
