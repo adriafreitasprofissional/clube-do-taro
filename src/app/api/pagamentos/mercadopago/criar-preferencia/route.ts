@@ -46,7 +46,6 @@ await supabaseAdmin
     valor,
   });
 const body = {
-  purpose: "wallet_purchase",
  
   items: [
     {
