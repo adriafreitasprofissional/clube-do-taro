@@ -46,6 +46,10 @@ await supabaseAdmin
     valor,
   });
 const body = {
+
+  payer: {
+    email: email,
+  },
  
   items: [
     {
