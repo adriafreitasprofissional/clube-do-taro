@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,16 +7,23 @@ import { supabase } from "@/lib/supabase";
 type Perfil = {
   id: string;
   nome: string;
-  email: string;
   plano: string;
-  role: string;
 };
 
 export default function PainelProfissionalPage() {
   const router = useRouter();
 
-  const [perfil, setPerfil] = useState<Perfil | null>(null);
-  const [carregando, setCarregando] = useState(true);
+  const [perfil, setPerfil] =
+    useState<Perfil | null>(null);
+
+  const [totalConsulentes, setTotalConsulentes] =
+    useState(0);
+
+  const [limiteConsulentes, setLimiteConsulentes] =
+    useState(10);
+
+  const [carregando, setCarregando] =
+    useState(true);
 
   useEffect(() => {
     async function carregar() {
@@ -24,23 +31,33 @@ export default function PainelProfissionalPage() {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session?.user?.email) {
+      if (!session?.access_token) {
         router.replace("/login");
         return;
       }
 
-      const { data } = await supabase
-        .from("club_clients")
-        .select("id,nome,email,plano,role")
-        .ilike("email", session.user.email)
-        .maybeSingle();
+      const response = await fetch(
+        "/api/profissional/consulentes",
+        {
+          cache: "no-store",
+          headers: {
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+        }
+      );
 
-      if (!data || data.role !== "profissional") {
+      const data = await response.json();
+
+      if (!response.ok) {
+        await supabase.auth.signOut();
         router.replace("/login");
         return;
       }
 
-      setPerfil(data);
+      setPerfil(data.profissional);
+      setTotalConsulentes(data.total || 0);
+      setLimiteConsulentes(data.limite || 10);
       setCarregando(false);
     }
 
@@ -51,6 +68,9 @@ export default function PainelProfissionalPage() {
     await supabase.auth.signOut();
     router.replace("/login");
   }
+
+  const limiteAtingido =
+    totalConsulentes >= limiteConsulentes;
 
   if (carregando) {
     return (
@@ -103,9 +123,92 @@ export default function PainelProfissionalPage() {
           Bem-vinda, {perfil?.nome}
         </h1>
 
-        <p style={{ color: "#CDBFD3" }}>
-          Plano Fundador
-        </p>
+        <div
+          style={{
+            marginTop: "18px",
+            maxWidth: "520px",
+            padding: "18px",
+            borderRadius: "16px",
+            border:
+              "1px solid rgba(216,182,91,.35)",
+            background:
+              "rgba(255,255,255,.05)",
+          }}
+        >
+          <strong
+            style={{
+              color: "#E7C96F",
+            }}
+          >
+            Plano Fundador
+          </strong>
+
+          <p
+            style={{
+              margin: "8px 0 0",
+              color: "#D7C8DD",
+            }}
+          >
+            Até {limiteConsulentes} consulentes ativos
+          </p>
+
+          <p
+            style={{
+              margin: "6px 0 0",
+              fontSize: "14px",
+              color: limiteAtingido
+                ? "#F0C56A"
+                : "#BCAAC4",
+            }}
+          >
+            {totalConsulentes} de{" "}
+            {limiteConsulentes} utilizados
+          </p>
+
+          {limiteAtingido && (
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "14px",
+                borderRadius: "14px",
+                background:
+                  "rgba(216,182,91,.10)",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}
+              >
+                Você atingiu o limite do seu plano.
+                Para cadastrar novos consulentes,
+                faça upgrade.
+              </p>
+
+              <button
+                type="button"
+                onClick={() =>
+                  alert(
+                    "Solicitação de upgrade. Em breve você poderá escolher um plano com mais consulentes."
+                  )
+                }
+                style={{
+                  marginTop: "12px",
+                  padding: "10px 18px",
+                  borderRadius: "10px",
+                  border: "none",
+                  background: "#D8B65B",
+                  color: "#160018",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                Fazer upgrade
+              </button>
+            </div>
+          )}
+        </div>
 
         <div
           style={{
@@ -113,27 +216,45 @@ export default function PainelProfissionalPage() {
             gridTemplateColumns:
               "repeat(auto-fit,minmax(220px,1fr))",
             gap: "18px",
-            marginTop: "40px",
+            marginTop: "32px",
           }}
         >
-          <div style={card}>
-            <h2>Consulentes</h2>
-            <p>Cadastre e organize seus consulentes.</p>
+          <div style={{ ...card, cursor: "pointer" }} onClick={() => router.push("/profissional/consulentes")}>`r`n            <h2>Consulentes</h2>
+
+            <p>
+              Cadastre e organize seus consulentes.
+            </p>
+
+            <strong
+              style={{
+                color: "#E7C96F",
+              }}
+            >
+              {totalConsulentes} /{" "}
+              {limiteConsulentes}
+            </strong>
           </div>
 
           <div style={card}>
             <h2>Direcionamentos</h2>
-            <p>Prepare os direcionamentos semanais.</p>
+            <p>
+              Prepare os direcionamentos semanais.
+            </p>
           </div>
 
           <div style={card}>
             <h2>Áudios e PDFs</h2>
-            <p>Organize as entregas de cada consulente.</p>
+            <p>
+              Organize as entregas de cada
+              consulente.
+            </p>
           </div>
 
           <div style={card}>
             <h2>Histórico</h2>
-            <p>Acompanhe o que já foi entregue.</p>
+            <p>
+              Acompanhe o que já foi entregue.
+            </p>
           </div>
         </div>
 
@@ -144,7 +265,8 @@ export default function PainelProfissionalPage() {
             marginTop: "40px",
             padding: "12px 22px",
             borderRadius: "12px",
-            border: "1px solid #D8B65B",
+            border:
+              "1px solid #D8B65B",
             background: "transparent",
             color: "#D8B65B",
             cursor: "pointer",
@@ -161,6 +283,8 @@ const card: React.CSSProperties = {
   minHeight: "150px",
   padding: "24px",
   borderRadius: "20px",
-  border: "1px solid rgba(216,182,91,.35)",
-  background: "rgba(255,255,255,.06)",
+  border:
+    "1px solid rgba(216,182,91,.35)",
+  background:
+    "rgba(255,255,255,.06)",
 };
