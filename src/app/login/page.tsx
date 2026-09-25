@@ -56,6 +56,11 @@ console.log(clienteData);
     return;
   }
 
+  if (clienteData.role === "profissional") {
+    window.location.href = "/profissional/painel";
+    return;
+  }
+
   if (clienteData.produto === "Cursos") {
     window.location.href = `/minha-area-alunos-externos?slug=${clienteData.slug}`;
     return;
