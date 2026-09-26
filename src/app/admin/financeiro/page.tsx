@@ -184,6 +184,7 @@ export default function FinanceiroAdminPage() {
   const [tituloRecado, setTituloRecado] = useState("Lembrete do Clube do Tarô");
   const [textoRecado, setTextoRecado] = useState("");
   const [enviandoRecado, setEnviandoRecado] = useState(false);
+  const [recadosEnviados, setRecadosEnviados] = useState<Record<string, string>>({});
 
   const [planoEdicao, setPlanoEdicao] = useState("bronze");
   const [tipoEdicao, setTipoEdicao] = useState("mensal");
@@ -235,6 +236,13 @@ export default function FinanceiroAdminPage() {
     }
 
     setClientes((data || []) as Cliente[]);
+    const ids = (data || []).map((cliente) => cliente.id);
+    const { data: recados } = ids.length ? await supabase.from("client_messages").select("client_id, created_at").in("client_id", ids).in("titulo", ["Lembrete do Clube do Tarô", "Sua cortesia no Clube do Tarô"]).eq("publicado", true).order("created_at", { ascending: false }) : { data: [] };
+    const ultimos: Record<string, string> = {};
+    for (const recado of recados || []) {
+      if (recado.client_id && !ultimos[recado.client_id]) ultimos[recado.client_id] = recado.created_at;
+    }
+    setRecadosEnviados(ultimos);
     setCarregando(false);
   }
 
@@ -359,6 +367,7 @@ export default function FinanceiroAdminPage() {
       return;
     }
 
+    setRecadosEnviados((atual) => ({ ...atual, [clienteRecado.id]: new Date().toISOString() }));
     alert("Recado enviado com sucesso.");
     setClienteRecado(null);
     setTextoRecado("");
@@ -847,13 +856,15 @@ if (carregando) {
                                       ✓ Registrar pagamento
                                     </button>
 
-                                    <button
+                                    <div className="flex flex-col items-center gap-1"><button
                                       type="button"
                                       onClick={() => abrirRecadoFinanceiro(cliente)}
-                                      className="rounded-lg bg-purple-600 px-3 py-2 text-xs font-bold transition hover:bg-purple-500"
+                                      className={`rounded-lg px-3 py-2 text-xs font-bold transition ${recadosEnviados[cliente.id] ? "bg-blue-600 hover:bg-blue-500" : "bg-purple-600 hover:bg-purple-500"}`}
                                     >
-                                      💬 Enviar recado
+                                      {recadosEnviados[cliente.id] ? "✓ Recado enviado" : "💬 Enviar recado"}
                                     </button>
+                                    {recadosEnviados[cliente.id] && (<span className="text-[10px] text-blue-300">Enviado em {new Date(recadosEnviados[cliente.id]).toLocaleDateString("pt-BR")}</span>)}
+                                  </div>
 
                                     <button
                                       type="button"
