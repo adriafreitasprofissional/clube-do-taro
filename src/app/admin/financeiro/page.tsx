@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 type Cliente = {
   id: string;
   nome: string | null;
+  nome_referencia?: string | null;
   slug: string;
   plano: string | null;
   tipo_assinatura: string | null;
@@ -179,6 +180,10 @@ export default function FinanceiroAdminPage() {
   const [busca, setBusca] = useState("");
   const [clienteEditando, setClienteEditando] = useState<Cliente | null>(null);
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
+  const [clienteRecado, setClienteRecado] = useState<Cliente | null>(null);
+  const [tituloRecado, setTituloRecado] = useState("Lembrete do Clube do Tarô");
+  const [textoRecado, setTextoRecado] = useState("");
+  const [enviandoRecado, setEnviandoRecado] = useState(false);
 
   const [planoEdicao, setPlanoEdicao] = useState("bronze");
   const [tipoEdicao, setTipoEdicao] = useState("mensal");
@@ -286,6 +291,78 @@ export default function FinanceiroAdminPage() {
     return { emDia, vence, atraso, anual, previsaoMensal };
   }, [clientes]);
 
+  function nomeParaRecado(cliente: Cliente) {
+    return cliente.nome_referencia?.trim() || cliente.slug?.trim() || cliente.nome?.split(" ")[0] || "assinante";
+  }
+
+  function criarMensagemFinanceira(cliente: Cliente) {
+    const nome = nomeParaRecado(cliente);
+
+    if (cliente.tipo_assinatura === "cortesia") {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      const fim = cliente.cortesia_fim ? new Date(cliente.cortesia_fim + "T12:00:00") : null;
+      if (fim && fim.getTime() < hoje.getTime()) {
+        return "Olá, " + nome + "! Sua cortesia no Clube do Tarô chegou ao fim. 💜\n\nO que achou da experiência no Clube?\n\nSe quiser continuar com a gente, preparei uma condição especial para você fazer parte do Clube.\n\nhttps://www.magiaoriente.com.br\n\nVou adorar ter você por aqui!";
+      }
+    }
+
+    const vencimento = cliente.proximo_vencimento ? new Date(cliente.proximo_vencimento + "T12:00:00") : null;
+    if (!vencimento) {
+      return "Oi, " + nome + "! Passando para deixar um recadinho sobre sua assinatura do Clube do Tarô. 💜\n\nSe precisar falar comigo sobre seu pagamento ou vencimento, estou por aqui.\n\nBeijos, Ádria.";
+    }
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const dias = Math.ceil((vencimento.getTime() - hoje.getTime()) / 86400000);
+    const data = formatarData(cliente.proximo_vencimento);
+
+    if (dias === 0) {
+      return "Oi, " + nome + "! Hoje é o vencimento da sua mensalidade do Clube do Tarô. 💜\n\nEste é só um lembrete para você não perder o acesso aos seus conteúdos.\n\nBeijos, Ádria.";
+    }
+
+    if (dias < 0) {
+      return "Oi, " + nome + "! Percebi que sua mensalidade do Clube do Tarô venceu em " + data + " e ainda consta como pendente. 💜\n\nQuando puder, dê uma conferidinha para manter seu acesso normalmente.\n\nSe já realizou o pagamento, pode desconsiderar este recadinho.\n\nBeijos, Ádria.";
+    }
+
+    return "Oi, " + nome + "! Passando para lembrar com carinho que a mensalidade do Clube do Tarô vence no dia " + data + ". 💜\n\nAssim você mantém seu acesso e continua aproveitando tudo do Clube.\n\nBeijos, Ádria.";
+  }
+
+  function abrirRecadoFinanceiro(cliente: Cliente) {
+    setClienteRecado(cliente);
+    setTituloRecado(
+      cliente.tipo_assinatura === "cortesia"
+        ? "Sua cortesia no Clube do Tarô"
+        : "Lembrete do Clube do Tarô"
+    );
+    setTextoRecado(criarMensagemFinanceira(cliente));
+  }
+
+  async function enviarRecadoFinanceiro() {
+    if (!clienteRecado || !textoRecado.trim()) return;
+
+    setEnviandoRecado(true);
+
+    const { error } = await supabase.from("client_messages").insert({
+      client_id: clienteRecado.id,
+      titulo: tituloRecado.trim() || "Lembrete do Clube do Tarô",
+      mensagem: textoRecado.trim(),
+      tipo_destino: "cliente",
+      publicado: true,
+    });
+
+    setEnviandoRecado(false);
+
+    if (error) {
+      console.error("Erro ao enviar recado financeiro:", error);
+      alert("Não foi possível enviar o recado.");
+      return;
+    }
+
+    alert("Recado enviado com sucesso.");
+    setClienteRecado(null);
+    setTextoRecado("");
+  }
   function abrirEdicao(cliente: Cliente) {
     setClienteEditando(cliente);
     setPlanoEdicao(cliente.plano || "bronze");
@@ -772,6 +849,14 @@ if (carregando) {
 
                                     <button
                                       type="button"
+                                      onClick={() => abrirRecadoFinanceiro(cliente)}
+                                      className="rounded-lg bg-purple-600 px-3 py-2 text-xs font-bold transition hover:bg-purple-500"
+                                    >
+                                      💬 Enviar recado
+                                    </button>
+
+                                    <button
+                                      type="button"
                                       onClick={() => abrirEdicao(cliente)}
                                       className="rounded-lg bg-slate-600 px-3 py-2 text-xs font-bold transition hover:bg-slate-500"
                                     >
@@ -877,6 +962,8 @@ if (carregando) {
           </section>
         </div>
       </div>
+
+      {clienteRecado && (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"><div className="w-full max-w-2xl rounded-2xl border border-purple-500/40 bg-[#19172f] p-6 shadow-2xl"><div className="flex items-start justify-between gap-4"><div><p className="text-sm text-purple-300">Recado financeiro</p><h2 className="mt-1 text-xl font-extrabold text-yellow-400">💬 Enviar recado</h2><p className="mt-2 text-xs text-purple-300">Para: {clienteRecado.nome_referencia || clienteRecado.nome || clienteRecado.slug}</p></div><button type="button" onClick={() => setClienteRecado(null)} className="rounded-lg px-3 py-1 text-xl text-purple-200 hover:bg-purple-800/40">×</button></div><div className="mt-6"><label className="mb-2 block text-sm font-semibold text-purple-100">Título</label><input value={tituloRecado} onChange={(e) => setTituloRecado(e.target.value)} className="w-full rounded-xl border border-purple-500/40 bg-[#100d24] px-4 py-3 text-white outline-none" /></div><div className="mt-4"><label className="mb-2 block text-sm font-semibold text-purple-100">Mensagem</label><textarea value={textoRecado} onChange={(e) => setTextoRecado(e.target.value)} rows={10} className="w-full resize-none rounded-xl border border-purple-500/40 bg-[#100d24] px-4 py-3 text-white outline-none" /><p className="mt-2 text-xs text-purple-300">Você pode alterar a mensagem antes de enviar.</p></div><div className="mt-6 flex justify-end gap-3"><button type="button" onClick={() => setClienteRecado(null)} disabled={enviandoRecado} className="rounded-xl border border-purple-500/40 px-5 py-3 text-sm font-bold text-purple-100 hover:bg-purple-800/30 disabled:opacity-50">Cancelar</button><button type="button" onClick={enviarRecadoFinanceiro} disabled={enviandoRecado || !textoRecado.trim()} className="rounded-xl bg-purple-600 px-5 py-3 text-sm font-extrabold text-white hover:bg-purple-500 disabled:opacity-50">{enviandoRecado ? "Enviando..." : "💬 Enviar recado"}</button></div></div></div>)}
 
       {clienteEditando && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
