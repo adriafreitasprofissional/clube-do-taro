@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function AssinantesPage() {
   const [nome, setNome] = useState("");
@@ -23,6 +24,17 @@ export default function AssinantesPage() {
     const response = await fetch("/api/admin/clientes");
     const data = await response.json();
     setClientes(data);
+  }
+
+  async function enviarEmailBoasVindas(id: string) {
+    const { data: sessao } = await supabase.auth.getSession();
+    const token = sessao.session?.access_token;
+    if (!token) { alert("Sessão expirada. Entre novamente."); return false; }
+    const response = await fetch("/api/admin/enviar-boas-vindas", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ id }) });
+    const data = await response.json();
+    if (!response.ok) { alert(data.error || "Não foi possível enviar o e-mail."); return false; }
+    alert(`E-mail de boas-vindas enviado para ${data.email}.`);
+    return true;
   }
 
   async function criarAssinante() {
@@ -59,7 +71,10 @@ export default function AssinantesPage() {
       return;
     }
 
-    alert("✨ Assinante criado com sucesso!");
+    const enviarAgora = confirm("Assinante cadastrada com sucesso!\n\nDeseja enviar agora o e-mail de boas-vindas com os dados de acesso?");
+    if (enviarAgora) {
+      await enviarEmailBoasVindas(data.userId);
+    }
 
     carregarClientes();
 
