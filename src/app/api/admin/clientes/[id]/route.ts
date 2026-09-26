@@ -21,8 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { data: cliente, error } = await supabaseAdmin.from("club_clients").select("*").eq("id", id).maybeSingle();
     if (error) throw error;
     if (!cliente) return NextResponse.json({ error: "Assinante não encontrada." }, { status: 404 });
-    const { senha_inicial, ...dadosSeguros } = cliente;
-    return NextResponse.json(dadosSeguros);
+    return NextResponse.json(cliente);
   } catch (error) {
     console.error("ERRO AO BUSCAR ASSINANTE:", error);
     return NextResponse.json({ error: "Não foi possível carregar a assinante." }, { status: 500 });

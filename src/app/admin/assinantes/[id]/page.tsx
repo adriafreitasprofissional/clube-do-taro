@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 type Cliente = {
-  id: string; nome: string; nome_referencia?: string | null; email?: string | null; whatsapp?: string | null; plano?: string | null; genero?: string | null; tipo_assinatura?: string | null; data_inicio?: string | null; slug?: string | null; status?: string | null; acesso_app?: boolean | null; direcionamento_exclusivo?: boolean | null;
+  id: string; nome: string; senha_inicial?: string | null; nome_referencia?: string | null; email?: string | null; whatsapp?: string | null; plano?: string | null; genero?: string | null; tipo_assinatura?: string | null; data_inicio?: string | null; slug?: string | null; status?: string | null; acesso_app?: boolean | null; direcionamento_exclusivo?: boolean | null;
 };
 
 export default function FichaAssinante({ params }: { params: Promise<{ id: string }> }) {
@@ -55,6 +55,7 @@ export default function FichaAssinante({ params }: { params: Promise<{ id: strin
           <p><strong>Nome de referência:</strong> {cliente.nome_referencia || "—"}</p>
           <p><strong>E-mail:</strong> {cliente.email || "—"}</p>
           <p><strong>WhatsApp:</strong> {cliente.whatsapp || "—"}</p>
+          <p><strong>Senha inicial:</strong> {cliente.senha_inicial || "—"}</p>
           <p><strong>Plano:</strong> {cliente.plano || "—"}</p>
           <p><strong>Tipo de assinatura:</strong> {cliente.tipo_assinatura || "—"}</p>
           <p><strong>Status:</strong> {cliente.status || "—"}</p>
