@@ -316,7 +316,7 @@ const toggleGrupo = (grupo: keyof typeof abertos) => {
                       paddingLeft: 18,
                     }}
                   >
-                    <strong>{cliente.nome}</strong>
+                    <a href={`/admin/assinantes/${cliente.id}`} style={{ color: "#fff", fontWeight: "bold", textDecoration: "none" }}>{cliente.nome}</a>
                     <br />
                     <span style={{ color: "#ccc" }}>
                       {cliente.status}
