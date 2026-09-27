@@ -8,10 +8,11 @@ export default function AssinantesPage() {
   const [nomeReferencia, setNomeReferencia] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
-  const [tipoAssinatura, setTipoAssinatura] = useState("assinatura");
+  const [tipoAssinatura, setTipoAssinatura] = useState("mensal");
   const [plano, setPlano] = useState("Bronze");
   const [senhaInicial, setSenhaInicial] = useState("");
   const [dataInicio, setDataInicio] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [genero, setGenero] = useState("Mulher");
 
   const [clientes, setClientes] = useState<any[]>([]);
@@ -59,6 +60,7 @@ export default function AssinantesPage() {
   plano,
   senhaInicial,
   dataInicio,
+  dataNascimento,
   genero,
 }),
       }
@@ -82,10 +84,11 @@ export default function AssinantesPage() {
     setNomeReferencia("");
     setEmail("");
     setWhatsapp("");
-    setTipoAssinatura("assinatura");
+    setTipoAssinatura("mensal");
     setPlano("Bronze");
     setSenhaInicial("");
     setDataInicio("");
+    setDataNascimento("");
     setGenero("Mulher");
   }
 
@@ -197,7 +200,8 @@ const toggleGrupo = (grupo: keyof typeof abertos) => {
   onChange={(e) => setTipoAssinatura(e.target.value)}
   style={campo}
 >
-  <option value="assinatura">Assinatura</option>
+  <option value="mensal">Mensal</option>
+  <option value="anual">Anual</option>
   <option value="cortesia">Cortesia</option>
 </select>
 
@@ -233,6 +237,15 @@ const toggleGrupo = (grupo: keyof typeof abertos) => {
             style={campo}
           />
 
+          <label style={{ display: "block", color: "#d8c6e8", marginBottom: "6px" }}>Data de nascimento</label>
+          <input
+            type="date"
+            value={dataNascimento}
+            onChange={(e) => setDataNascimento(e.target.value)}
+            style={campo}
+          />
+
+          <label style={{ display: "block", color: "#d8c6e8", marginBottom: "6px" }}>Data de início no Clube</label>
           <input
             type="date"
             value={dataInicio}

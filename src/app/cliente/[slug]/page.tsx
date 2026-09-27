@@ -349,26 +349,6 @@ const tituloGuardiao = ehHomem ? "Guardião" : "Guardiã";
 </Link>         
 
               
-{ehDiamante && (
-  <Link
-    href={`/cliente/${slug}/agenda-mentoria`}
-    className="rounded-2xl border border-yellow-400/50 bg-yellow-500/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-300"
-  >
-    <p className="text-3xl">🗓️</p>
-
-    <h3 className="mt-4 text-xl font-extrabold text-yellow-300">
-      Agendamento de Mentoria
-    </h3>
-
-    <p className="mt-3 text-sm leading-6 text-purple-50">
-      Veja os horários individuais e confirme as mentorias em grupo.
-    </p>
-
-    <p className="mt-5 text-sm font-bold text-yellow-200">
-      Abrir minha agenda →
-    </p>
-  </Link>
-)}
             </div>
          {recados.length > 0 && (
   <div className="mt-8 w-full max-w-4xl">

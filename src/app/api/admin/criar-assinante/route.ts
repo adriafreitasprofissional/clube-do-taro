@@ -14,11 +14,12 @@ export async function POST(req: Request) {
       nomeReferencia,
       email,
       whatsapp,
-      tipoAssinatura = "assinatura",
+      tipoAssinatura = "mensal",
       plano,
       genero = "",
       senhaInicial,
       dataInicio = new Date().toISOString().slice(0, 10),
+      dataNascimento = null,
     } = body;
 
     let senha = senhaInicial;
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     // 1. Gerar slug da assinante
-    const slug = nome
+    const slug = (nomeReferencia || nome)
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
@@ -64,6 +65,15 @@ export async function POST(req: Request) {
       );
     }
 
+    const valoresPlanos: Record<string, number> = { bronze: 29.30, prata: 49.91, ouro: 74.00, diamante: 164.00 };
+    const valorMensal = valoresPlanos[String(plano).toLowerCase()] ?? null;
+
+    const inicio = new Date(`${dataInicio}T12:00:00`);
+    const diaVencimento = inicio.getDate();
+    const ultimoDiaProximoMes = new Date(inicio.getFullYear(), inicio.getMonth() + 2, 0).getDate();
+    const proximoData = new Date(inicio.getFullYear(), inicio.getMonth() + 1, Math.min(diaVencimento, ultimoDiaProximoMes));
+    const proximoVencimento = [proximoData.getFullYear(), String(proximoData.getMonth() + 1).padStart(2, "0"), String(proximoData.getDate()).padStart(2, "0")].join("-");
+
     // 3. Criar assinante no banco
     const { data: cliente, error: clientError } =
       await supabaseAdmin
@@ -75,10 +85,16 @@ export async function POST(req: Request) {
           email,
           whatsapp,
           plano: plano.toLowerCase(),
+          valor_mensal: valorMensal,
           genero,
           tipo_assinatura: tipoAssinatura,
           senha_inicial: senha,
           data_inicio: dataInicio,
+          data_nascimento: dataNascimento || null,
+          dia_vencimento: tipoAssinatura === "mensal" ? diaVencimento : null,
+          proximo_vencimento: tipoAssinatura === "mensal" ? proximoVencimento : null,
+          ultimo_pagamento: tipoAssinatura === "mensal" ? dataInicio : null,
+          status_pagamento: tipoAssinatura === "mensal" ? "em_dia" : null,
           slug,
           status: "ativo",
           produto: "Clube do Tarô",

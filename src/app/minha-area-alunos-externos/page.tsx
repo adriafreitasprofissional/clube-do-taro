@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -14,35 +14,27 @@ useEffect(() => {
 }, []);
 
 async function carregarCursos() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!user?.email) return;
-
-  const { data: liberados, error } = await supabase
-    .from("course_students")
-    .select("course_id, slug")
-    .eq("email", user.email)
-    .eq("status", "ativo");
-
-  if (error || !liberados?.length) {
+  if (!session?.access_token) {
     setCursos([]);
     return;
   }
 
-  setSlugAluno(liberados[0].slug);
+  const resposta = await fetch("/api/meus-cursos", {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    cache: "no-store",
+  });
 
-  const ids = liberados.map((item) => item.course_id);
+  if (!resposta.ok) {
+    setCursos([]);
+    return;
+  }
 
-  const { data: cursosData } = await supabase
-    .from("courses")
-    .select("*")
-    .in("id", ids);
-
-  setCursos(cursosData || []);
+  const dados = await resposta.json();
+  setCursos(dados.cursos || []);
+  setSlugAluno(dados.slugAluno || "");
 }
-
 async function sair() {
   await supabase.auth.signOut();
   window.location.href = "/login";
@@ -118,7 +110,7 @@ const sairStyle: React.CSSProperties = {
             lineHeight: 1.1,
           }}
         >
-          Área do
+          Ãrea do
           <br />
           Aluno
         </h2>
@@ -131,17 +123,17 @@ const sairStyle: React.CSSProperties = {
     gap: 12,
   }}
 >
-  <button style={menuAtivo}>📚 Meus Cursos</button>
+  <button style={menuAtivo}>ðŸ“š Meus Cursos</button>
 
-  <button style={menuStyle}>⭐ Convites Especiais</button>
+  <button style={menuStyle}>â­ Convites Especiais</button>
 
-  <button style={menuStyle}>👥 Grupo Exclusivo</button>
+  <button style={menuStyle}>ðŸ‘¥ Grupo Exclusivo</button>
 
-  <button style={menuStyle}>💬 Suporte</button>
+  <button style={menuStyle}>ðŸ’¬ Suporte</button>
 
-  <button style={menuStyle}>💳 Pagamentos</button>
+  <button style={menuStyle}>ðŸ’³ Pagamentos</button>
 
-  <button style={menuStyle}>✨ Clube do Tarô</button>
+  <button style={menuStyle}>âœ¨ Clube do TarÃ´</button>
 </div>
 
         <div style={{ flex: 1 }} />
@@ -150,12 +142,12 @@ const sairStyle: React.CSSProperties = {
   style={sairStyle}
   onClick={sair}
 >
-  ↩ Sair da conta
+  â†© Sair da conta
 </button>
 
       </aside>
 
-      {/* CONTEÚDO */}
+      {/* CONTEÃšDO */}
 
       <section
         style={{
@@ -168,7 +160,7 @@ const sairStyle: React.CSSProperties = {
             marginBottom: 12,
           }}
         >
-          Seu espaço de estudos
+          Seu espaÃ§o de estudos
         </p>
 
         <h1
@@ -194,7 +186,7 @@ const sairStyle: React.CSSProperties = {
             color: "#fff",
           }}
         >
-          🎓 Aluno Convidado
+          ðŸŽ“ Aluno Convidado
         </div>
 
         <p
@@ -216,7 +208,7 @@ const sairStyle: React.CSSProperties = {
             lineHeight: 1.8,
           }}
         >
-          Aqui você encontra todos os cursos liberados para sua conta.
+          Aqui vocÃª encontra todos os cursos liberados para sua conta.
         </p>
 
         <div
@@ -233,7 +225,7 @@ const sairStyle: React.CSSProperties = {
               marginBottom: 30,
             }}
           >
-            📚 Meus Cursos
+            ðŸ“š Meus Cursos
           </h2>
 
          <div
@@ -283,7 +275,7 @@ const sairStyle: React.CSSProperties = {
             fontWeight: 700,
           }}
         >
-          Entrar no curso →
+          Entrar no curso â†’
         </div>
       </div>
     </Link>
