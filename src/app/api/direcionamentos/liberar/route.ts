@@ -92,7 +92,7 @@ function bearerToken(
     : "";
 }
 
-async function verificarAdmin(
+async function verificarOperador(
   request: NextRequest
 ) {
   const token =
@@ -129,7 +129,7 @@ async function verificarAdmin(
   if (
     adminError ||
     !admin ||
-    admin.role !== "admin"
+    !["admin", "profissional"].includes(admin.role)
   ) {
     return null;
   }
@@ -138,19 +138,24 @@ async function verificarAdmin(
 }
 
 async function buscarCliente(
-  slug: string
+  slug: string,
+  operador: { id: string; role: string }
 ) {
   const {
     data: cliente,
     error,
   } = await supabaseAdmin
     .from("club_clients")
-    .select("id,slug,nome")
+    .select("id,slug,nome,professional_id")
     .eq("slug", slug)
     .maybeSingle();
 
   if (error) {
     throw error;
+  }
+
+  if (operador.role === "profissional" && cliente?.professional_id !== operador.id) {
+    return null;
   }
 
   return cliente;
@@ -253,7 +258,7 @@ export async function GET(
 ) {
   try {
     const admin =
-      await verificarAdmin(request);
+      await verificarOperador(request);
 
     if (!admin) {
       return NextResponse.json(
@@ -290,7 +295,7 @@ export async function GET(
     }
 
     const cliente =
-      await buscarCliente(slug);
+      await buscarCliente(slug, admin);
 
     if (!cliente?.id) {
       return NextResponse.json(
@@ -364,7 +369,7 @@ export async function POST(
 ) {
   try {
     const admin =
-      await verificarAdmin(request);
+      await verificarOperador(request);
 
     if (!admin) {
       return NextResponse.json(
@@ -400,7 +405,7 @@ export async function POST(
     }
 
     const cliente =
-      await buscarCliente(slug);
+      await buscarCliente(slug, admin);
 
     if (!cliente?.id) {
       return NextResponse.json(

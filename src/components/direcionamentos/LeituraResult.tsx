@@ -41,6 +41,7 @@ export function LeituraResult(props: Props) {
   const [roteiroAudio, setRoteiroAudio] = useState("");
   const [gerandoRoteiro, setGerandoRoteiro] = useState(false);
   const [gerandoAudio, setGerandoAudio] = useState(false);
+  const [enviandoAudioManual, setEnviandoAudioManual] = useState(false);
 const [rascunhoAudioCarregado, setRascunhoAudioCarregado] = useState(false);
 const [salvandoPdf, setSalvandoPdf] = useState(false);
 const [statusPublicacao, setStatusPublicacao] =
@@ -247,9 +248,13 @@ useEffect(() => {
       setGerandoRoteiro(true);
       setRoteiroAudio("");
 
+      const { data: sessaoRoteiro } = await supabase.auth.getSession();
+      const tokenRoteiro = sessaoRoteiro.session?.access_token;
+      if (!tokenRoteiro) throw new Error("Sessão expirada. Entre novamente.");
+
       const response = await fetch("/api/gerador-direcionamento/roteiro-audio", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenRoteiro}` },
         body: JSON.stringify({
           leitura,
           parecerAdria,
@@ -307,11 +312,16 @@ async function gerarPdfESalvar() {
 
     formData.append("dataFim", props.dataFim);
 
+    const { data: sessaoPdf } = await supabase.auth.getSession();
+    const tokenPdf = sessaoPdf.session?.access_token;
+    if (!tokenPdf) throw new Error("Sessão expirada. Entre novamente.");
+
     const response =
       await fetch(
         "/api/direcionamentos/salvar-pdf",
         {
           method: "POST",
+          headers: { Authorization: `Bearer ${tokenPdf}` },
           body: formData,
         }
       );
@@ -376,10 +386,15 @@ async function gerarPdfESalvar() {
     try {
       setGerandoAudio(true);
 
+      const { data: sessaoAudio } = await supabase.auth.getSession();
+      const tokenAudio = sessaoAudio.session?.access_token;
+      if (!tokenAudio) throw new Error("Sessão expirada. Entre novamente.");
+
       const response = await fetch("/api/elevenlabs/gerar-audio", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenAudio}`,
         },
        body: JSON.stringify({
   texto: roteiroAudio,
@@ -432,6 +447,30 @@ link.download = nomeArquivo;
       );
     } finally {
       setGerandoAudio(false);
+    }
+  }
+
+  async function subirAudioManual(arquivo: File) {
+    try {
+      setEnviandoAudioManual(true);
+      const { data: sessao } = await supabase.auth.getSession();
+      const token = sessao.session?.access_token;
+      if (!token) throw new Error("Sessão expirada. Entre novamente.");
+      const formData = new FormData();
+      formData.append("arquivo", arquivo);
+      formData.append("slug", props.slug);
+      formData.append("dataInicio", props.dataInicio);
+      formData.append("dataFim", props.dataFim || "");
+      const response = await fetch("/api/direcionamentos/upload-audio", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Não foi possível enviar o áudio.");
+      await carregarStatusPublicacao();
+      alert("Áudio enviado e salvo com sucesso.");
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Erro ao enviar áudio.");
+    } finally {
+      setEnviandoAudioManual(false);
     }
   }
 
@@ -508,7 +547,8 @@ link.download = nomeArquivo;
       <div className="grid gap-4 md:grid-cols-2">
         <Message title={leitura.cartaCigana} value={leitura.significadoCartaCigana} onSave={edit("significadoCartaCigana")} />
         <Message title={leitura.cartaTaro} value={leitura.significadoTaro} onSave={edit("significadoTaro")} />
-      </div>
+
+</div>
 
       <section className={box}>
         <h3 className="text-xl font-bold text-yellow-300">Numerologia — Semana {leitura.numerologiaDetalhe.numeroSemana} · Vibração do Nome {leitura.numerologiaDetalhe.numeroNome}</h3>
@@ -524,7 +564,8 @@ link.download = nomeArquivo;
         <Message title={`Foco — ${leitura.foco}`} value={leitura.mensagemFoco} onSave={edit("mensagemFoco")} />
         <Message title="Espiritual" value={leitura.mensagemEspiritual} onSave={edit("mensagemEspiritual")} />
         <Message title="Saúde" value={leitura.mensagemSaude} onSave={edit("mensagemSaude")} />
-      </div>
+
+</div>
 
       <section className={box}>
         <h3 className="text-xl font-bold text-yellow-300">Direcionamento prático</h3>
@@ -607,6 +648,11 @@ link.download = nomeArquivo;
       ? "GERANDO ÁUDIO..."
       : "GERAR ÁUDIO — ELEVENLABS"}
   </button>
+
+  <label className={`cursor-pointer rounded-2xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-4 text-center font-bold text-yellow-200 transition hover:bg-yellow-500/20 ${enviandoAudioManual ? "pointer-events-none opacity-40" : ""}`}>
+    {enviandoAudioManual ? "ENVIANDO ÁUDIO..." : "SUBIR ÁUDIO MANUAL"}
+    <input type="file" accept=".mp3,audio/mpeg" className="hidden" disabled={enviandoAudioManual} onChange={(e) => { const arquivo = e.target.files?.[0]; if (arquivo) void subirAudioManual(arquivo); e.currentTarget.value = ""; }} />
+  </label>
   
 </div>
      

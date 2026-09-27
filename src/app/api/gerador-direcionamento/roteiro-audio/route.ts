@@ -5,6 +5,8 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function bearerToken(req: Request) { const auth = req.headers.get("authorization") || ""; return auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : ""; }
+
 function chamarOpenAI(apiKey: string, prompt: string) {
   return new Promise<string>((resolve, reject) => {
     const body = Buffer.from(
@@ -100,6 +102,12 @@ function chamarOpenAI(apiKey: string, prompt: string) {
 
 export async function POST(req: Request) {
   try {
+    const token = bearerToken(req);
+    if (!token) return NextResponse.json({ erro: "Não autorizado." }, { status: 401 });
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !authData.user?.email) return NextResponse.json({ erro: "Não autorizado." }, { status: 401 });
+    const { data: operador, error: operadorError } = await supabaseAdmin.from("club_clients").select("id,email,role,status").eq("email", authData.user.email).maybeSingle();
+    if (operadorError || !operador || !["admin", "profissional"].includes(operador.role)) return NextResponse.json({ erro: "Acesso negado." }, { status: 403 });
     const {
       leitura,
       parecerAdria = "",
@@ -112,6 +120,12 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    if (!slug) return NextResponse.json({ erro: "Consulente não informado." }, { status: 400 });
+    const { data: clienteAutorizado, error: clienteAutorizadoError } = await supabaseAdmin.from("club_clients").select("id,slug,professional_id").eq("slug", slug).maybeSingle();
+    if (clienteAutorizadoError) throw clienteAutorizadoError;
+    if (!clienteAutorizado?.id) return NextResponse.json({ erro: "Consulente não encontrado." }, { status: 404 });
+    if (operador.role === "profissional" && clienteAutorizado.professional_id !== operador.id) return NextResponse.json({ erro: "Acesso negado a este consulente." }, { status: 403 });
 
     const apiKey = process.env.OPENAI_API_KEY;
 

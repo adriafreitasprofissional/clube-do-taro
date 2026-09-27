@@ -10,6 +10,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
+function bearerToken(req: Request) { const auth = req.headers.get("authorization") || ""; return auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : ""; }
+
 function numeroSemanaDoMes(data: Date) {
   const primeiroDia = new Date(
     data.getFullYear(),
@@ -27,6 +29,13 @@ function numeroSemanaDoMes(data: Date) {
 
 export async function POST(req: Request) {
   try {
+    const token = bearerToken(req);
+    if (!token) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !authData.user?.email) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+    const { data: operador, error: operadorError } = await supabaseAdmin.from("club_clients").select("id,email,role,status").eq("email", authData.user.email).maybeSingle();
+    if (operadorError || !operador || !["admin", "profissional"].includes(operador.role)) return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
+
     const {
       texto,
       nome,
@@ -64,6 +73,11 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const { data: clienteAutorizado, error: clienteAutorizadoError } = await supabaseAdmin.from("club_clients").select("id,slug,professional_id").eq("slug", slug).maybeSingle();
+    if (clienteAutorizadoError) throw clienteAutorizadoError;
+    if (!clienteAutorizado?.id) return NextResponse.json({ error: "Consulente não encontrado." }, { status: 404 });
+    if (operador.role === "profissional" && clienteAutorizado.professional_id !== operador.id) return NextResponse.json({ error: "Acesso negado a este consulente." }, { status: 403 });
 
     const apiKey =
       process.env.ELEVENLABS_API_KEY;
