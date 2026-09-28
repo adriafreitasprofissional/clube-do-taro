@@ -60,7 +60,7 @@ export default function FichaAssinante({ params }: { params: Promise<{ id: strin
           <p><strong>Tipo de assinatura:</strong> {cliente.tipo_assinatura || "—"}</p>
           <p><strong>Status:</strong> {cliente.status || "—"}</p>
           <p><strong>Início:</strong> {cliente.data_inicio ? new Date(cliente.data_inicio + "T00:00:00").toLocaleDateString("pt-BR") : "—"}</p>
-          <button onClick={enviarAcesso} disabled={enviando} style={{ marginTop: 16, padding: "12px 18px", border: 0, borderRadius: 10, background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: enviando ? "wait" : "pointer" }}>{enviando ? "Enviando..." : "Enviar/Reenviar acesso"}</button>
+          <button onClick={enviarAcesso} disabled={enviando} style={{ marginTop: 16, padding: "12px 18px", border: 0, borderRadius: 10, background: "#7c3aed", color: "#fff", fontWeight: 700, cursor: enviando ? "wait" : "pointer" }}>{enviando ? "Enviando..." : "Enviar/Reenviar acesso"}</button>{cliente.slug && <a href={`/cliente/${cliente.slug}`} target="_blank" rel="noreferrer" style={{ marginTop: 16, marginLeft: 10, display: "inline-block", padding: "12px 18px", borderRadius: 10, background: "#d4af37", color: "#21112f", fontWeight: 700, textDecoration: "none" }}>👁 Ver como consulente</a>}
         </section>
       </div>
     </main>
