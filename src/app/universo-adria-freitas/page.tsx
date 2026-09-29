@@ -53,14 +53,14 @@ const livros = [
   {
     titulo: "No Portal da Escuridão",
     subtitulo: "Romance espiritual",
-    imagem: "/livros/no-portal-da-escuridao.jpg",
+    imagem: "/livros/no-portal-da-escuridao.png",
     uiclap: "https://loja.uiclap.com/titulo/ua102723/",
     amazon: null,
   },
   {
     titulo: "Seu Lado Sombrio",
     subtitulo: "Ação e Reação",
-    imagem: "/livros/seu-lado-sombrio.jpg",
+    imagem: "/livros/seu-lado-sombrio.png",
     uiclap: "https://loja.uiclap.com/titulo/ua74195/",
     amazon:
       "https://www.amazon.com/SEU-LADO-SOMBRIO-REA%C3%87%C3%83O-Portuguese/dp/6501066875?ref_=ast_author_dp_rw&th=1&psc=1&dib=eyJ2IjoiMSJ9.hMgJ02IRgXHZ6X_oKkLZ8M_06BjM-Brki3gAWmmLd1XmO6VvO29kN4lGaPjK53J_i_XAM5pPiuuFwD0Vlm4RrEky7-oj2qiRXwFIuhU0Ulstgy26GXGNXPxowanBuT4htVzvs6NG47Zqkt9-yX52AD_VO1a6iHcSNGDeHsYhNXw.x9EP0klNIPd2R9UJxYzXhAHzsPfeOC8dF-7Df1mi4Ls&dib_tag=AUTHOR",
