@@ -462,8 +462,10 @@ link.download = nomeArquivo;
       formData.append("dataInicio", props.dataInicio);
       formData.append("dataFim", props.dataFim || "");
       const response = await fetch("/api/direcionamentos/upload-audio", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Não foi possível enviar o áudio.");
+      const textoResposta = await response.text();
+      let data: any = null;
+      try { data = JSON.parse(textoResposta); } catch {}
+      if (!response.ok) throw new Error(data?.error || textoResposta || `Erro HTTP ${response.status}`);
       await carregarStatusPublicacao();
       alert("Áudio enviado e salvo com sucesso.");
     } catch (error) {
