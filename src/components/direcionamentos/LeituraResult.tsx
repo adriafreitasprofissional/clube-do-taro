@@ -450,27 +450,144 @@ link.download = nomeArquivo;
     }
   }
 
-  async function subirAudioManual(arquivo: File) {
+    async function subirAudioManual(arquivo: File) {
     try {
       setEnviandoAudioManual(true);
+
       const { data: sessao } = await supabase.auth.getSession();
       const token = sessao.session?.access_token;
-      if (!token) throw new Error("Sessão expirada. Entre novamente.");
-      const formData = new FormData();
-      formData.append("arquivo", arquivo);
-      formData.append("slug", props.slug);
-      formData.append("dataInicio", props.dataInicio);
-      formData.append("dataFim", props.dataFim || "");
-      const response = await fetch("/api/direcionamentos/upload-audio", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
-      const textoResposta = await response.text();
-      let data: any = null;
-      try { data = JSON.parse(textoResposta); } catch {}
-      if (!response.ok) throw new Error(data?.error || textoResposta || `Erro HTTP ${response.status}`);
+
+      if (!token) {
+        throw new Error("Sessão expirada. Entre novamente.");
+      }
+
+      if (
+        arquivo.type &&
+        arquivo.type !== "audio/mpeg" &&
+        !arquivo.name.toLowerCase().endsWith(".mp3")
+      ) {
+        throw new Error("Envie um arquivo MP3.");
+      }
+
+      // 1. O servidor prepara uma sessão de upload no Google Drive.
+      // O MP3 ainda não é enviado para o nosso servidor.
+      const respostaInicio = await fetch(
+        "/api/direcionamentos/upload-audio-iniciar",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            slug: props.slug,
+            dataInicio: props.dataInicio,
+            dataFim: props.dataFim || "",
+            tamanho: arquivo.size,
+          }),
+        }
+      );
+
+      const textoInicio = await respostaInicio.text();
+      let inicio: any = null;
+
+      try {
+        inicio = JSON.parse(textoInicio);
+      } catch {}
+
+      if (!respostaInicio.ok) {
+        throw new Error(
+          inicio?.error ||
+            textoInicio ||
+            `Erro HTTP ${respostaInicio.status}`
+        );
+      }
+
+      if (!inicio?.uploadUrl) {
+        throw new Error(
+          "Não foi possível preparar o envio para o Google Drive."
+        );
+      }
+
+      // 2. O navegador envia o MP3 diretamente ao Google Drive.
+      // Assim o arquivo grande não passa pela função da hospedagem.
+      const respostaUpload = await fetch(inicio.uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "audio/mpeg",
+          "Content-Length": String(arquivo.size),
+        },
+        body: arquivo,
+      });
+
+      const textoUpload = await respostaUpload.text();
+      let upload: any = null;
+
+      try {
+        upload = textoUpload ? JSON.parse(textoUpload) : null;
+      } catch {}
+
+      if (!respostaUpload.ok) {
+        throw new Error(
+          upload?.error?.message ||
+            textoUpload ||
+            `Google Drive recusou o áudio: HTTP ${respostaUpload.status}`
+        );
+      }
+
+      const fileId = upload?.id || inicio.fileIdExistente;
+
+      if (!fileId) {
+        throw new Error(
+          "O áudio chegou ao Google Drive, mas o ID do arquivo não foi retornado."
+        );
+      }
+
+      // 3. Depois do Drive confirmar, registramos o novo áudio no Clube.
+      const respostaFinal = await fetch(
+        "/api/direcionamentos/upload-audio-finalizar",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            clientId: inicio.clientId,
+            slug: inicio.slug,
+            ano: inicio.ano,
+            mes: inicio.mes,
+            semana: inicio.semana,
+            folderId: inicio.folderId,
+            fileId,
+          }),
+        }
+      );
+
+      const textoFinal = await respostaFinal.text();
+      let finalizacao: any = null;
+
+      try {
+        finalizacao = JSON.parse(textoFinal);
+      } catch {}
+
+      if (!respostaFinal.ok) {
+        throw new Error(
+          finalizacao?.error ||
+            textoFinal ||
+            `Erro HTTP ${respostaFinal.status}`
+        );
+      }
+
       await carregarStatusPublicacao();
       alert("Áudio enviado e salvo com sucesso.");
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Erro ao enviar áudio.");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Erro ao enviar áudio."
+      );
     } finally {
       setEnviandoAudioManual(false);
     }

@@ -17,8 +17,31 @@ const MESES = [
   "NOVEMBRO",
   "DEZEMBRO",
 ];
+export function getGoogleDriveAuth() {
+  const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
+  const redirectUri =
+    process.env.GOOGLE_DRIVE_REDIRECT_URI ||
+    "http://localhost:3000/api/google-drive/callback";
 
-function getDriveClient() {
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error("Credenciais do Google Drive nao configuradas.");
+  }
+
+  const oauth2Client = new google.auth.OAuth2(
+    clientId,
+    clientSecret,
+    redirectUri
+  );
+
+  oauth2Client.setCredentials({
+    refresh_token: refreshToken,
+  });
+
+  return oauth2Client;
+}
+export function getDriveClient() {
   const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
   const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
