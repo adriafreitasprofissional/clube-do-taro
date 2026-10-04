@@ -605,7 +605,7 @@ link.download = nomeArquivo;
       <section className={box}>
         <div className="text-center">
           <p className="text-xs text-purple-300">Associada #{leitura.idAssociado}</p>
-          <h2 className="mt-1 text-3xl font-bold text-yellow-400">{leitura.nome}</h2>
+          <h2 className="mt-1 text-3xl font-bold text-yellow-400">{props.slug}</h2>
           <p className="mt-1 text-sm text-purple-200">Semana: {leitura.semana}</p>
         </div>
 
