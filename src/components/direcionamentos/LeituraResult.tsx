@@ -19,8 +19,10 @@ type StatusPublicacao = {
 interface Props {
   leitura: Leitura;
   slug: string;
+  nomeReferencia: string;
   dataInicio: string;
   dataFim: string;
+
   onTrocarOrixa?: (value: string) => void;
   onTrocarFoco?: (value: string) => void;
   onTrocarCartaCigana?: (value: string) => void;
@@ -58,7 +60,7 @@ const [liberando, setLiberando] =
 
 const chaveRascunhoAudio =
 
-  `clube-taro-audio:${props.slug}:${props.dataInicio}:${props.dataFim}`;
+  `clube-taro-audio:${props.nomeReferencia}:${props.dataInicio}:${props.dataFim}`;
 
   useEffect(() => {
   setRascunhoAudioCarregado(false);
@@ -605,7 +607,7 @@ link.download = nomeArquivo;
       <section className={box}>
         <div className="text-center">
           <p className="text-xs text-purple-300">Associada #{leitura.idAssociado}</p>
-          <h2 className="mt-1 text-3xl font-bold text-yellow-400">{props.slug}</h2>
+         <h2 className="mt-1 text-3xl font-bold text-yellow-400">{props.nomeReferencia}</h2>
           <p className="mt-1 text-sm text-purple-200">Semana: {leitura.semana}</p>
         </div>
 

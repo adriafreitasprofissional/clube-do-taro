@@ -16,6 +16,7 @@ interface Client {
   email: string;
   plano: string;
   status: string;
+  nome_referencia?: string | null;
 }
 
 interface UltimaSelecao {
@@ -480,44 +481,46 @@ export default function GeradorDirecionamentoPage() {
           </div>
         )}
       </section>
+    {leitura && cliente && (
+  <LeituraResult
+    leitura={leitura}
+    slug={cliente.slug || ""}
+    nomeReferencia={cliente.nome_referencia || ""}
+    dataInicio={dataInicio}
+    dataFim={dataFim}
+    onLiberado={trocarAssinante}
+    onTrocarOrixa={(v) =>
+      gerar({
+        ...contexto(),
+        orixaOverride: v,
+      })
+    }
+    onTrocarFoco={(v) =>
+      gerar({
+        ...contexto(),
+        focoOverride: v,
+      })
+    }
+    onTrocarCartaCigana={(v) =>
+      gerar({
+        ...contexto(),
+        cartaCiganaOverride: v,
+      })
+    }
+    onTrocarCartaTaro={(v) =>
+      gerar({
+        ...contexto(),
+        cartaTaroOverride: v,
+      })
+    }
+    onEditarCampo={editarCampo}
+  />
+)}
+      
 
-      {leitura && cliente && (
-        <LeituraResult
-  leitura={leitura}
-  slug={cliente.slug || ""}
-  dataInicio={dataInicio}
-  dataFim={dataFim}
-  onLiberado={trocarAssinante}  
 
-          onTrocarOrixa={(v) =>
-            gerar({
-              ...contexto(),
-              orixaOverride: v,
-            })
-          }
-          onTrocarFoco={(v) =>
-            gerar({
-              ...contexto(),
-              focoOverride: v,
-            })
-          }
-          onTrocarCartaCigana={(v) =>
-            gerar({
-              ...contexto(),
-              cartaCiganaOverride: v,
-            })
-          }
-          onTrocarCartaTaro={(v) =>
-            gerar({
-              ...contexto(),
-              cartaTaroOverride: v,
-            })
-          }
-          onEditarCampo={
-            editarCampo
-          }
-        />
-      )}
+
+
     </main>
   );
 }
