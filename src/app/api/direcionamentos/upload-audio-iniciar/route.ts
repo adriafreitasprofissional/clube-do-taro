@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import {
   garantirPastaAssinante,
   getGoogleDriveAuth,
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
     const { data: cliente, error: clienteError } = await supabaseAdmin
       .from("club_clients")
       .select("id,slug,professional_id")
-      .eq("slug", slug)
+      .ilike("slug", slug)
       .maybeSingle();
 
     if (clienteError) throw clienteError;

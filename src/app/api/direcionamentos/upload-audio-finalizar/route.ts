@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
@@ -53,8 +53,8 @@ export async function POST(req: Request) {
 
     const clientId = String(body?.clientId || "").trim();
     const slug = String(body?.slug || "").trim();
-    const ano = Number(body?.ano);
-    const mes = Number(body?.mes);
+    const ano = String(body?.ano || "").trim();
+    const mes = String(body?.mes || "").trim();
     const semana = String(body?.semana || "").trim();
     const folderId = String(body?.folderId || "").trim();
     const fileId = String(body?.fileId || "").trim();
@@ -62,8 +62,8 @@ export async function POST(req: Request) {
     if (
       !clientId ||
       !slug ||
-      !Number.isFinite(ano) ||
-      !Number.isFinite(mes) ||
+      !ano ||
+      !mes ||
       !semana ||
       !folderId ||
       !fileId
@@ -130,7 +130,7 @@ export async function POST(req: Request) {
           mes,
           semana,
           tipo: "audio_individual",
-          titulo: semana + "ª Semana — Áudio",
+          titulo: semana + "Âª Semana â€” Ãudio",
           drive_file_id: fileId,
           drive_file_url: driveFileUrl,
           drive_folder_id: folderId,
