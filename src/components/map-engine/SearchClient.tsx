@@ -8,6 +8,7 @@ interface Client {
   id: string;
   slug?: string;
   nome: string;
+  nome_referencia?: string | null;
   email: string;
   plano: string;
   status: string;
@@ -86,19 +87,20 @@ export function SearchClient({
       const { data } = await supabase
         .from("club_clients")
         .select(`
-          id,
-          slug,
-          nome,
-          email,
-          plano,
-          status,
-          whatsapp,
-          data_nascimento,
-          hora_nascimento,
-          cidade_nascimento,
-          estado_nascimento,
-          pais_nascimento
-        `)
+  id,
+  slug,
+  nome,
+  nome_referencia,
+  email,
+  plano,
+  status,
+  whatsapp,
+  data_nascimento,
+  hora_nascimento,
+  cidade_nascimento,
+  estado_nascimento,
+  pais_nascimento
+`)
         .eq("status", "ativo")
         .or(
           `nome.ilike.%${search}%,email.ilike.%${search}%,whatsapp.ilike.%${search}%`

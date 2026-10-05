@@ -1,0 +1,393 @@
+[1mdiff --git a/src/app/admin/agenda/mentorias/page.tsx b/src/app/admin/agenda/mentorias/page.tsx[m
+[1mindex 735287d..0a70481 100644[m
+[1m--- a/src/app/admin/agenda/mentorias/page.tsx[m
+[1m+++ b/src/app/admin/agenda/mentorias/page.tsx[m
+[36m@@ -13,9 +13,9 @@[m [mtype Evento = {[m
+   status: "open" | "booked" | "completed" | "cancelled";[m
+ };[m
+ [m
+[31m-const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];[m
+[32m+[m[32mconst DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "SÃ¡b"];[m
+ const MESES = [[m
+[31m-  "Janeiro","Fevereiro","Março","Abril","Maio","Junho",[m
+[32m+[m[32m  "Janeiro","Fevereiro","MarÃ§o","Abril","Maio","Junho",[m
+   "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro",[m
+ ];[m
+ [m
+[36m@@ -56,7 +56,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+     const { data: { session } } = await supabase.auth.getSession();[m
+ [m
+     if (!session?.access_token) {[m
+[31m-      throw new Error("Sessão administrativa expirada.");[m
+[32m+[m[32m      throw new Error("SessÃ£o administrativa expirada.");[m
+     }[m
+ [m
+     const headers = new Headers(init?.headers);[m
+[36m@@ -246,12 +246,12 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+     const times = horarios();[m
+ [m
+     if (!selecionadas.length) {[m
+[31m-      setErro("Selecione pelo menos um dia no calendário.");[m
+[32m+[m[32m      setErro("Selecione pelo menos um dia no calendÃ¡rio.");[m
+       return;[m
+     }[m
+ [m
+     if (!times.length) {[m
+[31m-      setErro("Informe pelo menos um horário no formato 19:00.");[m
+[32m+[m[32m      setErro("Informe pelo menos um horÃ¡rio no formato 19:00.");[m
+       return;[m
+     }[m
+ [m
+[36m@@ -284,16 +284,16 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+       const data = await response.json();[m
+ [m
+       if (!response.ok) {[m
+[31m-        throw new Error(data?.error || "Erro ao criar horários.");[m
+[32m+[m[32m        throw new Error(data?.error || "Erro ao criar horÃ¡rios.");[m
+       }[m
+ [m
+       const criados = data.created?.length || 0;[m
+       const pulados = data.skipped?.length || 0;[m
+ [m
+       setMensagem([m
+[31m-        `${criados} ${criados === 1 ? "horário criado" : "horários criados"}${[m
+[32m+[m[32m        `${criados} ${criados === 1 ? "horÃ¡rio criado" : "horÃ¡rios criados"}${[m
+           pulados[m
+[31m-            ? ` · ${pulados} ${pulados === 1 ? "conflito ignorado" : "conflitos ignorados"}`[m
+[32m+[m[32m            ? ` Â· ${pulados} ${pulados === 1 ? "conflito ignorado" : "conflitos ignorados"}`[m
+             : ""[m
+         }.`[m
+       );[m
+[36m@@ -327,7 +327,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+     const data = await response.json();[m
+ [m
+     if (!response.ok) {[m
+[31m-      setErro(data?.error || "Não foi possível alterar o espelho.");[m
+[32m+[m[32m      setErro(data?.error || "NÃ£o foi possÃ­vel alterar o espelho.");[m
+       return;[m
+     }[m
+ [m
+[36m@@ -429,7 +429,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+       const data = await response.json();[m
+ [m
+       if (!response.ok) {[m
+[31m-        throw new Error(data?.error || "Não foi possível enviar os convites.");[m
+[32m+[m[32m        throw new Error(data?.error || "NÃ£o foi possÃ­vel enviar os convites.");[m
+       }[m
+ [m
+       setMensagem([m
+[36m@@ -492,7 +492,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+       status === "confirmed"[m
+         ? "Confirmado"[m
+         : status === "declined"[m
+[31m-        ? "Não vai participar"[m
+[32m+[m[32m        ? "NÃ£o vai participar"[m
+         : "Aguardando resposta";[m
+ [m
+     return ([m
+[36m@@ -564,7 +564,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">[m
+         <div>[m
+           <p className="text-sm font-medium text-yellow-300">[m
+[31m-            Agenda oficial do Clube do Tarô[m
+[32m+[m[32m            Agenda oficial do Clube do TarÃ´[m
+           </p>[m
+ [m
+           <h1 className="mt-1 text-3xl font-semibold text-purple-200">[m
+[36m@@ -572,7 +572,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+           </h1>[m
+ [m
+           <p className="mt-1 text-sm text-purple-300/70">[m
+[31m-            Individual, em grupo, confirmações, presença e histórico.[m
+[32m+[m[32m            Individual, em grupo, confirmaÃ§Ãµes, presenÃ§a e histÃ³rico.[m
+           </p>[m
+         </div>[m
+ [m
+[36m@@ -580,7 +580,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+           href="/admin/agenda"[m
+           className="rounded-xl border border-purple-500/30 px-5 py-3 text-center text-sm font-semibold text-purple-100"[m
+         >[m
+[31m-          ← Agenda geral[m
+[32m+[m[32m          â† Agenda geral[m
+         </Link>[m
+       </div>[m
+ [m
+[36m@@ -604,7 +604,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+             </h2>[m
+ [m
+             <p className="mt-1 text-sm text-purple-200/70">[m
+[31m-              Quando ativo, compromissos da Terapia e do Clube bloqueiam os mesmos horários.[m
+[32m+[m[32m              Quando ativo, compromissos da Terapia e do Clube bloqueiam os mesmos horÃ¡rios.[m
+             </p>[m
+           </div>[m
+ [m
+[36m@@ -622,7 +622,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+             }`}[m
+           >[m
+             {dados?.settings?.mirror_club_therapy[m
+[31m-              ? "✓ Espelho ativado"[m
+[32m+[m[32m              ? "âœ“ Espelho ativado"[m
+               : "Espelho desativado"}[m
+           </button>[m
+         </div>[m
+[36m@@ -669,14 +669,14 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+               className="mt-2 w-full rounded-xl border border-purple-500/30 bg-black/20 px-4 py-3 text-white"[m
+             />[m
+             <span className="mt-2 block text-xs font-normal text-purple-300/70">[m
+[31m-              Este tema aparecerá no convite enviado aos participantes.[m
+[32m+[m[32m              Este tema aparecerÃ¡ no convite enviado aos participantes.[m
+             </span>[m
+           </label>[m
+         )}[m
+ [m
+         <div className="mt-5 grid gap-4 md:grid-cols-2">[m
+           <label className="text-sm font-bold text-purple-100">[m
+[31m-            Horários[m
+[32m+[m[32m            HorÃ¡rios[m
+             <input[m
+               value={horariosTexto}[m
+               onChange={(e) => setHorariosTexto(e.target.value)}[m
+[36m@@ -684,12 +684,12 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+               className="mt-2 w-full rounded-xl border border-purple-500/30 bg-black/20 px-4 py-3 text-white"[m
+             />[m
+             <span className="mt-2 block text-xs font-normal text-purple-300/70">[m
+[31m-              Pode informar vários horários separados por vírgula.[m
+[32m+[m[32m              Pode informar vÃ¡rios horÃ¡rios separados por vÃ­rgula.[m
+             </span>[m
+           </label>[m
+ [m
+           <label className="text-sm font-bold text-purple-100">[m
+[31m-            Duração (minutos)[m
+[32m+[m[32m            DuraÃ§Ã£o (minutos)[m
+             <input[m
+               type="number"[m
+               min={15}[m
+[36m@@ -715,7 +715,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+               }[m
+               className="rounded-xl border border-yellow-500/20 px-4 py-2 text-yellow-300"[m
+             >[m
+[31m-              ‹[m
+[32m+[m[32m              â€¹[m
+             </button>[m
+ [m
+             <h3 className="font-bold text-yellow-300">[m
+[36m@@ -735,7 +735,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+               }[m
+               className="rounded-xl border border-yellow-500/20 px-4 py-2 text-yellow-300"[m
+             >[m
+[31m-              ›[m
+[32m+[m[32m              â€º[m
+             </button>[m
+           </div>[m
+ [m
+[36m@@ -785,7 +785,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+               ? "Salvando..."[m
+               : tipo === "group"[m
+               ? "Criar Mentoria em Grupo"[m
+[31m-              : "Liberar horários individuais"}[m
+[32m+[m[32m              : "Liberar horÃ¡rios individuais"}[m
+           </button>[m
+ [m
+           <span className="text-xs text-purple-300/70">[m
+[36m@@ -797,7 +797,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+ [m
+       <section className="rounded-3xl border border-purple-500/20 bg-[#1d0023] p-5">[m
+         <h2 className="text-xl font-bold text-purple-100">[m
+[31m-          Próximas mentorias[m
+[32m+[m[32m          PrÃ³ximas mentorias[m
+         </h2>[m
+ [m
+         <div className="mt-5 grid gap-4">[m
+[36m@@ -842,7 +842,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+                     </h3>[m
+ [m
+                     <p className="mt-1 text-sm capitalize text-purple-200">[m
+[31m-                      {dataHora(evento.starts_at)} · {evento.duration_minutes} min[m
+[32m+[m[32m                      {dataHora(evento.starts_at)} Â· {evento.duration_minutes} min[m
+                     </p>[m
+ [m
+                     {confirmadoIndividual && ([m
+[36m@@ -910,7 +910,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+                           </p>[m
+ [m
+                           <p className="mt-1 text-sm capitalize text-purple-200">[m
+[31m-                            {dataHora(evento.starts_at)} · via Google Meet[m
+[32m+[m[32m                            {dataHora(evento.starts_at)} Â· via Google Meet[m
+                           </p>[m
+ [m
+                           <div className="mt-4 flex flex-wrap gap-3">[m
+[36m@@ -942,12 +942,12 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+                                 Convidados do Clube ({selecionados.length} selecionados)[m
+                               </p>[m
+                               <p className="mt-1 text-xs text-purple-300/70">[m
+[31m-                                Escolha uma ou várias pessoas para receber o convite.[m
+[32m+[m[32m                                Escolha uma ou vÃ¡rias pessoas para receber o convite.[m
+                               </p>[m
+                             </div>[m
+ [m
+                             <span className="text-xl text-purple-300">[m
+[31m-                              {secaoEstaAberta(chaveConvidados) ? "▾" : "›"}[m
+[32m+[m[32m                              {secaoEstaAberta(chaveConvidados) ? "â–¾" : "â€º"}[m
+                             </span>[m
+                           </button>[m
+ [m
+[36m@@ -974,14 +974,14 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+                                   }[m
+                                   className="rounded-lg border border-purple-400/20 px-3 py-2 text-xs font-bold text-purple-200"[m
+                                 >[m
+[31m-                                  Limpar seleção[m
+[32m+[m[32m                                  Limpar seleÃ§Ã£o[m
+                                 </button>[m
+                               </div>[m
+ [m
+                               <div className="max-h-72 space-y-2 overflow-y-auto pr-1">[m
+                                 {convidadosDisponiveis.length === 0 ? ([m
+                                   <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">[m
+[31m-                                    Não há outros assinantes ativos para convidar.[m
+[32m+[m[32m                                    NÃ£o hÃ¡ outros assinantes ativos para convidar.[m
+                                   </p>[m
+                                 ) : ([m
+                                   convidadosDisponiveis.map((cliente: any) => {[m
+[36m@@ -1020,7 +1020,7 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+                                             {nome}[m
+                                           </p>[m
+                                           <p className="mt-1 text-xs capitalize text-purple-300/70">[m
+[31m-                                            Plano {cliente.plano || "—"}[m
+[32m+[m[32m                                            Plano {cliente.plano || "â€”"}[m
+                                           </p>[m
+                                         </div>[m
+                                       </label>[m
+[36m@@ -1048,74 +1048,77 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+                           )}[m
+                         </div>[m
+ [m
+[31m-                        {convidadosIncluidos.length > 0 && ([m
+[31m-                          <div className="mt-3 overflow-hidden rounded-2xl border border-blue-400/20 bg-blue-400/[0.03]">[m
+[31m-                            <button[m
+[31m-                              type="button"[m
+[31m-                              onClick={() =>[m
+[31m-                                alternarSecao(chaveIncluidos)[m
+[31m-                              }[m
+[31m-                              className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"[m
+[31m-                            >[m
+[31m-                              <span className="text-base font-bold text-blue-100">[m
+[31m-                                Convidados incluídos ({convidadosIncluidos.length})[m
+[31m-                              </span>[m
+[31m-[m
+[31m-                              <span className="text-xl text-blue-300">[m
+[31m-                                {secaoEstaAberta(chaveIncluidos) ? "▾" : "›"}[m
+[31m-                              </span>[m
+[31m-                            </button>[m
+[31m-[m
+[31m-                            {secaoEstaAberta(chaveIncluidos) && ([m
+[31m-                              <div className="grid gap-2 border-t border-blue-400/10 p-3">[m
+[31m-                                {convidadosIncluidos.map((item: any) => ([m
+[31m-                                  <div[m
+[31m-                                    key={item.client_id}[m
+[31m-                                    className="rounded-xl bg-black/20 p-3"[m
+[31m-                                  >[m
+[31m-                                    <p className="font-bold text-white">[m
+[31m-                                      {item.client_name || "Convidado"}[m
+[31m-                                    </p>[m
+[31m-                                    <p className="mt-1 text-xs text-blue-200/80">[m
+[31m-                                      {item.response === "confirmed"[m
+[31m-                                        ? "Confirmado"[m
+[31m-                                        : item.response === "declined"[m
+[31m-                                        ? "Não vai participar"[m
+[31m-                                        : "Convite enviado · aguardando resposta"}[m
+[31m-                                    </p>[m
+[31m-                                  </div>[m
+[31m-                                ))}[m
+[31m-                              </div>[m
+[31m-                            )}[m
+[31m-                          </div>[m
+[31m-                        )}[m
+[32m+[m[32m                        <div className="mt-3 rounded-2xl border border-blue-400/20 bg-blue-400/[0.03] p-4">[m
+[32m+[m[32m                          <p className="text-sm font-bold text-blue-100">[m
+[32m+[m[32m                            Convidados especiais ({convidadosIncluidos.length})[m
+[32m+[m[32m                          </p>[m
+[32m+[m[32m                          <p className="mt-1 text-xs text-blue-200/70">[m
+[32m+[m[32m                            Estes assinantes receberam acesso especial somente para esta mentoria.[m
+[32m+[m[32m                          </p>[m
+[32m+[m[32m                        </div>[m
+                       </div>[m
+                     );[m
+                   })()}[m
+ [m
+                 {evento.event_type === "group" &&[m
+                   (() => {[m
+[31m-                    const itensDiamante = (dados?.diamond_clients || []).map([m
+[31m-                      (cliente: any) => ({[m
+[32m+[m[32m                    const clientesPorId = new Map([m
+[32m+[m[32m                      (dados?.active_clients || []).map((cliente: any) => [[m
+[32m+[m[32m                        cliente.id,[m
+                         cliente,[m
+[31m-                        participante: participantes.find([m
+[31m-                          (item) => item.client_id === cliente.id[m
+[31m-                        ),[m
+[31m-                      })[m
+[32m+[m[32m                      ])[m
+                     );[m
+ [m
+[31m-                    const aguardando = itensDiamante.filter([m
+[32m+[m[32m                    const itensParticipantes = participantes.map([m
+[32m+[m[32m                      (participante: any) => {[m
+[32m+[m[32m                        const cliente =[m
+[32m+[m[32m                          clientesPorId.get(participante.client_id) || {[m
+[32m+[m[32m                            id: participante.client_id,[m
+[32m+[m[32m                            nome: participante.client_name,[m
+[32m+[m[32m                            nome_referencia: participante.client_name,[m
+[32m+[m[32m                            plano: participante.client_plan,[m
+[32m+[m[32m                          };[m
+[32m+[m
+[32m+[m[32m                        return {[m
+[32m+[m[32m                          cliente,[m
+[32m+[m[32m                          participante,[m
+[32m+[m[32m                        };[m
+[32m+[m[32m                      }[m
+[32m+[m[32m                    );[m
+[32m+[m
+[32m+[m[32m                    const idsComParticipacao = new Set([m
+[32m+[m[32m                      participantes.map((item: any) => item.client_id)[m
+[32m+[m[32m                    );[m
+[32m+[m
+[32m+[m[32m                    const diamantesSemResposta = ([m
+[32m+[m[32m                      dados?.diamond_clients || [][m
+[32m+[m[32m                    )[m
+[32m+[m[32m                      .filter([m
+[32m+[m[32m                        (cliente: any) =>[m
+[32m+[m[32m                          !idsComParticipacao.has(cliente.id)[m
+[32m+[m[32m                      )[m
+[32m+[m[32m                      .map((cliente: any) => ({[m
+[32m+[m[32m                        cliente,[m
+[32m+[m[32m                        participante: undefined,[m
+[32m+[m[32m                      }));[m
+[32m+[m
+[32m+[m[32m                    const todos = [[m
+[32m+[m[32m                      ...itensParticipantes,[m
+[32m+[m[32m                      ...diamantesSemResposta,[m
+[32m+[m[32m                    ];[m
+[32m+[m
+[32m+[m[32m                    const aguardando = todos.filter([m
+                       (item: any) =>[m
+                         item.participante?.response !== "confirmed" &&[m
+                         item.participante?.response !== "declined"[m
+                     );[m
+ [m
+[31m-                    const confirmados = itensDiamante.filter([m
+[32m+[m[32m                    const confirmados = todos.filter([m
+                       (item: any) =>[m
+                         item.participante?.response === "confirmed"[m
+                     );[m
+ [m
+[31m-                    const recusados = itensDiamante.filter([m
+[32m+[m[32m                    const recusados = todos.filter([m
+                       (item: any) =>[m
+                         item.participante?.response === "declined"[m
+                     );[m
+[36m@@ -1126,9 +1129,22 @@[m [mexport default function AgendaMentoriasAdminPage() {[m
+ [m
+                     return ([m
+                       <div className="mt-5 border-t border-purple-500/20 pt-5">[m
+[31m-                        <p className="text-base font-bold uppercase tracking-wide text-yellow-300">[m
+[31m-                          Confirmações do g

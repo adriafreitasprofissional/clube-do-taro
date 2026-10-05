@@ -245,7 +245,7 @@ export default function GeradorDirecionamentoPage() {
       : undefined;
 
     const novaLeitura =
-      gerarLeitura(cliente.nome, {
+      gerarLeitura(cliente.nome_referencia || cliente.nome, {
         semanaInicio: inicio,
         semanaFim: fim,
         ...overrides,

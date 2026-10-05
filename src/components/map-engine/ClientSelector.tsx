@@ -4,9 +4,11 @@ interface Client {
   id: string;
   slug?: string;
   nome: string;
+  nome_referencia?: string | null;
   email: string;
   plano: string;
   status: string;
+
 
   data_nascimento?: string;
   hora_nascimento?: string;

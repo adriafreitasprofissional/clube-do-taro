@@ -103,7 +103,14 @@ export default function QuizzesPage() {
 
   const [editandoId, setEditandoId] = useState<string | null>(null);
 
-  const [clientId, setClientId] = useState("");
+  const [quizParaReenviar, setQuizParaReenviar] =
+    useState<Quiz | null>(null);
+  const [pacientesReenvio, setPacientesReenvio] =
+    useState<string[]>([]);
+  const [reenviando, setReenviando] = useState(false);
+  const [historicoAberto, setHistoricoAberto] = useState(false);
+
+  const [clientIds, setClientIds] = useState<string[]>([]);
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [sourceNotes, setSourceNotes] = useState("");
@@ -203,7 +210,7 @@ export default function QuizzesPage() {
 
   function limparFormulario() {
     setEditandoId(null);
-    setClientId("");
+    setClientIds([]);
     setTitle("");
     setSubtitle("");
     setSourceNotes("");
@@ -473,8 +480,8 @@ export default function QuizzesPage() {
     setErro(null);
     setMensagem(null);
 
-    if (!clientId) {
-      setErro("Escolha uma paciente.");
+    if (clientIds.length === 0) {
+      setErro("Escolha pelo menos uma paciente.");
       return;
     }
 
@@ -496,8 +503,14 @@ export default function QuizzesPage() {
       const token = await tokenAdmin();
 
       const corpo = {
-        ...(editandoId ? { id: editandoId } : {}),
-        client_id: clientId,
+        ...(editandoId
+          ? {
+              id: editandoId,
+              client_id: clientIds[0],
+            }
+          : {
+              client_ids: clientIds,
+            }),
         title: title.trim(),
         subtitle: subtitle.trim() || null,
         source_notes: sourceNotes.trim() || null,
@@ -545,7 +558,7 @@ export default function QuizzesPage() {
 
   function editarQuiz(quiz: Quiz) {
     setEditandoId(quiz.id);
-    setClientId(quiz.client_id || "");
+    setClientIds(quiz.client_id ? [quiz.client_id] : []);
     setTitle(quiz.title || "");
     setSubtitle(quiz.subtitle || "");
     setSourceNotes(quiz.source_notes || "");
@@ -585,6 +598,71 @@ export default function QuizzesPage() {
       top: 0,
       behavior: "smooth",
     });
+  }
+
+  async function reenviarQuiz() {
+    if (!quizParaReenviar) {
+      return;
+    }
+
+    if (pacientesReenvio.length === 0) {
+      setErro("Escolha pelo menos um paciente.");
+      return;
+    }
+
+    setErro(null);
+    setMensagem(null);
+    setReenviando(true);
+
+    try {
+      const token = await tokenAdmin();
+
+      const response = await fetch(
+        "/api/admin/terapia/quizzes",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_ids: pacientesReenvio,
+            title: quizParaReenviar.title,
+            subtitle: quizParaReenviar.subtitle || null,
+            source_notes: quizParaReenviar.source_notes || null,
+            instructions: quizParaReenviar.instructions || null,
+            quiz_type: quizParaReenviar.quiz_type,
+            questions: quizParaReenviar.questions || [],
+            status: "published",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Não foi possível reenviar a atividade."
+        );
+      }
+
+      setMensagem(
+        "Atividade enviada novamente com sucesso."
+      );
+      setQuizParaReenviar(null);
+      setPacientesReenvio([]);
+
+      await carregar();
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : "Erro ao reenviar atividade."
+      );
+    } finally {
+      setReenviando(false);
+    }
   }
 
   async function alterarStatus(
@@ -712,23 +790,53 @@ export default function QuizzesPage() {
               Cancelar edição
             </button>
           )}
+          
         </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <Campo label="Paciente">
-            <select
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              className={inputClass}
-            >
-              <option value="">Selecione a paciente</option>
+          <Campo label="Pacientes">
+            <div className="space-y-2 rounded-xl border border-[#b7c28b]/20 bg-[#13170f]/80 p-3">
+              {pacientes.map((paciente) => {
+                const selecionado =
+                  clientIds.includes(paciente.id);
 
-              {pacientes.map((paciente) => (
-                <option key={paciente.id} value={paciente.id}>
-                  {paciente.nome}
-                </option>
-              ))}
-            </select>
+                return (
+                  <label
+                    key={paciente.id}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/5"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selecionado}
+                      onChange={() => {
+                        if (editandoId) {
+                          setClientIds([paciente.id]);
+                          return;
+                        }
+
+                        setClientIds((atual) =>
+                          selecionado
+                            ? atual.filter(
+                                (id) => id !== paciente.id
+                              )
+                            : [...atual, paciente.id]
+                        );
+                      }}
+                    />
+
+                    <span className="text-sm text-white">
+                      {paciente.nome}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {clientIds.length > 0 && (
+              <p className="mt-2 text-xs text-[#cbd69d]">
+                {clientIds.length} paciente(s) selecionado(s)
+              </p>
+            )}
           </Campo>
 
           <Campo label="Tipo de atividade">
@@ -1103,15 +1211,31 @@ export default function QuizzesPage() {
       {/* HISTÓRICO */}
       <section className="mt-10">
         <div className="mb-4">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#b7c28b]">
-            Histórico
-          </p>
+          <button
+            type="button"
+            onClick={() =>
+              setHistoricoAberto((atual) => !atual)
+            }
+            className="flex w-full items-center justify-between rounded-2xl border border-[#b7c28b]/15 bg-[#1b2015]/45 px-5 py-4 text-left"
+          >
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#b7c28b]">
+                Histórico
+              </p>
 
-          <h2 className="mt-2 text-xl font-semibold text-white">
-            Atividades criadas
-          </h2>
+              <h2 className="mt-2 text-xl font-semibold text-white">
+                Atividades criadas ({quizzes.length})
+              </h2>
+            </div>
+
+            <span className="text-2xl text-[#cbd69d]">
+              {historicoAberto ? "⌃" : "⌄"}
+            </span>
+          </button>
         </div>
 
+        {historicoAberto && (
+          <>
         {carregando ? (
           <div className="rounded-2xl border border-[#b7c28b]/15 bg-[#1b2015]/70 p-5 text-sm text-white/50">
             Carregando...
@@ -1165,7 +1289,16 @@ export default function QuizzesPage() {
                     >
                       Editar
                     </button>
-
+<button
+  type="button"
+  onClick={() => {
+    setQuizParaReenviar(quiz);
+    setPacientesReenvio([]);
+  }}
+  className="rounded-xl border border-[#b7c28b]/25 px-4 py-2 text-xs font-bold text-[#dce5c0]"
+>
+  Enviar novamente
+</button>
                     {quiz.status === "draft" && (
                       <button
                         type="button"
@@ -1189,9 +1322,77 @@ export default function QuizzesPage() {
                     </button>
                   </div>
                 </div>
+                                {quizParaReenviar?.id === quiz.id && (
+                  <div className="mt-5 rounded-2xl border border-[#b7c28b]/20 bg-[#13170f]/90 p-5">
+                    <p className="text-sm font-semibold text-white">
+                      Enviar novamente para:
+                    </p>
+
+                    <div className="mt-4 space-y-2">
+                      {pacientes.map((paciente) => {
+                        const selecionado =
+                          pacientesReenvio.includes(paciente.id);
+
+                        return (
+                          <label
+                            key={paciente.id}
+                            className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/5"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selecionado}
+                              onChange={() => {
+                                setPacientesReenvio((atual) =>
+                                  selecionado
+                                    ? atual.filter(
+                                        (id) => id !== paciente.id
+                                      )
+                                    : [...atual, paciente.id]
+                                );
+                              }}
+                            />
+
+                            <span className="text-sm text-white">
+                              {paciente.nome}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        disabled={
+                          reenviando ||
+                          pacientesReenvio.length === 0
+                        }
+                        onClick={reenviarQuiz}
+                        className="rounded-xl bg-[#b8c68a] px-4 py-2 text-xs font-bold text-[#263019] disabled:opacity-50"
+                      >
+                        {reenviando
+                          ? "Enviando..."
+                          : "Enviar atividade"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQuizParaReenviar(null);
+                          setPacientesReenvio([]);
+                        }}
+                        className="rounded-xl border border-white/10 px-4 py-2 text-xs font-bold text-white/50"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </article>
             ))}
           </div>
+        )}
+          </>
         )}
       </section>
     </div>

@@ -1,0 +1,124 @@
+import { NextResponse } from "next/server";
+import { Preference } from "mercadopago";
+import { mpClient } from "@/lib/mercadopago";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+}
+
+export async function POST(req: Request) {
+  console.log("🔥 ENTREI NA API criar-preferencia");
+
+ console.log("TOKEN:", process.env.MERCADOPAGO_ACCESS_TOKEN?.slice(0, 15));
+
+  try {
+
+    
+    const { plano, valor, nome, email } = await req.json();
+
+    console.log("=== DADOS RECEBIDOS ===");
+    console.log({
+      plano,
+      valor,
+    });
+
+    const preference = new Preference(mpClient);
+
+const externalReference = `novo-${Date.now()}`;
+
+await supabaseAdmin
+  .from("checkout_pendentes")
+  .insert({
+    external_reference: externalReference,
+    nome,
+    email,
+    plano,
+    valor,
+  });
+const body = {
+  purpose: "wallet_purchase",
+ 
+  items: [
+    {
+      id: plano,
+      title: `Clube do Tarô - ${plano}`,
+      quantity: 1,
+      currency_id: "BRL",
+      unit_price: Number(valor),
+    },
+  ],
+
+  metadata: {
+    produto: "clube",
+    plano,
+    tipo_usuario: "assinante",
+    origem: "landing",
+  },
+
+ back_urls: {
+  success: "https://www.magiaoriente.com.br/obrigado",
+  failure: "https://www.magiaoriente.com.br/pagamentos/falha",
+  pending: "https://www.magiaoriente.com.br/pagamentos/pendente",
+},
+
+  auto_return: "approved",
+
+  notification_url:
+    "https://www.magiaoriente.com.br/api/pagamentos/mercadopago/webhook",
+
+  external_reference: externalReference,
+};
+
+    console.log("=== BODY ENVIADO ===");
+    console.dir(body, { depth: null });
+
+    const response = await preference.create({
+      body,
+    });
+
+   console.log("========== PREFERENCE ==========");
+console.log("AUTO RETURN:", body.auto_return);
+console.log("BACK URLS:", body.back_urls);
+console.log("INIT POINT:", response.init_point);
+console.log("================================");
+
+    return NextResponse.json(
+      {
+        ok: true,
+        preferenceId: response.id,
+        initPoint: response.init_point,
+        sandboxInitPoint: response.sandbox_init_point,
+      },
+      {
+        headers: corsHeaders,
+      }
+    );
+  } catch (error: any) {
+    console.error("=== MERCADO PAGO ERRO ===");
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        ok: false,
+        erro: error?.message ?? null,
+        causa: error?.cause ?? null,
+        status: error?.status ?? null,
+        response: error?.response ?? null,
+      },
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
+    );
+  }
+}

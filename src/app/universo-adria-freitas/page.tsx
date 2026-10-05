@@ -266,7 +266,7 @@ export default function UniversoAdriaFreitas() {
               alt="Rosa Caveira - A Missão"
               fill
               sizes="(max-width: 1024px) 100vw, 40vw"
-              className="object-cover"
+              className="object-contain"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#130c13]/80 lg:block" />
           </div>
@@ -327,7 +327,7 @@ export default function UniversoAdriaFreitas() {
             </div>
 
             <a
-              href="https://www.instagram.com/adriafreitasescritora/"
+              href="https://www.instagram.com/portfolioadriafreitas/"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-9 inline-flex items-center gap-3 rounded-full border border-[#d8ba73]/35 bg-[#d8ba73]/10 px-7 py-4 text-[#e7d7b2] transition hover:bg-[#d8ba73]/15"
@@ -372,7 +372,7 @@ export default function UniversoAdriaFreitas() {
             </a>
 
             <a
-              href="https://www.instagram.com/adriafreitasescritora/"
+              href="https://www.instagram.com/portfolioadriafreitas/"
               target="_blank"
               rel="noopener noreferrer"
               className="group rounded-[28px] border border-white/10 bg-white/5 p-7 text-center transition hover:-translate-y-1 hover:border-[#d8ba73]/40"

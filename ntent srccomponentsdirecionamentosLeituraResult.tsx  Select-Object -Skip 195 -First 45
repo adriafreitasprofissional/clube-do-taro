@@ -1,0 +1,57 @@
+warning: in the working copy of 'src/app/admin/gerador-direcionamento/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/direcionamentos/LeituraResult.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/app/admin/gerador-direcionamento/page.tsx b/src/app/admin/gerador-direcionamento/page.tsx[m
+[1mindex 0e17705..6d8f9da 100644[m
+[1m--- a/src/app/admin/gerador-direcionamento/page.tsx[m
+[1m+++ b/src/app/admin/gerador-direcionamento/page.tsx[m
+[36m@@ -486,7 +486,8 @@[m [mexport default function GeradorDirecionamentoPage() {[m
+   leitura={leitura}[m
+   slug={cliente.slug || ""}[m
+   dataInicio={dataInicio}[m
+[31m-  dataFim={dataFim}  [m
+[32m+[m[32m  dataFim={dataFim}[m
+[32m+[m[32m  onLiberado={trocarAssinante}[m[41m  [m
+ [m
+           onTrocarOrixa={(v) =>[m
+             gerar({[m
+[1mdiff --git a/src/app/api/elevenlabs/gerar-audio/route.ts b/src/app/api/elevenlabs/gerar-audio/route.ts[m
+[1mindex 5f8e311..11d16be 100644[m
+[1m--- a/src/app/api/elevenlabs/gerar-audio/route.ts[m
+[1m+++ b/src/app/api/elevenlabs/gerar-audio/route.ts[m
+[36m@@ -8,6 +8,7 @@[m [mimport { supabaseAdmin } from "@/lib/supabase-admin";[m
+ [m
+ export const runtime = "nodejs";[m
+ export const dynamic = "force-dynamic";[m
+[32m+[m[32mexport const maxDuration = 300;[m
+ [m
+ function numeroSemanaDoMes(data: Date) {[m
+   const primeiroDia = new Date([m
+[1mdiff --git a/src/components/direcionamentos/LeituraResult.tsx b/src/components/direcionamentos/LeituraResult.tsx[m
+[1mindex 30873ef..cb3f8dc 100644[m
+[1m--- a/src/components/direcionamentos/LeituraResult.tsx[m
+[1m+++ b/src/components/direcionamentos/LeituraResult.tsx[m
+[36m@@ -26,6 +26,7 @@[m [minterface Props {[m
+   onTrocarCartaCigana?: (value: string) => void;[m
+   onTrocarCartaTaro?: (value: string) => void;[m
+   onEditarCampo?: (path: string, value: EditValue) => void;[m
+[32m+[m[32m  onLiberado?: () => void;[m
+ }[m
+ [m
+ const box = "rounded-2xl border border-purple-500/20 bg-[#151221] p-6";[m
+[36m@@ -204,6 +205,7 @@[m [museEffect(() => {[m
+           body: JSON.stringify({[m
+             slug: props.slug,[m
+             dataInicio: props.dataInicio,[m
+[32m+[m[32m            dataFim: props.dataFim,[m
+           }),[m
+         }[m
+       );[m
+[36m@@ -219,6 +221,8 @@[m [museEffect(() => {[m
+ [m
+       await carregarStatusPublicacao();[m
+ [m
+[32m+[m[32m      props.onLiberado?.();[m
+[32m+[m
+       alert([m
+         "Direcionamento liberado. PDF e áudio já podem aparecer para a assinante."[m
+       );[m
