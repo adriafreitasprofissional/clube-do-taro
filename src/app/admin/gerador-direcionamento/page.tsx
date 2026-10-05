@@ -328,11 +328,7 @@ export default function GeradorDirecionamentoPage() {
       })
     );
 
-    carregarRascunho(
-      novoCliente.id,
-      dataInicio,
-      dataFim
-    );
+    setLeitura(null);
   }
 
   function trocarAssinante() {
