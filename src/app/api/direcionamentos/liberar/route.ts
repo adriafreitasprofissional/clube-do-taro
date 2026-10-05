@@ -142,13 +142,13 @@ async function buscarCliente(
   operador: { id: string; role: string }
 ) {
   const {
-    data: cliente,
-    error,
-  } = await supabaseAdmin
-    .from("club_clients")
-    .select("id,slug,nome,professional_id")
-    .eq("slug", slug)
-    .maybeSingle();
+  data: cliente,
+  error,
+} = await supabaseAdmin
+  .from("club_clients")
+  .select("id,slug,nome,professional_id")
+  .ilike("slug", slug)
+  .maybeSingle();
 
   if (error) {
     throw error;
