@@ -599,7 +599,6 @@ link.download = nomeArquivo;
     setEnviandoAudioManual(false);
   }
 }
-  }
 
   const edit = (path: string) =>
     props.onEditarCampo
@@ -655,7 +654,7 @@ link.download = nomeArquivo;
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <div className={sub}><p className={label}>Cores</p><EditableField value={leitura.orixaPerfil.cores} onSave={edit("orixaPerfil.cores")} hint="Uma cor por linha."><p className={texto}>{leitura.orixaPerfil.cores.join(" â€¢ ")}</p></EditableField></div>
-          <div className={sub}><p className={label}>Dia de pico</p><EditableField value={leitura.orixaPerfil.diaSemana} onSave={edit("orixaPerfil.diaSemana")}><p className={texto}>{leitura.orixaPerfil.diaSemana}</p></EditableField></div>
+          <div className={sub}><p className={label}>Dia do orixá</p><EditableField value={leitura.orixaPerfil.diaSemana} onSave={edit("orixaPerfil.diaSemana")}><p className={texto}>{leitura.orixaPerfil.diaSemana}</p></EditableField></div>
           <div className={sub}><p className={label}>Elemento</p><p className={texto}>{leitura.orixaPerfil.elemento}</p></div>
         </div>
       </section>
@@ -875,4 +874,6 @@ function Message({ title, value, onSave }: { title: string; value: string; onSav
 function Lista({ titulo, value, onSave }: { titulo: string; value: string[]; onSave?: (value: EditValue) => void }) {
   return <div className={sub}><p className={label}>{titulo}</p><EditableField value={value} onSave={onSave} hint="Um item por linha."><ul className="mt-2 space-y-1 text-sm text-purple-100">{value.map((s, i) => <li key={i}>â€¢ {s}</li>)}</ul></EditableField></div>;
 }
+
+
 

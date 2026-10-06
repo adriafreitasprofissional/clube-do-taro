@@ -1,8 +1,8 @@
-import { jsPDF } from "jspdf";
+﻿import { jsPDF } from "jspdf";
 import type { Leitura } from "./direcionamento-engine";
 
 /* ============================================================================
- * Cores dos Orixás (hex real, espelhando LeituraResult.tsx)
+ * Cores dos OrixÃ¡s (hex real, espelhando LeituraResult.tsx)
  * ========================================================================== */
 const CorHex: Record<string, string> = {
   "Branco": "#FFFFFF",
@@ -26,9 +26,9 @@ const CorHex: Record<string, string> = {
   "Prata": "#C0C0C0",
   "Marrom": "#6E3B1F",
   "Rosa": "#F4A6C0",
-  "Lilás": "#C8A2C8",
+  "LilÃ¡s": "#C8A2C8",
   "Roxo": "#6A0DAD",
-  "Todas as cores do arco-íris": "#E040FB",
+  "Todas as cores do arco-Ã­ris": "#E040FB",
 };
 function hex2rgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
@@ -125,7 +125,7 @@ function sanitizeText(s: string): string {
     .replace(/[\u{2600}-\u{27BF}]/gu, "")
     .replace(/[\u{1F000}-\u{1F2FF}]/gu, "")
     .replace(/\uFE0F/g, "")
-    .replace(/[\u2013\u2014]/g, "—")
+    .replace(/[\u2013\u2014]/g, "â€”")
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/\s+/g, " ")
@@ -155,11 +155,11 @@ function drawBackground(doc: jsPDF, w: number, h: number, t: Theme) {
       doc.circle(w / 2, h / 2, (i / 30) * Math.max(w, h) * 0.55, "F");
     }
     setFill(doc, t.bgBase);
-    // repõe borda (deixa vinheta escura)
+    // repÃµe borda (deixa vinheta escura)
     doc.rect(0, 0, w, 6, "F");
     doc.rect(0, h - 6, w, 6, "F");
 
-    // partículas douradas
+    // partÃ­culas douradas
     let seed = 4242;
     const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
     setFill(doc, t.gold);
@@ -269,11 +269,11 @@ function renderPdf(
     if (y + needed > H - FOOTER) newPage();
   };
 
-  /* ---------- Cabeçalho ---------- */
+  /* ---------- CabeÃ§alho ---------- */
   setText(doc, theme.gold);
   doc.setFont("times", "italic");
   doc.setFontSize(11);
-  doc.text("Clube do Tarô — Ádria Freitas", W / 2, y, { align: "center" });
+  doc.text("Clube do TarÃ´ â€” Ãdria Freitas", W / 2, y, { align: "center" });
   y += 2;
   setDraw(doc, theme.gold);
   doc.setLineWidth(0.5);
@@ -295,7 +295,7 @@ function renderPdf(
   doc.text(`Semana: ${sanitizeText(leitura.semana)}`, W / 2, y, { align: "center" });
   setText(doc, theme.gold);
   doc.setFontSize(8);
-  doc.text(`Associada  •  #${leitura.idAssociado}`, W / 2, y + 4, { align: "center" });
+  doc.text(`Associada  â€¢  #${leitura.idAssociado}`, W / 2, y + 4, { align: "center" });
   y += 10;
 
   /* ---------- Indicadores ---------- */
@@ -375,7 +375,7 @@ function renderPdf(
     }
   };
 
-  /* ---------- Perfil do Orixá com bolinhas de cor ---------- */
+  /* ---------- Perfil do OrixÃ¡ com bolinhas de cor ---------- */
   {
     const perfil = leitura.orixaPerfil;
     const innerW = W - M * 2 - padding * 2;
@@ -384,7 +384,7 @@ function renderPdf(
     const desc = measureText(doc, sanitizeText(perfil.descricao), innerW, 11, 1.45);
     const ondeLabel = "Onde essa energia ajuda a sua vida:";
     const onde = measureText(doc, sanitizeText(perfil.ondeAjuda), innerW, 11, 1.45);
-    const diaTxt = `Dia de pico: ${sanitizeText(perfil.diaSemana)}  •  Elemento: ${sanitizeText(perfil.elemento)}  •  Saudação: ${sanitizeText(perfil.saudação)}`;
+    const diaTxt = `Dia do orixá: ${sanitizeText(perfil.diaSemana)}  â€¢  Elemento: ${sanitizeText(perfil.elemento)}  â€¢  SaudaÃ§Ã£o: ${sanitizeText(perfil.saudaÃ§Ã£o)}`;
     const dia = measureText(doc, diaTxt, innerW, 10.5, 1.4);
 
     const swatchH = 14; // altura reservada p/ label + bolinhas
@@ -399,11 +399,11 @@ function renderPdf(
     setText(doc, theme.titleText);
     doc.setFont("times", "bold");
     doc.setFontSize(14);
-    doc.text(`${sanitizeText(leitura.orixa)} — energia espiritual da semana`, M + padding + 8, y + 8.5);
+    doc.text(`${sanitizeText(leitura.orixa)} â€” energia espiritual da semana`, M + padding + 8, y + 8.5);
     setText(doc, theme.mutedText);
     doc.setFont("times", "italic");
     doc.setFontSize(9.5);
-    doc.text(sanitizeText(perfil.saudação), M + padding + 8, y + 14);
+    doc.text(sanitizeText(perfil.saudaÃ§Ã£o), M + padding + 8, y + 14);
     drawDivider(doc, M + padding, W - M - padding, y + 17.5, theme, theme.wine);
 
     let yy = y + headerH + 2;
@@ -529,11 +529,11 @@ function renderPdf(
   }
 
 
-  /* ---------- Significados (Cigana + Tarô) ---------- */
+  /* ---------- Significados (Cigana + TarÃ´) ---------- */
   {
     const sigDefs: { title: string; subtitle: string; text: string; accent: RGB }[] = [
       { title: sanitizeText(leitura.cartaCigana), subtitle: "Carta Cigana", text: sanitizeText(leitura.significadoCartaCigana), accent: theme.amethyst },
-      { title: sanitizeText(leitura.cartaTaro), subtitle: "Tarô", text: sanitizeText(leitura.significadoTaro), accent: theme.goldDeep },
+      { title: sanitizeText(leitura.cartaTaro), subtitle: "TarÃ´", text: sanitizeText(leitura.significadoTaro), accent: theme.goldDeep },
     ];
     const sigGap = 4;
     const sigW = (W - M * 2 - sigGap) / 2;
@@ -590,7 +590,7 @@ function renderPdf(
     const buildList = (arr: string[]) => {
       const all: string[] = [];
       arr.forEach((p) => {
-        const ls = doc.splitTextToSize(`• ${p}`, subW - 6);
+        const ls = doc.splitTextToSize(`â€¢ ${p}`, subW - 6);
         ls.forEach((l: string) => all.push(l));
       });
       return all;
@@ -615,16 +615,16 @@ function renderPdf(
     setText(doc, theme.titleText);
     doc.setFont("times", "bold");
     doc.setFontSize(14);
-    doc.text(`Numerologia — Semana ${nd.numeroSemana} · Vibração do Nome ${nd.numeroNome}`, M + padding + 8, y + 8.5);
+    doc.text(`Numerologia â€” Semana ${nd.numeroSemana} Â· VibraÃ§Ã£o do Nome ${nd.numeroNome}`, M + padding + 8, y + 8.5);
     setText(doc, theme.mutedText);
     doc.setFont("times", "italic");
     doc.setFontSize(9.5);
-    doc.text("Vibração da semana e Vibração do Nome", M + padding + 8, y + 14);
+    doc.text("VibraÃ§Ã£o da semana e VibraÃ§Ã£o do Nome", M + padding + 8, y + 14);
     drawDivider(doc, M + padding, W - M - padding, y + 17.5, theme, theme.gold);
 
     let yy = y + headerH;
 
-    // Vibração da semana
+    // VibraÃ§Ã£o da semana
     drawCard(doc, M + padding, yy, innerW, boxSem, theme, {
       fill: theme.isDark ? mix(theme.cardBg, theme.gold, 0.12) : mix(theme.cardBg, theme.gold, 0.06),
       border: theme.gold,
@@ -672,31 +672,31 @@ function renderPdf(
     y += totalH + 5;
   }
 
-  /* ---------- Foco / Espiritual / Saúde ---------- */
+  /* ---------- Foco / Espiritual / SaÃºde ---------- */
   [
     { title: "Foco da Semana", subtitle: sanitizeText(leitura.foco), text: sanitizeText(leitura.mensagemFoco), accent: theme.goldDeep },
     { title: "Espiritual", subtitle: "Energia & Sentimento", text: sanitizeText(leitura.mensagemEspiritual), accent: theme.amethyst },
-    { title: "Saude", subtitle: "Emocional & Físico", text: sanitizeText(leitura.mensagemSaude), accent: theme.rose },
+    { title: "Saude", subtitle: "Emocional & FÃ­sico", text: sanitizeText(leitura.mensagemSaude), accent: theme.rose },
   ].forEach(drawSection);
 
-  /* ---------- Sugestões práticas ---------- */
+  /* ---------- SugestÃµes prÃ¡ticas ---------- */
   const sugestoes = leitura.sugestoes ?? [];
   if (sugestoes.length > 0) {
     const texto = sugestoes.map((s, i) => `${i + 1}. ${sanitizeText(s)}`).join("\n");
     drawSection({
-      title: "Direcionamento Prático da Semana",
+      title: "Direcionamento PrÃ¡tico da Semana",
       subtitle: "Pequenas atitudes constantes movem mais do que grandes promessas",
       text: texto,
       accent: theme.gold,
     });
   }
 
-  /* ---------- Exercício mental ---------- */
+  /* ---------- ExercÃ­cio mental ---------- */
   const ex = leitura.exercicioMental;
   if (ex?.passos?.length) {
     const texto = ex.passos.map((p, i) => `${i + 1}. ${sanitizeText(p)}`).join("\n");
     drawSection({
-      title: "Exercício de Saúde Mental da Semana",
+      title: "ExercÃ­cio de SaÃºde Mental da Semana",
       subtitle: sanitizeText(ex.titulo),
       text: texto,
       accent: theme.emerald,
@@ -734,7 +734,7 @@ function renderPdf(
         setText(doc, theme.mutedText);
         doc.setFont("times", "italic");
         doc.setFontSize(9);
-        doc.text("Palavra de amor, gratidão e incentivo para a sua semana", W / 2, y + 14, { align: "center" });
+        doc.text("Palavra de amor, gratidÃ£o e incentivo para a sua semana", W / 2, y + 14, { align: "center" });
       }
       setText(doc, theme.bodyText);
       doc.setFont("times", "italic");
@@ -752,14 +752,14 @@ function renderPdf(
   }
 
 
-  /* ---------- Rodapé ---------- */
+  /* ---------- RodapÃ© ---------- */
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
     setText(doc, theme.gold);
     doc.setFont("times", "italic");
     doc.setFontSize(8.5);
-    doc.text("Direcionamento Sagrado  -  Clube do Tarô", W / 2, H - 3.5, { align: "center" });
+    doc.text("Direcionamento Sagrado  -  Clube do TarÃ´", W / 2, H - 3.5, { align: "center" });
   }
 
   const slug =
@@ -826,7 +826,7 @@ export function gerarPdfImpressao(
   );
 }
 
-/** Compat: mantém a função antiga apontando para a versão de impressão. */
+/** Compat: mantÃ©m a funÃ§Ã£o antiga apontando para a versÃ£o de impressÃ£o. */
 export function gerarPdfLeitura(
   leitura: Leitura,
   slugArquivo?: string
@@ -836,3 +836,4 @@ export function gerarPdfLeitura(
     slugArquivo
   );
 }
+
