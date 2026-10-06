@@ -40,10 +40,21 @@ function getDefaultWeekRange() {
   const hoje = new Date();
 
   const inicio = new Date(hoje);
-  inicio.setDate(hoje.getDate() - hoje.getDay());
+
+  const dia = hoje.getDay();
+
+  const diferencaParaSegunda =
+    dia === 0 ? -6 : 1 - dia;
+
+  inicio.setDate(
+    hoje.getDate() + diferencaParaSegunda
+  );
 
   const fim = new Date(inicio);
-  fim.setDate(inicio.getDate() + 6);
+
+  fim.setDate(
+    inicio.getDate() + 6
+  );
 
   return {
     inicio: toInput(inicio),
@@ -132,13 +143,11 @@ export default function GeradorDirecionamentoPage() {
           ultima?.dataInicio &&
           ultima?.dataFim
         ) {
-          setCliente(ultima.cliente);
-          setDataInicio(
-            ultima.dataInicio
-          );
-          setDataFim(
-            ultima.dataFim
-          );
+          
+          const semanaAtual = getDefaultWeekRange();
+
+setDataInicio(semanaAtual.inicio);
+setDataFim(semanaAtual.fim);
 
           const key = getDraftKey(
             ultima.cliente.id,
