@@ -139,7 +139,7 @@ useEffect(() => {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "NÃ£o foi possÃ­vel verificar a publicaÃ§Ã£o."
+            "Não foi possível verificar a publicação."
         );
       }
 
@@ -151,7 +151,7 @@ useEffect(() => {
       });
     } catch (error) {
       console.error(
-        "Erro ao verificar publicaÃ§Ã£o:",
+        "Erro ao verificar publicação:",
         error
       );
     } finally {
@@ -169,13 +169,13 @@ useEffect(() => {
       !statusPublicacao.audioPronto
     ) {
       alert(
-        "Gere e salve o PDF e o Ã¡udio antes de liberar."
+        "Gere e salve o PDF e o áudio antes de liberar."
       );
       return;
     }
 
     const confirmar = window.confirm(
-      `Liberar agora o PDF e o Ã¡udio de ${leitura.nome} para esta semana?`
+      `Liberar agora o PDF e o áudio de ${leitura.nome} para esta semana?`
     );
 
     if (!confirmar) {
@@ -191,7 +191,7 @@ useEffect(() => {
 
       if (!session?.access_token) {
         throw new Error(
-          "Sua sessÃ£o administrativa expirou. Entre novamente no ADM."
+          "Sua sessão administrativa expirou. Entre novamente no ADM."
         );
       }
 
@@ -218,7 +218,7 @@ useEffect(() => {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "NÃ£o foi possÃ­vel liberar o direcionamento."
+            "Não foi possível liberar o direcionamento."
         );
       }
 
@@ -227,7 +227,7 @@ useEffect(() => {
       props.onLiberado?.();
 
       alert(
-        "Direcionamento liberado. PDF e Ã¡udio jÃ¡ podem aparecer para a assinante."
+        "Direcionamento liberado. PDF e áudio já podem aparecer para a assinante."
       );
     } catch (error) {
       console.error(
@@ -237,7 +237,7 @@ useEffect(() => {
 
       alert(
         error instanceof Error
-          ?error.message
+          ? error.message
           : "Erro ao liberar direcionamento."
       );
     } finally {
@@ -252,7 +252,7 @@ useEffect(() => {
 
       const { data: sessaoRoteiro } = await supabase.auth.getSession();
       const tokenRoteiro = sessaoRoteiro.session?.access_token;
-      if (!tokenRoteiro) throw new Error("SessÃ£o expirada. Entre novamente.");
+      if (!tokenRoteiro) throw new Error("Sessão expirada. Entre novamente.");
 
       const response = await fetch("/api/gerador-direcionamento/roteiro-audio", {
         method: "POST",
@@ -266,13 +266,13 @@ useEffect(() => {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data?.erro || "NÃ£o foi possÃ­vel gerar o roteiro para Ã¡udio.");
+        throw new Error(data?.erro || "Não foi possível gerar o roteiro para áudio.");
       }
 
       setRoteiroAudio(data.roteiro || "");
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ?error.message : "Erro ao gerar roteiro para Ã¡udio.");
+      alert(error instanceof Error ? error.message : "Erro ao gerar roteiro para áudio.");
     } finally {
       setGerandoRoteiro(false);
     }
@@ -316,7 +316,7 @@ async function gerarPdfESalvar() {
 
     const { data: sessaoPdf } = await supabase.auth.getSession();
     const tokenPdf = sessaoPdf.session?.access_token;
-    if (!tokenPdf) throw new Error("SessÃ£o expirada. Entre novamente.");
+    if (!tokenPdf) throw new Error("Sessão expirada. Entre novamente.");
 
     const response =
       await fetch(
@@ -334,11 +334,11 @@ async function gerarPdfESalvar() {
     if (!response.ok) {
       throw new Error(
         data?.error ||
-          "NÃ£o foi possÃ­vel salvar o PDF."
+          "Não foi possível salvar o PDF."
       );
     }
 
-    // Baixa a mesma cÃ³pia no computador
+    // Baixa a mesma cópia no computador
     const url =
       URL.createObjectURL(blob);
 
@@ -371,7 +371,7 @@ async function gerarPdfESalvar() {
 
     alert(
       error instanceof Error
-        ?error.message
+        ? error.message
         : "Erro ao gerar PDF."
     );
   } finally {
@@ -381,7 +381,7 @@ async function gerarPdfESalvar() {
 
   async function gerarAudioElevenLabs() {
     if (!roteiroAudio.trim()) {
-      alert("Gere o roteiro para Ã¡udio primeiro.");
+      alert("Gere o roteiro para áudio primeiro.");
       return;
     }
 
@@ -390,7 +390,7 @@ async function gerarPdfESalvar() {
 
       const { data: sessaoAudio } = await supabase.auth.getSession();
       const tokenAudio = sessaoAudio.session?.access_token;
-      if (!tokenAudio) throw new Error("SessÃ£o expirada. Entre novamente.");
+      if (!tokenAudio) throw new Error("Sessão expirada. Entre novamente.");
 
       const response = await fetch("/api/elevenlabs/gerar-audio", {
         method: "POST",
@@ -408,7 +408,7 @@ async function gerarPdfESalvar() {
       });
 
       if (!response.ok) {
-        let mensagem = "NÃ£o foi possÃ­vel gerar o Ã¡udio.";
+        let mensagem = "Não foi possível gerar o áudio.";
 
         try {
           const data = await response.json();
@@ -444,27 +444,42 @@ link.download = nomeArquivo;
 
       alert(
         error instanceof Error
-          ?error.message
-          : "Erro ao gerar Ã¡udio."
+          ? error.message
+          : "Erro ao gerar áudio."
       );
     } finally {
       setGerandoAudio(false);
     }
   }
 
-    async function reconhecerAudioDrive() {
+    async function subirAudioManual(arquivo: File) {
   try {
     setEnviandoAudioManual(true);
 
-    const { data: sessao } = await supabase.auth.getSession();
-    const token = sessao.session?.access_token;
+    const { data: sessao } =
+      await supabase.auth.getSession();
+
+    const token =
+      sessao.session?.access_token;
 
     if (!token) {
-      throw new Error("Sess?o expirada. Entre novamente.");
+      throw new Error(
+        "Sessão expirada. Entre novamente."
+      );
     }
 
-    const response = await fetch(
-      "/api/direcionamentos/reconhecer-audio",
+    if (
+      arquivo.type &&
+      arquivo.type !== "audio/mpeg" &&
+      !arquivo.name.toLowerCase().endsWith(".mp3")
+    ) {
+      throw new Error(
+        "Envie um arquivo MP3."
+      );
+    }
+
+    const iniciarResponse = await fetch(
+      "/api/direcionamentos/upload-audio-iniciar",
       {
         method: "POST",
         headers: {
@@ -475,29 +490,110 @@ link.download = nomeArquivo;
           slug: props.slug,
           dataInicio: props.dataInicio,
           dataFim: props.dataFim || "",
+          tamanho: arquivo.size,
         }),
       }
     );
 
-    const data = await response.json();
+    const inicio = await iniciarResponse.json();
 
-    if (!response.ok) {
+    if (!iniciarResponse.ok) {
       throw new Error(
-        data?.error ||
-          "N?o foi poss?vel reconhecer o ?udio no Google Drive."
+        inicio?.error ||
+          "Não foi possível preparar o envio do áudio."
+      );
+    }
+
+    if (!inicio?.uploadUrl) {
+      throw new Error(
+        "Não foi possível preparar o envio para o Google Drive."
+      );
+    }
+
+    const uploadResponse = await fetch(
+      inicio.uploadUrl,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "audio/mpeg",
+        },
+        body: arquivo,
+      }
+    );
+
+    const textoUpload =
+      await uploadResponse.text();
+
+    if (!uploadResponse.ok) {
+      throw new Error(
+        textoUpload ||
+          `Erro no envio ao Google Drive. HTTP ${uploadResponse.status}`
+      );
+    }
+
+    let uploadData: any = {};
+
+    try {
+      uploadData = textoUpload
+        ? JSON.parse(textoUpload)
+        : {};
+    } catch {}
+
+    const fileId =
+      uploadData?.id ||
+      inicio?.fileIdExistente;
+
+    if (!fileId) {
+      throw new Error(
+        "O áudio chegou ao Google Drive, mas não foi possível identificar o arquivo."
+      );
+    }
+
+    const finalizarResponse = await fetch(
+      "/api/direcionamentos/upload-audio-finalizar",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          clientId: inicio.clientId,
+          slug: inicio.slug,
+          ano: inicio.ano,
+          mes: inicio.mes,
+          semana: inicio.semana,
+          folderId: inicio.folderId,
+          fileId,
+        }),
+      }
+    );
+
+    const finalizar =
+      await finalizarResponse.json();
+
+    if (!finalizarResponse.ok) {
+      throw new Error(
+        finalizar?.error ||
+          "O áudio foi enviado, mas não foi possível registrá-lo."
       );
     }
 
     await carregarStatusPublicacao();
 
-    alert(`?udio reconhecido com sucesso: ${data.nomeArquivo}`);
+    alert(
+      "Áudio enviado e salvo com sucesso."
+    );
   } catch (error) {
-    console.error("Erro ao reconhecer ?udio:", error);
+    console.error(
+      "Erro ao enviar áudio manual:",
+      error
+    );
 
     alert(
       error instanceof Error
-        ?error.message
-        : "Erro ao reconhecer ?udio."
+        ? error.message
+        : "Erro ao enviar áudio."
     );
   } finally {
     setEnviandoAudioManual(false);
@@ -506,10 +602,10 @@ link.download = nomeArquivo;
 
   const edit = (path: string) =>
     props.onEditarCampo
-      ?(value: EditValue) => props.onEditarCampo?.(path, value)
+      ? (value: EditValue) => props.onEditarCampo?.(path, value)
       : undefined;
 
-  const ancestralidade = leitura.orixa === "BabÃ¡ Egum";
+  const ancestralidade = leitura.orixa === "Babá Egum";
 
   return (
     <div className="space-y-6">
@@ -525,7 +621,7 @@ link.download = nomeArquivo;
             ["Numerologia", leitura.numerologia],
             ["Energia espiritual", leitura.orixa],
             ["Carta Cigana", leitura.cartaCigana],
-            ["TarÃ´", leitura.cartaTaro],
+            ["Tarô", leitura.cartaTaro],
             ["Foco", leitura.foco],
           ].map(([k, v]) => (
             <div key={String(k)} className={sub}>
@@ -539,13 +635,13 @@ link.download = nomeArquivo;
           <SelectBox labelText="Trocar energia espiritual" value={leitura.orixa} options={orixas} onChange={props.onTrocarOrixa} />
           <SelectBox labelText="Trocar foco" value={leitura.foco} options={focos} onChange={props.onTrocarFoco} />
           <SelectBox labelText="Trocar Carta Cigana" value={leitura.cartaCigana} options={cartasCiganas} onChange={props.onTrocarCartaCigana} />
-          <SelectBox labelText="Trocar TarÃ´" value={leitura.cartaTaro} options={tarot} onChange={props.onTrocarCartaTaro} />
+          <SelectBox labelText="Trocar Tarô" value={leitura.cartaTaro} options={tarot} onChange={props.onTrocarCartaTaro} />
         </div>
       </section>
 
       <section className={box}>
         <h3 className="text-xl font-bold text-yellow-300">
-          {leitura.orixa} â€” {ancestralidade ?"ancestralidade da semana" : "energia espiritual da semana"}
+          {leitura.orixa} — {ancestralidade ? "ancestralidade da semana" : "energia espiritual da semana"}
         </h3>
         <EditableField value={leitura.orixaPerfil.descricao} onSave={edit("orixaPerfil.descricao")}>
           <p className={texto}>{leitura.orixaPerfil.descricao}</p>
@@ -557,7 +653,7 @@ link.download = nomeArquivo;
           </EditableField>
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <div className={sub}><p className={label}>Cores</p><EditableField value={leitura.orixaPerfil.cores} onSave={edit("orixaPerfil.cores")} hint="Uma cor por linha."><p className={texto}>{leitura.orixaPerfil.cores.join(" â€¢ ")}</p></EditableField></div>
+          <div className={sub}><p className={label}>Cores</p><EditableField value={leitura.orixaPerfil.cores} onSave={edit("orixaPerfil.cores")} hint="Uma cor por linha."><p className={texto}>{leitura.orixaPerfil.cores.join(" • ")}</p></EditableField></div>
           <div className={sub}><p className={label}>Dia do orixá</p><EditableField value={leitura.orixaPerfil.diaSemana} onSave={edit("orixaPerfil.diaSemana")}><p className={texto}>{leitura.orixaPerfil.diaSemana}</p></EditableField></div>
           <div className={sub}><p className={label}>Elemento</p><p className={texto}>{leitura.orixaPerfil.elemento}</p></div>
         </div>
@@ -581,7 +677,7 @@ link.download = nomeArquivo;
 </div>
 
       <section className={box}>
-        <h3 className="text-xl font-bold text-yellow-300">Numerologia â€” Semana {leitura.numerologiaDetalhe.numeroSemana} Â· VibraÃ§Ã£o do Nome {leitura.numerologiaDetalhe.numeroNome}</h3>
+        <h3 className="text-xl font-bold text-yellow-300">Numerologia — Semana {leitura.numerologiaDetalhe.numeroSemana} · Vibração do Nome {leitura.numerologiaDetalhe.numeroNome}</h3>
         <div className={`${sub} mt-4`}><EditableField value={leitura.numerologiaDetalhe.mensagemUnificada} onSave={edit("numerologiaDetalhe.mensagemUnificada")}><p className={texto}>{leitura.numerologiaDetalhe.mensagemUnificada}</p></EditableField></div>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           <Lista titulo="Pontos fortes" value={leitura.numerologiaDetalhe.pontosFortes} onSave={edit("numerologiaDetalhe.pontosFortes")} />
@@ -591,21 +687,21 @@ link.download = nomeArquivo;
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Message title={`Foco â€” ${leitura.foco}`} value={leitura.mensagemFoco} onSave={edit("mensagemFoco")} />
+        <Message title={`Foco — ${leitura.foco}`} value={leitura.mensagemFoco} onSave={edit("mensagemFoco")} />
         <Message title="Espiritual" value={leitura.mensagemEspiritual} onSave={edit("mensagemEspiritual")} />
-        <Message title="SaÃºde" value={leitura.mensagemSaude} onSave={edit("mensagemSaude")} />
+        <Message title="Saúde" value={leitura.mensagemSaude} onSave={edit("mensagemSaude")} />
 
 </div>
 
       <section className={box}>
-        <h3 className="text-xl font-bold text-yellow-300">Direcionamento prÃ¡tico</h3>
+        <h3 className="text-xl font-bold text-yellow-300">Direcionamento prático</h3>
         <EditableField value={leitura.sugestoes} onSave={edit("sugestoes")} hint="Um item por linha.">
           <ol className="mt-3 space-y-2 text-purple-100">{leitura.sugestoes.map((s, i) => <li key={i}>{i + 1}. {s}</li>)}</ol>
         </EditableField>
       </section>
 
       <section className={box}>
-        <h3 className="text-xl font-bold text-yellow-300">ExercÃ­cio de saÃºde mental</h3>
+        <h3 className="text-xl font-bold text-yellow-300">Exercício de saúde mental</h3>
         <EditableField value={leitura.exercicioMental.titulo} onSave={edit("exercicioMental.titulo")}><p className={texto}>{leitura.exercicioMental.titulo}</p></EditableField>
         <EditableField value={leitura.exercicioMental.passos} onSave={edit("exercicioMental.passos")} hint="Um passo por linha."><ol className="mt-3 space-y-2 text-purple-100">{leitura.exercicioMental.passos.map((s, i) => <li key={i}>{i + 1}. {s}</li>)}</ol></EditableField>
       </section>
@@ -616,14 +712,14 @@ link.download = nomeArquivo;
       </section>
 
       <section className={box}>
-        <h3 className="text-xl font-bold text-yellow-300">Roteiro resumido para o Ã¡udio</h3>
+        <h3 className="text-xl font-bold text-yellow-300">Roteiro resumido para o áudio</h3>
         <p className="mt-2 text-sm text-purple-200">
-          Se quiser, acrescente uma observaÃ§Ã£o sua. O agente cria um resumo curto apenas da energia espiritual, cartas, naipe, elemento e numerologia; o restante permanece no PDF.
+          Se quiser, acrescente uma observação sua. O agente cria um resumo curto apenas da energia espiritual, cartas, naipe, elemento e numerologia; o restante permanece no PDF.
         </p>
         <textarea
           value={parecerAdria}
           onChange={(e) => setParecerAdria(e.target.value)}
-          placeholder="ObservaÃ§Ãµes da Ãdria para este Ã¡udio (opcional)..."
+          placeholder="Observações da Ádria para este áudio (opcional)..."
           className="mt-4 min-h-28 w-full resize-y rounded-xl border border-purple-500/30 bg-[#1c1729] p-4 text-purple-50 outline-none focus:border-yellow-400"
         />
 
@@ -633,12 +729,12 @@ link.download = nomeArquivo;
           disabled={gerandoRoteiro}
           className="mt-4 w-full rounded-2xl border border-purple-400/50 bg-purple-500/10 px-5 py-4 font-bold text-purple-100 transition hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {gerandoRoteiro ?"GERANDO ROTEIRO..." : "GERAR ROTEIRO RESUMIDO PARA ÃUDIO"}
+          {gerandoRoteiro ? "GERANDO ROTEIRO..." : "GERAR ROTEIRO RESUMIDO PARA ÁUDIO"}
         </button>
 
         {roteiroAudio && (
           <div className="mt-5 rounded-2xl border border-purple-500/30 bg-[#201a35] p-5">
-            <p className={label}>Roteiro pronto para gravaÃ§Ã£o</p>
+            <p className={label}>Roteiro pronto para gravação</p>
             <textarea
               value={roteiroAudio}
               onChange={(e) => setRoteiroAudio(e.target.value)}
@@ -664,7 +760,7 @@ link.download = nomeArquivo;
     className="rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-400 px-5 py-4 font-bold text-[#151221] disabled:cursor-not-allowed disabled:opacity-60"
   >
     {salvandoPdf
-      ?"SALVANDO PDF..."
+      ? "SALVANDO PDF..."
       : "GERAR PDF"}
   </button>
 
@@ -675,20 +771,14 @@ link.download = nomeArquivo;
     className="rounded-2xl border border-purple-400/40 bg-purple-500/10 px-5 py-4 font-bold text-purple-100 transition hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-40"
   >
     {gerandoAudio
-      ?"GERANDO ÃUDIO..."
-      : "GERAR ÃUDIO â€” ELEVENLABS"}
+      ? "GERANDO ÁUDIO..."
+      : "GERAR ÁUDIO — ELEVENLABS"}
   </button>
 
-  <button
-    type="button"
-    onClick={reconhecerAudioDrive}
-    disabled={enviandoAudioManual}
-    className="rounded-2xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-4 text-center font-bold text-yellow-200 transition hover:bg-yellow-500/20 disabled:cursor-not-allowed disabled:opacity-40"
-  >
-    {enviandoAudioManual
-      ?"PROCURANDO ?UDIO NO DRIVE..."
-      : "RECONHECER ?UDIO DO DRIVE"}
-  </button>
+  <label className={`cursor-pointer rounded-2xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-4 text-center font-bold text-yellow-200 transition hover:bg-yellow-500/20 ${enviandoAudioManual ? "pointer-events-none opacity-40" : ""}`}>
+    {enviandoAudioManual ? "ENVIANDO ÁUDIO..." : "SUBIR ÁUDIO MANUAL"}
+    <input type="file" accept=".mp3,audio/mpeg" className="hidden" disabled={enviandoAudioManual} onChange={(e) => { const arquivo = e.target.files?.[0]; if (arquivo) void subirAudioManual(arquivo); e.currentTarget.value = ""; }} />
+  </label>
   
 </div>
      
@@ -696,11 +786,11 @@ link.download = nomeArquivo;
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 className="text-xl font-bold text-yellow-300">
-              PublicaÃ§Ã£o do direcionamento
+              Publicação do direcionamento
             </h3>
 
             <p className="mt-2 text-sm text-purple-200">
-              PDF e Ã¡udio podem ficar prontos como rascunho. A assinante sÃ³ recebe quando vocÃª liberar.
+              PDF e áudio podem ficar prontos como rascunho. A assinante só recebe quando você liberar.
             </p>
           </div>
 
@@ -713,7 +803,7 @@ link.download = nomeArquivo;
             className="rounded-xl border border-purple-400/40 px-4 py-2 text-sm font-semibold text-purple-100 disabled:opacity-50"
           >
             {carregandoStatus
-              ?"VERIFICANDO..."
+              ? "VERIFICANDO..."
               : "ATUALIZAR STATUS"}
           </button>
         </div>
@@ -723,24 +813,24 @@ link.download = nomeArquivo;
             <p className={label}>PDF</p>
             <p className="mt-2 font-bold text-purple-50">
               {statusPublicacao.pdfPronto
-                ?"âœ“ Pronto e salvo"
-                : "â—‹ Ainda falta gerar"}
+                ? "✓ Pronto e salvo"
+                : "○ Ainda falta gerar"}
             </p>
           </div>
 
           <div className={sub}>
-            <p className={label}>Ãudio</p>
+            <p className={label}>Áudio</p>
             <p className="mt-2 font-bold text-purple-50">
               {statusPublicacao.audioPronto
-                ?"âœ“ Pronto e salvo"
-                : "â—‹ Ainda falta gerar"}
+                ? "✓ Pronto e salvo"
+                : "○ Ainda falta gerar"}
             </p>
           </div>
         </div>
 
-        {statusPublicacao.liberado ?(
+        {statusPublicacao.liberado ? (
           <div className="mt-5 rounded-2xl border border-green-400/30 bg-green-500/10 p-4 text-center font-bold text-green-200">
-            âœ“ DIRECIONAMENTO LIBERADO PARA A ASSINANTE
+            ✓ DIRECIONAMENTO LIBERADO PARA A ASSINANTE
           </div>
         ) : (
           <button
@@ -755,7 +845,7 @@ link.download = nomeArquivo;
             className="mt-5 w-full rounded-2xl bg-green-500 px-5 py-4 text-lg font-black text-[#10180f] transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-35"
           >
             {liberando
-              ?"LIBERANDO..."
+              ? "LIBERANDO..."
               : "LIBERAR DIRECIONAMENTO"}
           </button>
         )}
@@ -764,7 +854,7 @@ link.download = nomeArquivo;
           (!statusPublicacao.pdfPronto ||
             !statusPublicacao.audioPronto) && (
             <p className="mt-3 text-center text-xs text-purple-300">
-              O botÃ£o serÃ¡ liberado quando o PDF e o Ã¡udio estiverem salvos.
+              O botão será liberado quando o PDF e o áudio estiverem salvos.
             </p>
           )}
       </section>
@@ -782,7 +872,7 @@ function Message({ title, value, onSave }: { title: string; value: string; onSav
 }
 
 function Lista({ titulo, value, onSave }: { titulo: string; value: string[]; onSave?: (value: EditValue) => void }) {
-  return <div className={sub}><p className={label}>{titulo}</p><EditableField value={value} onSave={onSave} hint="Um item por linha."><ul className="mt-2 space-y-1 text-sm text-purple-100">{value.map((s, i) => <li key={i}>â€¢ {s}</li>)}</ul></EditableField></div>;
+  return <div className={sub}><p className={label}>{titulo}</p><EditableField value={value} onSave={onSave} hint="Um item por linha."><ul className="mt-2 space-y-1 text-sm text-purple-100">{value.map((s, i) => <li key={i}>• {s}</li>)}</ul></EditableField></div>;
 }
 
 
