@@ -237,7 +237,7 @@ useEffect(() => {
 
       alert(
         error instanceof Error
-          ? error.message
+          ?error.message
           : "Erro ao liberar direcionamento."
       );
     } finally {
@@ -272,7 +272,7 @@ useEffect(() => {
       setRoteiroAudio(data.roteiro || "");
     } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Erro ao gerar roteiro para Ã¡udio.");
+      alert(error instanceof Error ?error.message : "Erro ao gerar roteiro para Ã¡udio.");
     } finally {
       setGerandoRoteiro(false);
     }
@@ -371,7 +371,7 @@ async function gerarPdfESalvar() {
 
     alert(
       error instanceof Error
-        ? error.message
+        ?error.message
         : "Erro ao gerar PDF."
     );
   } finally {
@@ -444,7 +444,7 @@ link.download = nomeArquivo;
 
       alert(
         error instanceof Error
-          ? error.message
+          ?error.message
           : "Erro ao gerar Ã¡udio."
       );
     } finally {
@@ -496,7 +496,7 @@ link.download = nomeArquivo;
 
     alert(
       error instanceof Error
-        ? error.message
+        ?error.message
         : "Erro ao reconhecer ?udio."
     );
   } finally {
@@ -506,7 +506,7 @@ link.download = nomeArquivo;
 
   const edit = (path: string) =>
     props.onEditarCampo
-      ? (value: EditValue) => props.onEditarCampo?.(path, value)
+      ?(value: EditValue) => props.onEditarCampo?.(path, value)
       : undefined;
 
   const ancestralidade = leitura.orixa === "BabÃ¡ Egum";
@@ -545,7 +545,7 @@ link.download = nomeArquivo;
 
       <section className={box}>
         <h3 className="text-xl font-bold text-yellow-300">
-          {leitura.orixa} â€” {ancestralidade ? "ancestralidade da semana" : "energia espiritual da semana"}
+          {leitura.orixa} â€” {ancestralidade ?"ancestralidade da semana" : "energia espiritual da semana"}
         </h3>
         <EditableField value={leitura.orixaPerfil.descricao} onSave={edit("orixaPerfil.descricao")}>
           <p className={texto}>{leitura.orixaPerfil.descricao}</p>
@@ -633,7 +633,7 @@ link.download = nomeArquivo;
           disabled={gerandoRoteiro}
           className="mt-4 w-full rounded-2xl border border-purple-400/50 bg-purple-500/10 px-5 py-4 font-bold text-purple-100 transition hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {gerandoRoteiro ? "GERANDO ROTEIRO..." : "GERAR ROTEIRO RESUMIDO PARA ÃUDIO"}
+          {gerandoRoteiro ?"GERANDO ROTEIRO..." : "GERAR ROTEIRO RESUMIDO PARA ÃUDIO"}
         </button>
 
         {roteiroAudio && (
@@ -664,7 +664,7 @@ link.download = nomeArquivo;
     className="rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-400 px-5 py-4 font-bold text-[#151221] disabled:cursor-not-allowed disabled:opacity-60"
   >
     {salvandoPdf
-      ? "SALVANDO PDF..."
+      ?"SALVANDO PDF..."
       : "GERAR PDF"}
   </button>
 
@@ -675,7 +675,7 @@ link.download = nomeArquivo;
     className="rounded-2xl border border-purple-400/40 bg-purple-500/10 px-5 py-4 font-bold text-purple-100 transition hover:bg-purple-500/20 disabled:cursor-not-allowed disabled:opacity-40"
   >
     {gerandoAudio
-      ? "GERANDO ÃUDIO..."
+      ?"GERANDO ÃUDIO..."
       : "GERAR ÃUDIO â€” ELEVENLABS"}
   </button>
 
@@ -686,7 +686,7 @@ link.download = nomeArquivo;
     className="rounded-2xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-4 text-center font-bold text-yellow-200 transition hover:bg-yellow-500/20 disabled:cursor-not-allowed disabled:opacity-40"
   >
     {enviandoAudioManual
-      ? "PROCURANDO ?UDIO NO DRIVE..."
+      ?"PROCURANDO ?UDIO NO DRIVE..."
       : "RECONHECER ?UDIO DO DRIVE"}
   </button>
   
@@ -713,7 +713,7 @@ link.download = nomeArquivo;
             className="rounded-xl border border-purple-400/40 px-4 py-2 text-sm font-semibold text-purple-100 disabled:opacity-50"
           >
             {carregandoStatus
-              ? "VERIFICANDO..."
+              ?"VERIFICANDO..."
               : "ATUALIZAR STATUS"}
           </button>
         </div>
@@ -723,7 +723,7 @@ link.download = nomeArquivo;
             <p className={label}>PDF</p>
             <p className="mt-2 font-bold text-purple-50">
               {statusPublicacao.pdfPronto
-                ? "âœ“ Pronto e salvo"
+                ?"âœ“ Pronto e salvo"
                 : "â—‹ Ainda falta gerar"}
             </p>
           </div>
@@ -732,13 +732,13 @@ link.download = nomeArquivo;
             <p className={label}>Ãudio</p>
             <p className="mt-2 font-bold text-purple-50">
               {statusPublicacao.audioPronto
-                ? "âœ“ Pronto e salvo"
+                ?"âœ“ Pronto e salvo"
                 : "â—‹ Ainda falta gerar"}
             </p>
           </div>
         </div>
 
-        {statusPublicacao.liberado ? (
+        {statusPublicacao.liberado ?(
           <div className="mt-5 rounded-2xl border border-green-400/30 bg-green-500/10 p-4 text-center font-bold text-green-200">
             âœ“ DIRECIONAMENTO LIBERADO PARA A ASSINANTE
           </div>
@@ -755,7 +755,7 @@ link.download = nomeArquivo;
             className="mt-5 w-full rounded-2xl bg-green-500 px-5 py-4 text-lg font-black text-[#10180f] transition hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-35"
           >
             {liberando
-              ? "LIBERANDO..."
+              ?"LIBERANDO..."
               : "LIBERAR DIRECIONAMENTO"}
           </button>
         )}
