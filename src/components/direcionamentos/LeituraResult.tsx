@@ -452,34 +452,19 @@ link.download = nomeArquivo;
     }
   }
 
-    async function subirAudioManual(arquivo: File) {
+    async function reconhecerAudioDrive() {
   try {
     setEnviandoAudioManual(true);
 
-    const { data: sessao } =
-      await supabase.auth.getSession();
-
-    const token =
-      sessao.session?.access_token;
+    const { data: sessao } = await supabase.auth.getSession();
+    const token = sessao.session?.access_token;
 
     if (!token) {
-      throw new Error(
-        "Sessão expirada. Entre novamente."
-      );
+      throw new Error("Sess?o expirada. Entre novamente.");
     }
 
-    if (
-      arquivo.type &&
-      arquivo.type !== "audio/mpeg" &&
-      !arquivo.name.toLowerCase().endsWith(".mp3")
-    ) {
-      throw new Error(
-        "Envie um arquivo MP3."
-      );
-    }
-
-    const iniciarResponse = await fetch(
-      "/api/direcionamentos/upload-audio-iniciar",
+    const response = await fetch(
+      "/api/direcionamentos/reconhecer-audio",
       {
         method: "POST",
         headers: {
@@ -490,110 +475,29 @@ link.download = nomeArquivo;
           slug: props.slug,
           dataInicio: props.dataInicio,
           dataFim: props.dataFim || "",
-          tamanho: arquivo.size,
         }),
       }
     );
 
-    const inicio = await iniciarResponse.json();
+    const data = await response.json();
 
-    if (!iniciarResponse.ok) {
+    if (!response.ok) {
       throw new Error(
-        inicio?.error ||
-          "Não foi possível preparar o envio do áudio."
-      );
-    }
-
-    if (!inicio?.uploadUrl) {
-      throw new Error(
-        "Não foi possível preparar o envio para o Google Drive."
-      );
-    }
-
-    const uploadResponse = await fetch(
-      inicio.uploadUrl,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "audio/mpeg",
-        },
-        body: arquivo,
-      }
-    );
-
-    const textoUpload =
-      await uploadResponse.text();
-
-    if (!uploadResponse.ok) {
-      throw new Error(
-        textoUpload ||
-          `Erro no envio ao Google Drive. HTTP ${uploadResponse.status}`
-      );
-    }
-
-    let uploadData: any = {};
-
-    try {
-      uploadData = textoUpload
-        ? JSON.parse(textoUpload)
-        : {};
-    } catch {}
-
-    const fileId =
-      uploadData?.id ||
-      inicio?.fileIdExistente;
-
-    if (!fileId) {
-      throw new Error(
-        "O áudio chegou ao Google Drive, mas não foi possível identificar o arquivo."
-      );
-    }
-
-    const finalizarResponse = await fetch(
-      "/api/direcionamentos/upload-audio-finalizar",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          clientId: inicio.clientId,
-          slug: inicio.slug,
-          ano: inicio.ano,
-          mes: inicio.mes,
-          semana: inicio.semana,
-          folderId: inicio.folderId,
-          fileId,
-        }),
-      }
-    );
-
-    const finalizar =
-      await finalizarResponse.json();
-
-    if (!finalizarResponse.ok) {
-      throw new Error(
-        finalizar?.error ||
-          "O áudio foi enviado, mas não foi possível registrá-lo."
+        data?.error ||
+          "N?o foi poss?vel reconhecer o ?udio no Google Drive."
       );
     }
 
     await carregarStatusPublicacao();
 
-    alert(
-      "Áudio enviado e salvo com sucesso."
-    );
+    alert(`?udio reconhecido com sucesso: ${data.nomeArquivo}`);
   } catch (error) {
-    console.error(
-      "Erro ao enviar áudio manual:",
-      error
-    );
+    console.error("Erro ao reconhecer ?udio:", error);
 
     alert(
       error instanceof Error
         ? error.message
-        : "Erro ao enviar áudio."
+        : "Erro ao reconhecer ?udio."
     );
   } finally {
     setEnviandoAudioManual(false);
@@ -775,10 +679,16 @@ link.download = nomeArquivo;
       : "GERAR ÃUDIO â€” ELEVENLABS"}
   </button>
 
-  <label className={`cursor-pointer rounded-2xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-4 text-center font-bold text-yellow-200 transition hover:bg-yellow-500/20 ${enviandoAudioManual ? "pointer-events-none opacity-40" : ""}`}>
-    {enviandoAudioManual ? "ENVIANDO ÃUDIO..." : "SUBIR ÃUDIO MANUAL"}
-    <input type="file" accept=".mp3,audio/mpeg" className="hidden" disabled={enviandoAudioManual} onChange={(e) => { const arquivo = e.target.files?.[0]; if (arquivo) void subirAudioManual(arquivo); e.currentTarget.value = ""; }} />
-  </label>
+  <button
+    type="button"
+    onClick={reconhecerAudioDrive}
+    disabled={enviandoAudioManual}
+    className="rounded-2xl border border-yellow-400/40 bg-yellow-500/10 px-5 py-4 text-center font-bold text-yellow-200 transition hover:bg-yellow-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+  >
+    {enviandoAudioManual
+      ? "PROCURANDO ?UDIO NO DRIVE..."
+      : "RECONHECER ?UDIO DO DRIVE"}
+  </button>
   
 </div>
      
