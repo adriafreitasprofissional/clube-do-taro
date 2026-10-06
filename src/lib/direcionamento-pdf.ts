@@ -384,7 +384,7 @@ function renderPdf(
     const desc = measureText(doc, sanitizeText(perfil.descricao), innerW, 11, 1.45);
     const ondeLabel = "Onde essa energia ajuda a sua vida:";
     const onde = measureText(doc, sanitizeText(perfil.ondeAjuda), innerW, 11, 1.45);
-    const diaTxt = `Dia do orixá: ${sanitizeText(perfil.diaSemana)}  â€¢  Elemento: ${sanitizeText(perfil.elemento)}  â€¢  SaudaÃ§Ã£o: ${sanitizeText(perfil.saudaÃ§Ã£o)}`;
+    const diaTxt = `Dia do orixá: ${sanitizeText(perfil.diaSemana)}  â€¢  Elemento: ${sanitizeText(perfil.elemento)}  â€¢  SaudaÃ§Ã£o: ${sanitizeText(perfil.saudação)}`;
     const dia = measureText(doc, diaTxt, innerW, 10.5, 1.4);
 
     const swatchH = 14; // altura reservada p/ label + bolinhas
@@ -403,7 +403,7 @@ function renderPdf(
     setText(doc, theme.mutedText);
     doc.setFont("times", "italic");
     doc.setFontSize(9.5);
-    doc.text(sanitizeText(perfil.saudaÃ§Ã£o), M + padding + 8, y + 14);
+    doc.text(sanitizeText(perfil.saudação), M + padding + 8, y + 14);
     drawDivider(doc, M + padding, W - M - padding, y + 17.5, theme, theme.wine);
 
     let yy = y + headerH + 2;
@@ -836,4 +836,5 @@ export function gerarPdfLeitura(
     slugArquivo
   );
 }
+
 
