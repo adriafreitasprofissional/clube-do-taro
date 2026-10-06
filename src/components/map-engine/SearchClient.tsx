@@ -65,6 +65,7 @@ export function SearchClient({
     useState(false);
 
   const [nome, setNome] = useState("");
+  const [nomeReferencia, setNomeReferencia] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [dataNascimento, setDataNascimento] =
