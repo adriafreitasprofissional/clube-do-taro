@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const PROFESSIONAL = "Ádria Freitas";
+const PROFESSIONAL = "Ãdria Freitas";
 
 function bearerToken(request: NextRequest) {
   const authorization = request.headers.get("authorization") || "";
@@ -75,7 +75,7 @@ function formatarDataConvite(iso: string) {
 export async function GET(request: NextRequest) {
   if (!(await autorizarAdmin(request))) {
     return NextResponse.json(
-      { error: "Acesso administrativo não autorizado." },
+      { error: "Acesso administrativo nÃ£o autorizado." },
       { status: 401 }
     );
   }
@@ -228,7 +228,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   if (!(await autorizarAdmin(request))) {
     return NextResponse.json(
-      { error: "Acesso administrativo não autorizado." },
+      { error: "Acesso administrativo nÃ£o autorizado." },
       { status: 401 }
     );
   }
@@ -280,14 +280,14 @@ export async function POST(request: NextRequest) {
 
       if (!eventId) {
         return NextResponse.json(
-          { error: "Mentoria não informada." },
+          { error: "Mentoria nÃ£o informada." },
           { status: 400 }
         );
       }
 
       if (!["guests", "diamond"].includes(audience)) {
         return NextResponse.json(
-          { error: "Tipo de convite inválido." },
+          { error: "Tipo de convite invÃ¡lido." },
           { status: 400 }
         );
       }
@@ -308,7 +308,7 @@ export async function POST(request: NextRequest) {
 
       if (!evento || evento.event_type !== "group") {
         return NextResponse.json(
-          { error: "Mentoria em grupo não encontrada." },
+          { error: "Mentoria em grupo nÃ£o encontrada." },
           { status: 404 }
         );
       }
@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
 
       if (!destinatarios.length) {
         return NextResponse.json(
-          { error: "Nenhum destinatário ativo encontrado." },
+          { error: "Nenhum destinatÃ¡rio ativo encontrado." },
           { status: 404 }
         );
       }
@@ -418,10 +418,10 @@ export async function POST(request: NextRequest) {
         String(evento.title || "").trim() || "Mentoria em Grupo";
 
       const mensagem = [
-        "Você está convidado(a) para uma mentoria especial do Clube do Tarô.",
+        "VocÃª estÃ¡ convidado(a) para uma mentoria especial do Clube do TarÃ´.",
         "",
         `Data: ${dia}`,
-        `Horário: ${hora}`,
+        `HorÃ¡rio: ${hora}`,
         "Encontro: Mentoria do Grupo VIP",
         `Tema: ${tema}`,
         "Formato: via Google Meet",
@@ -457,13 +457,96 @@ export async function POST(request: NextRequest) {
         message:
           paraConvidar.length > 0
             ? `${paraConvidar.length} convite(s) enviado(s).`
-            : "Ninguém recebeu novo convite porque todos já responderam.",
+            : "NinguÃ©m recebeu novo convite porque todos jÃ¡ responderam.",
       });
     }
 
+    if (action === "send_individual_schedule") {
+      const agora = new Date().toISOString();
+
+      const { data: horarios, error: horariosError } = await supabaseAdmin
+        .from("club_mentoring_events")
+        .select("id, starts_at")
+        .eq("professional", PROFESSIONAL)
+        .eq("event_type", "individual")
+        .eq("status", "open")
+        .gte("starts_at", agora)
+        .order("starts_at", { ascending: true });
+
+      if (horariosError) {
+        return NextResponse.json(
+          { error: horariosError.message },
+          { status: 500 }
+        );
+      }
+
+      if (!horarios?.length) {
+        return NextResponse.json(
+          {
+            error:
+              "Não existem horários individuais abertos para enviar aos mentorados.",
+          },
+          { status: 400 }
+        );
+      }
+
+      const { data: clientes, error: clientesError } = await supabaseAdmin
+        .from("club_clients")
+        .select("id, nome, nome_referencia, slug")
+        .eq("status", "ativo")
+        .ilike("plano", "diamante");
+
+      if (clientesError) {
+        return NextResponse.json(
+          { error: clientesError.message },
+          { status: 500 }
+        );
+      }
+
+      const destinatarios = clientes || [];
+
+      if (!destinatarios.length) {
+        return NextResponse.json(
+          { error: "Nenhum mentorado Diamante ativo encontrado." },
+          { status: 404 }
+        );
+      }
+
+      const mensagem =
+        "Sua agenda de Mentoria Individual está aberta.\n\n" +
+        "Já estão disponíveis novos dias e horários para você escolher.\n\n" +
+        "Acesse a Agenda de Mentoria no seu painel e escolha o horário que preferir. " +
+        "Os horários ficam disponíveis por ordem de agendamento.";
+
+      const { error: mensagensError } = await supabaseAdmin
+        .from("client_messages")
+        .insert(
+          destinatarios.map((cliente) => ({
+            client_id: cliente.id,
+            titulo: "Agenda de Mentoria Individual aberta",
+            mensagem,
+            tipo_destino: "cliente",
+            publicado: true,
+          }))
+        );
+
+      if (mensagensError) {
+        return NextResponse.json(
+          { error: mensagensError.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        enviados: destinatarios.length,
+        horarios_abertos: horarios.length,
+        message: `Agenda enviada para ${destinatarios.length} mentorado(s) Diamante.`,
+      });
+    }
     if (action !== "create_events") {
       return NextResponse.json(
-        { error: "Ação inválida." },
+        { error: "AÃ§Ã£o invÃ¡lida." },
         { status: 400 }
       );
     }
@@ -516,14 +599,14 @@ const times: string[] = Array.isArray(body.times)
 
     if (!dates.length || !times.length) {
       return NextResponse.json(
-        { error: "Selecione pelo menos uma data e um horário." },
+        { error: "Selecione pelo menos uma data e um horÃ¡rio." },
         { status: 400 }
       );
     }
 
     if (!Number.isFinite(duration) || duration <= 0) {
       return NextResponse.json(
-        { error: "Duração inválida." },
+        { error: "DuraÃ§Ã£o invÃ¡lida." },
         { status: 400 }
       );
     }
@@ -563,7 +646,7 @@ const times: string[] = Array.isArray(body.times)
           skipped.push({
             date,
             time,
-            reason: "Já existe compromisso neste horário.",
+            reason: "JÃ¡ existe compromisso neste horÃ¡rio.",
           });
           continue;
         }
@@ -617,7 +700,7 @@ const times: string[] = Array.isArray(body.times)
 export async function PATCH(request: NextRequest) {
   if (!(await autorizarAdmin(request))) {
     return NextResponse.json(
-      { error: "Acesso administrativo não autorizado." },
+      { error: "Acesso administrativo nÃ£o autorizado." },
       { status: 401 }
     );
   }
@@ -637,7 +720,7 @@ export async function PATCH(request: NextRequest) {
         !["not_marked", "present", "absent"].includes(attendance)
       ) {
         return NextResponse.json(
-          { error: "Dados de presença inválidos." },
+          { error: "Dados de presenÃ§a invÃ¡lidos." },
           { status: 400 }
         );
       }
@@ -694,7 +777,7 @@ export async function PATCH(request: NextRequest) {
         !["open", "booked", "completed", "cancelled"].includes(status)
       ) {
         return NextResponse.json(
-          { error: "Status inválido." },
+          { error: "Status invÃ¡lido." },
           { status: 400 }
         );
       }
@@ -718,7 +801,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Ação inválida." },
+      { error: "AÃ§Ã£o invÃ¡lida." },
       { status: 400 }
     );
   } catch (error: unknown) {
@@ -737,7 +820,7 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   if (!(await autorizarAdmin(request))) {
     return NextResponse.json(
-      { error: "Acesso administrativo não autorizado." },
+      { error: "Acesso administrativo nÃ£o autorizado." },
       { status: 401 }
     );
   }
@@ -748,7 +831,7 @@ export async function DELETE(request: NextRequest) {
 
   if (!id) {
     return NextResponse.json(
-      { error: "Mentoria não informada." },
+      { error: "Mentoria nÃ£o informada." },
       { status: 400 }
     );
   }
@@ -767,3 +850,4 @@ export async function DELETE(request: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+

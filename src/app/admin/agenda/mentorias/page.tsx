@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -13,9 +13,9 @@ type Evento = {
   status: "open" | "booked" | "completed" | "cancelled";
 };
 
-const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "SÃ¡b"];
 const MESES = [
-  "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+  "Janeiro","Fevereiro","MarÃ§o","Abril","Maio","Junho",
   "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro",
 ];
 
@@ -56,7 +56,7 @@ export default function AgendaMentoriasAdminPage() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.access_token) {
-      throw new Error("Sessão administrativa expirada.");
+      throw new Error("SessÃ£o administrativa expirada.");
     }
 
     const headers = new Headers(init?.headers);
@@ -246,12 +246,12 @@ export default function AgendaMentoriasAdminPage() {
     const times = horarios();
 
     if (!selecionadas.length) {
-      setErro("Selecione pelo menos um dia no calendário.");
+      setErro("Selecione pelo menos um dia no calendÃ¡rio.");
       return;
     }
 
     if (!times.length) {
-      setErro("Informe pelo menos um horário no formato 19:00.");
+      setErro("Informe pelo menos um horÃ¡rio no formato 19:00.");
       return;
     }
 
@@ -284,16 +284,16 @@ export default function AgendaMentoriasAdminPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || "Erro ao criar horários.");
+        throw new Error(data?.error || "Erro ao criar horÃ¡rios.");
       }
 
       const criados = data.created?.length || 0;
       const pulados = data.skipped?.length || 0;
 
       setMensagem(
-        `${criados} ${criados === 1 ? "horário criado" : "horários criados"}${
+        `${criados} ${criados === 1 ? "horÃ¡rio criado" : "horÃ¡rios criados"}${
           pulados
-            ? ` · ${pulados} ${pulados === 1 ? "conflito ignorado" : "conflitos ignorados"}`
+            ? ` Â· ${pulados} ${pulados === 1 ? "conflito ignorado" : "conflitos ignorados"}`
             : ""
         }.`
       );
@@ -327,7 +327,7 @@ export default function AgendaMentoriasAdminPage() {
     const data = await response.json();
 
     if (!response.ok) {
-      setErro(data?.error || "Não foi possível alterar o espelho.");
+      setErro(data?.error || "NÃ£o foi possÃ­vel alterar o espelho.");
       return;
     }
 
@@ -429,7 +429,7 @@ export default function AgendaMentoriasAdminPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || "Não foi possível enviar os convites.");
+        throw new Error(data?.error || "NÃ£o foi possÃ­vel enviar os convites.");
       }
 
       setMensagem(
@@ -458,6 +458,45 @@ export default function AgendaMentoriasAdminPage() {
     }
   }
 
+  async function enviarAgendaIndividual() {
+    const chaveEnvio = "individual-schedule";
+
+    setEnviandoConvites(chaveEnvio);
+    setErro(null);
+    setMensagem(null);
+
+    try {
+      const response = await authFetch("/api/admin/agenda/mentorias", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "send_individual_schedule",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Não foi possível enviar a agenda aos mentorados."
+        );
+      }
+
+      setMensagem(
+        data?.message || "Agenda enviada aos mentorados Diamante."
+      );
+
+      await carregar();
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : "Erro ao enviar a agenda aos mentorados."
+      );
+    } finally {
+      setEnviandoConvites(null);
+    }
+  }
   function secaoEstaAberta(
     chave: string,
     abertaPorPadrao = false
@@ -492,7 +531,7 @@ export default function AgendaMentoriasAdminPage() {
       status === "confirmed"
         ? "Confirmado"
         : status === "declined"
-        ? "Não vai participar"
+        ? "NÃ£o vai participar"
         : "Aguardando resposta";
 
     return (
@@ -564,7 +603,7 @@ export default function AgendaMentoriasAdminPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-sm font-medium text-yellow-300">
-            Agenda oficial do Clube do Tarô
+            Agenda oficial do Clube do TarÃ´
           </p>
 
           <h1 className="mt-1 text-3xl font-semibold text-purple-200">
@@ -572,7 +611,7 @@ export default function AgendaMentoriasAdminPage() {
           </h1>
 
           <p className="mt-1 text-sm text-purple-300/70">
-            Individual, em grupo, confirmações, presença e histórico.
+            Individual, em grupo, confirmaÃ§Ãµes, presenÃ§a e histÃ³rico.
           </p>
         </div>
 
@@ -580,7 +619,7 @@ export default function AgendaMentoriasAdminPage() {
           href="/admin/agenda"
           className="rounded-xl border border-purple-500/30 px-5 py-3 text-center text-sm font-semibold text-purple-100"
         >
-          ← Agenda geral
+          â† Agenda geral
         </Link>
       </div>
 
@@ -604,7 +643,7 @@ export default function AgendaMentoriasAdminPage() {
             </h2>
 
             <p className="mt-1 text-sm text-purple-200/70">
-              Quando ativo, compromissos da Terapia e do Clube bloqueiam os mesmos horários.
+              Quando ativo, compromissos da Terapia e do Clube bloqueiam os mesmos horÃ¡rios.
             </p>
           </div>
 
@@ -622,7 +661,7 @@ export default function AgendaMentoriasAdminPage() {
             }`}
           >
             {dados?.settings?.mirror_club_therapy
-              ? "✓ Espelho ativado"
+              ? "âœ“ Espelho ativado"
               : "Espelho desativado"}
           </button>
         </div>
@@ -669,14 +708,14 @@ export default function AgendaMentoriasAdminPage() {
               className="mt-2 w-full rounded-xl border border-purple-500/30 bg-black/20 px-4 py-3 text-white"
             />
             <span className="mt-2 block text-xs font-normal text-purple-300/70">
-              Este tema aparecerá no convite enviado aos participantes.
+              Este tema aparecerÃ¡ no convite enviado aos participantes.
             </span>
           </label>
         )}
 
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="text-sm font-bold text-purple-100">
-            Horários
+            HorÃ¡rios
             <input
               value={horariosTexto}
               onChange={(e) => setHorariosTexto(e.target.value)}
@@ -684,12 +723,12 @@ export default function AgendaMentoriasAdminPage() {
               className="mt-2 w-full rounded-xl border border-purple-500/30 bg-black/20 px-4 py-3 text-white"
             />
             <span className="mt-2 block text-xs font-normal text-purple-300/70">
-              Pode informar vários horários separados por vírgula.
+              Pode informar vÃ¡rios horÃ¡rios separados por vÃ­rgula.
             </span>
           </label>
 
           <label className="text-sm font-bold text-purple-100">
-            Duração (minutos)
+            DuraÃ§Ã£o (minutos)
             <input
               type="number"
               min={15}
@@ -715,7 +754,7 @@ export default function AgendaMentoriasAdminPage() {
               }
               className="rounded-xl border border-yellow-500/20 px-4 py-2 text-yellow-300"
             >
-              ‹
+              â€¹
             </button>
 
             <h3 className="font-bold text-yellow-300">
@@ -735,7 +774,7 @@ export default function AgendaMentoriasAdminPage() {
               }
               className="rounded-xl border border-yellow-500/20 px-4 py-2 text-yellow-300"
             >
-              ›
+              â€º
             </button>
           </div>
 
@@ -785,7 +824,7 @@ export default function AgendaMentoriasAdminPage() {
               ? "Salvando..."
               : tipo === "group"
               ? "Criar Mentoria em Grupo"
-              : "Liberar horários individuais"}
+              : "Liberar horÃ¡rios individuais"}
           </button>
 
           <span className="text-xs text-purple-300/70">
@@ -796,9 +835,22 @@ export default function AgendaMentoriasAdminPage() {
       </section>
 
       <section className="rounded-3xl border border-purple-500/20 bg-[#1d0023] p-5">
-        <h2 className="text-xl font-bold text-purple-100">
-          Próximas mentorias
-        </h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-xl font-bold text-purple-100">
+            Próximas mentorias
+          </h2>
+
+          <button
+            type="button"
+            onClick={enviarAgendaIndividual}
+            disabled={enviandoConvites === "individual-schedule"}
+            className="rounded-xl bg-yellow-400 px-5 py-3 text-sm font-extrabold text-black transition hover:bg-yellow-300 disabled:opacity-50"
+          >
+            {enviandoConvites === "individual-schedule"
+              ? "Enviando..."
+              : "Enviar agenda para mentorados"}
+          </button>
+        </div>
 
         <div className="mt-5 grid gap-4">
           {proximos.length === 0 && (
@@ -842,7 +894,7 @@ export default function AgendaMentoriasAdminPage() {
                     </h3>
 
                     <p className="mt-1 text-sm capitalize text-purple-200">
-                      {dataHora(evento.starts_at)} · {evento.duration_minutes} min
+                      {dataHora(evento.starts_at)} Â· {evento.duration_minutes} min
                     </p>
 
                     {confirmadoIndividual && (
@@ -910,7 +962,7 @@ export default function AgendaMentoriasAdminPage() {
                           </p>
 
                           <p className="mt-1 text-sm capitalize text-purple-200">
-                            {dataHora(evento.starts_at)} · via Google Meet
+                            {dataHora(evento.starts_at)} Â· via Google Meet
                           </p>
 
                           <div className="mt-4 flex flex-wrap gap-3">
@@ -942,12 +994,12 @@ export default function AgendaMentoriasAdminPage() {
                                 Convidados do Clube ({selecionados.length} selecionados)
                               </p>
                               <p className="mt-1 text-xs text-purple-300/70">
-                                Escolha uma ou várias pessoas para receber o convite.
+                                Escolha uma ou vÃ¡rias pessoas para receber o convite.
                               </p>
                             </div>
 
                             <span className="text-xl text-purple-300">
-                              {secaoEstaAberta(chaveConvidados) ? "▾" : "›"}
+                              {secaoEstaAberta(chaveConvidados) ? "â–¾" : "â€º"}
                             </span>
                           </button>
 
@@ -974,14 +1026,14 @@ export default function AgendaMentoriasAdminPage() {
                                   }
                                   className="rounded-lg border border-purple-400/20 px-3 py-2 text-xs font-bold text-purple-200"
                                 >
-                                  Limpar seleção
+                                  Limpar seleÃ§Ã£o
                                 </button>
                               </div>
 
                               <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                                 {convidadosDisponiveis.length === 0 ? (
                                   <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
-                                    Não há outros assinantes ativos para convidar.
+                                    NÃ£o hÃ¡ outros assinantes ativos para convidar.
                                   </p>
                                 ) : (
                                   convidadosDisponiveis.map((cliente: any) => {
@@ -1020,7 +1072,7 @@ export default function AgendaMentoriasAdminPage() {
                                             {nome}
                                           </p>
                                           <p className="mt-1 text-xs capitalize text-purple-300/70">
-                                            Plano {cliente.plano || "—"}
+                                            Plano {cliente.plano || "â€”"}
                                           </p>
                                         </div>
                                       </label>
@@ -1158,8 +1210,8 @@ export default function AgendaMentoriasAdminPage() {
                               </span>
                               <span className="text-xl text-yellow-300">
                                 {secaoEstaAberta(chaveAguardando, true)
-                                  ? "▾"
-                                  : "›"}
+                                  ? "â–¾"
+                                  : "â€º"}
                               </span>
                             </button>
 
@@ -1167,7 +1219,7 @@ export default function AgendaMentoriasAdminPage() {
                               <div className="grid gap-2 border-t border-yellow-400/10 p-3">
                                 {aguardando.length === 0 ? (
                                   <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
-                                    Ninguém aguardando resposta.
+                                    NinguÃ©m aguardando resposta.
                                   </p>
                                 ) : (
                                   aguardando.map((item: any) =>
@@ -1195,8 +1247,8 @@ export default function AgendaMentoriasAdminPage() {
                               </span>
                               <span className="text-xl text-green-300">
                                 {secaoEstaAberta(chaveConfirmados)
-                                  ? "▾"
-                                  : "›"}
+                                  ? "â–¾"
+                                  : "â€º"}
                               </span>
                             </button>
 
@@ -1204,7 +1256,7 @@ export default function AgendaMentoriasAdminPage() {
                               <div className="grid gap-2 border-t border-green-400/10 p-3">
                                 {confirmados.length === 0 ? (
                                   <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
-                                    Ainda não há confirmações.
+                                    Ainda nÃ£o hÃ¡ confirmaÃ§Ãµes.
                                   </p>
                                 ) : (
                                   confirmados.map((item: any) =>
@@ -1228,12 +1280,12 @@ export default function AgendaMentoriasAdminPage() {
                               className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
                             >
                               <span className="text-base font-bold text-red-200">
-                                Não participarão ({recusados.length})
+                                NÃ£o participarÃ£o ({recusados.length})
                               </span>
                               <span className="text-xl text-red-300">
                                 {secaoEstaAberta(chaveRecusados)
-                                  ? "▾"
-                                  : "›"}
+                                  ? "â–¾"
+                                  : "â€º"}
                               </span>
                             </button>
 
@@ -1241,7 +1293,7 @@ export default function AgendaMentoriasAdminPage() {
                               <div className="grid gap-2 border-t border-red-400/10 p-3">
                                 {recusados.length === 0 ? (
                                   <p className="rounded-xl bg-black/20 p-4 text-sm text-purple-300/70">
-                                    Ninguém recusou esta mentoria.
+                                    NinguÃ©m recusou esta mentoria.
                                   </p>
                                 ) : (
                                   recusados.map((item: any) =>
@@ -1274,16 +1326,16 @@ export default function AgendaMentoriasAdminPage() {
           >
             <div>
               <h2 className="text-xl font-bold text-green-200">
-                Compromissos espelhados da Agenda-Mãe ({compromissosEspelhados.length})
+                Compromissos espelhados da Agenda-MÃ£e ({compromissosEspelhados.length})
               </h2>
 
               <p className="mt-1 text-sm text-purple-300/70">
-                Estes horários também impedem que você libere uma mentoria no mesmo período.
+                Estes horÃ¡rios tambÃ©m impedem que vocÃª libere uma mentoria no mesmo perÃ­odo.
               </p>
             </div>
 
             <span className="text-2xl text-green-300">
-              {secaoEstaAberta("agenda-mae") ? "▾" : "›"}
+              {secaoEstaAberta("agenda-mae") ? "â–¾" : "â€º"}
             </span>
           </button>
 
@@ -1316,8 +1368,8 @@ export default function AgendaMentoriasAdminPage() {
 
                         <span className="text-lg text-green-300">
                           {secaoEstaAberta(chave, abertaPorPadrao)
-                            ? "▾"
-                            : "›"}
+                            ? "â–¾"
+                            : "â€º"}
                         </span>
                       </button>
 
@@ -1333,7 +1385,7 @@ export default function AgendaMentoriasAdminPage() {
                               </p>
 
                               <p className="mt-1 text-sm capitalize text-green-200/80">
-                                {item.service_type} · {dataHora(item.scheduled_at)}
+                                {item.service_type} Â· {dataHora(item.scheduled_at)}
                               </p>
                             </div>
                           ))}
@@ -1355,11 +1407,11 @@ export default function AgendaMentoriasAdminPage() {
           className="flex w-full items-center justify-between gap-4 p-5 text-left"
         >
           <h2 className="text-xl font-bold text-purple-100">
-            Histórico de mentorias ({historico.length})
+            HistÃ³rico de mentorias ({historico.length})
           </h2>
 
           <span className="text-2xl text-purple-300">
-            {secaoEstaAberta("historico-mentorias") ? "▾" : "›"}
+            {secaoEstaAberta("historico-mentorias") ? "â–¾" : "â€º"}
           </span>
         </button>
 
@@ -1367,7 +1419,7 @@ export default function AgendaMentoriasAdminPage() {
           <div className="grid gap-3 border-t border-purple-500/10 p-5">
             {historico.length === 0 ? (
               <p className="text-sm text-purple-300/70">
-                O histórico aparecerá aqui após os encontros.
+                O histÃ³rico aparecerÃ¡ aqui apÃ³s os encontros.
               </p>
             ) : (
               historicoPorMes.map((grupo, indice) => {
@@ -1392,8 +1444,8 @@ export default function AgendaMentoriasAdminPage() {
 
                       <span className="text-lg text-purple-300">
                         {secaoEstaAberta(chave, abertaPorPadrao)
-                          ? "▾"
-                          : "›"}
+                          ? "â–¾"
+                          : "â€º"}
                       </span>
                     </button>
 
@@ -1415,7 +1467,7 @@ export default function AgendaMentoriasAdminPage() {
                                   </p>
 
                                   <p className="mt-1 text-sm capitalize text-purple-300">
-                                    {dataHora(evento.starts_at)} ·{" "}
+                                    {dataHora(evento.starts_at)} Â·{" "}
                                     {evento.event_type === "group"
                                       ? "Em Grupo"
                                       : "Individual"}
@@ -1444,3 +1496,5 @@ export default function AgendaMentoriasAdminPage() {
     </div>
   );
 }
+
+
