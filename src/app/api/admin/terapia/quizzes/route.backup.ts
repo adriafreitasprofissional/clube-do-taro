@@ -414,20 +414,17 @@ export async function POST(
     const body =
       await request.json();
 
-    const clientIds = Array.isArray(body.client_ids)
-      ? body.client_ids
-          .map((id: unknown) => String(id || "").trim())
-          .filter(Boolean)
-      : body.client_id
-        ? [String(body.client_id).trim()].filter(Boolean)
-        : [];
+    const clientId =
+      String(
+        body.client_id || ""
+      ).trim();
 
     const title =
       String(
         body.title || ""
       ).trim();
 
-    if (clientIds.length === 0) {
+    if (!clientId) {
       return NextResponse.json(
         {
           error:
@@ -477,50 +474,48 @@ Em qualquer pergunta, você pode escolher não responder, pular ou parar por aqu
     const { data, error } =
       await supabaseAdmin
         .from("therapy_quizzes")
-        .insert(
-         clientIds.map((clientId: string) => ({
-            professional_id:
-              profissional.id,
+        .insert({
+          professional_id:
+            profissional.id,
 
-            client_id:
-              clientId,
+          client_id:
+            clientId,
 
-            appointment_id:
-              body.appointment_id
-                ? String(
-                    body.appointment_id
-                  ).trim()
-                : null,
+          appointment_id:
+            body.appointment_id
+              ? String(
+                  body.appointment_id
+                ).trim()
+              : null,
 
-            title,
+          title,
 
-            subtitle:
-              String(
-                body.subtitle || ""
-              ).trim() || null,
+          subtitle:
+            String(
+              body.subtitle || ""
+            ).trim() || null,
 
-            source_notes:
-              String(
-                body.source_notes || ""
-              ).trim() || null,
+          source_notes:
+            String(
+              body.source_notes || ""
+            ).trim() || null,
 
-            instructions,
+          instructions,
 
-            questions,
+          questions,
 
-            status,
+          status,
 
-            quiz_type:
-              normalizarTipoQuiz(
-                body.quiz_type
-              ),
+          quiz_type:
+            normalizarTipoQuiz(
+              body.quiz_type
+            ),
 
-            published_at:
-              status === "published"
-                ? new Date().toISOString()
-                : null,
-          }))
-        )
+          published_at:
+            status === "published"
+              ? new Date().toISOString()
+              : null,
+        })
         .select(`
           id,
           professional_id,
@@ -536,7 +531,8 @@ Em qualquer pergunta, você pode escolher não responder, pular ou parar por aqu
           published_at,
           created_at,
           updated_at
-        `);
+        `)
+        .single();
 
     if (error) {
       return NextResponse.json(
@@ -549,7 +545,7 @@ Em qualquer pergunta, você pode escolher não responder, pular ou parar por aqu
 
     return NextResponse.json(
       {
-        quizzes: data || [],
+        quiz: data,
       },
       { status: 201 }
     );
