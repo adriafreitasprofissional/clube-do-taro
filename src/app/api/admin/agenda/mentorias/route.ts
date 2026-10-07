@@ -1,7 +1,7 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const PROFESSIONAL = "Ãdria Freitas";
+const PROFESSIONAL = "Ádria Freitas";
 
 function bearerToken(request: NextRequest) {
   const authorization = request.headers.get("authorization") || "";
